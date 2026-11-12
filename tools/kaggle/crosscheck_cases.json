@@ -1,0 +1,5648 @@
+{
+"layout": "cells/tm_tray/layouts/strict.yaml",
+"robot": "cells/tm_tray/assets/tm5s_egu50_no_air_cylinder.urdf",
+"jaw": 0.057675,
+"cap": 0.1,
+"joint_names": [
+"joint_1",
+"joint_2",
+"joint_3",
+"joint_4",
+"joint_5",
+"joint_6"
+],
+"cases": [
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+2.753885442600999,
+0.5624324973209331,
+2.3395505925956073,
+0.23862142630025618,
+-1.9602279882781257,
+-3.1412188291577587
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+2.7538853367696285,
+2.654382488252102,
+-2.3395504695733265,
+2.82577253399121,
+-1.9602280282235656,
+-3.141218925374508
+],
+"cpu_distance": -0.03268003474377183,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+2.7538854027982786,
+1.3390027035498466,
+2.0566822201010284,
+2.887500622779469,
+1.9585031612543773,
+1.411479253476955e-07
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+2.7538853600387414,
+-3.062115956086408,
+-2.056682150437431,
+-1.164386919060699,
+1.958503207634812,
+2.9381668653627457e-08
+],
+"cpu_distance": -0.0680396642775174,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-1.2518911080214743,
+3.062116103652576,
+2.056682236404326,
+1.1643876616801467,
+-0.31890563955208817,
+3.092723899200678e-07
+],
+"cpu_distance": -0.060253505810286344,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-1.251891014936263,
+-1.3390025370348573,
+-2.0566821550780325,
+-2.887499978897133,
+-0.3189056309140259,
+2.4780172491745134e-07
+],
+"cpu_distance": 0.06389999011920933,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-1.2518910731714168,
+-2.654640022659272,
+2.3402372512003007,
+-2.8242604564144376,
+0.3171808223533237,
+-3.138810219656559
+],
+"cpu_distance": -0.0305208307518903,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-1.2518910382942263,
+-0.5622376952933461,
+-2.340237079263712,
+-0.2361887077824565,
+0.31718078465727917,
+-3.1388104875581924
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+2.8260298539521527,
+0.6132461066024737,
+2.1805192471653854,
+0.34686501074435583,
+-1.8880835736906312,
+-3.1412938071074663
+],
+"cpu_distance": 0.06389999011920933,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+2.8260297573127984,
+2.592029520520761,
+-2.1805191290488253,
+2.7291200010758665,
+-1.8880836062102568,
+-3.1412938972043816
+],
+"cpu_distance": -0.03215388908464581,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+2.8260298182087205,
+1.31332684725841,
+1.9223469511519182,
+3.0475117577380484,
+1.886358747155465,
+1.3201191562117742e-07
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+2.826029776041554,
+3.0848605943455656,
+-1.9223468783434552,
+-1.1625134345969246,
+1.8863587847660899,
+2.777211305371452e-08
+],
+"cpu_distance": -0.05761259134638323,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-1.0599488091951628,
+-3.0848604757527816,
+1.9223469985438166,
+1.1625140663742615,
+-0.51084793158401,
+1.966573983658293e-07
+],
+"cpu_distance": -0.05605971637536714,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-1.059948723506114,
+-1.3133266828604597,
+-1.922346914705096,
+-3.04751116735739,
+-0.5108479216106421,
+1.4290943761707808e-07
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-1.059948781497269,
+-2.592166386097274,
+2.180854020756346,
+-2.7284037575727482,
+0.5091231100120561,
+-3.139954803850148
+],
+"cpu_distance": -0.014053217076844066,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-1.0599487428752488,
+-0.6131300505686728,
+-2.180853883515818,
+-0.345732334262125,
+0.5091230790690968,
+-3.1399549704874317
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+2.817650402510086,
+0.2376358196339008,
+2.132025822275101,
+0.7709660484327538,
+-1.8964630483055123,
+-3.1412853017769047
+],
+"cpu_distance": 0.018456028817242787,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+2.81765031279871,
+2.1792598940275063,
+-2.1320257129498725,
+3.093393527370651,
+-1.8964630470465718,
+-3.1412853585151512
+],
+"cpu_distance": -0.01384789672704885,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+2.8176503714753025,
+0.9134609131483016,
+2.1483777957113244,
+-3.061838464651517,
+1.8947382169088822,
+1.445436721425608e-07
+],
+"cpu_distance": 0.01845602881724265,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+2.8176503369624726,
+2.867727237508767,
+-2.1483777258410535,
+-0.7193492339435656,
+1.8947382145784788,
+3.951837390658852e-08
+],
+"cpu_distance": -0.04717525301992184,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-1.0833554150659888,
+-2.8677271046851156,
+2.1483778442413213,
+0.7193498720306999,
+-0.487441313610681,
+2.2176611746971275e-07
+],
+"cpu_distance": -0.03944255369844227,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-1.0833553246757344,
+-0.9134607414710536,
+-2.1483777789413816,
+3.0618390226605436,
+-0.4874413149361909,
+9.807101619685454e-08
+],
+"cpu_distance": 0.018456028817240913,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-1.0833553775583091,
+-2.1792771740849,
+2.1323708641601655,
+-3.0927273038134517,
+0.4857164877901994,
+-3.1398609029210744
+],
+"cpu_distance": -0.002720831618273273,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-1.0833553426791918,
+-0.2373852697393759,
+-2.132370716449566,
+-0.7698778177142422,
+0.48571649009545537,
+-3.1398611180550087
+],
+"cpu_distance": 0.0184560288172432,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+2.9500409388366506,
+0.6577267121852604,
+1.4551775722509426,
+1.0277565800247146,
+-1.7640724859675898,
+-3.1414151271343966
+],
+"cpu_distance": 0.008358520315522472,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_03"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+2.950040876092851,
+2.0189973948354005,
+-1.4551774662199968,
+2.576840945516752,
+-1.7640724852499308,
+-3.1414151777084864
+],
+"cpu_distance": 0.008358520315521223,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_03"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+2.9500409194351658,
+1.0879044706097662,
+1.4688753337521012,
+-2.5567795415691803,
+1.7623476583900892,
+1.2398466564533805e-07
+],
+"cpu_distance": 0.008358520315522932,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_03"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+2.950040883681403,
+2.4615719485447825,
+-1.4688752533844822,
+-0.9926964182683804,
+1.7623476573438372,
+5.025504945521675e-08
+],
+"cpu_distance": -0.020036424872280356,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+-0.6800525539505711,
+-2.4615718388108196,
+1.4688754272289408,
+0.9926969275820632,
+-0.8907441493510522,
+1.1166302593679234e-07
+],
+"cpu_distance": -0.00043518061040231926,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+-0.680052490658813,
+-1.0879042745587513,
+-1.4688753454097008,
+2.556780093984326,
+-0.8907441500938642,
+4.4968783363685816e-08
+],
+"cpu_distance": 0.00835852031552246,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_03"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+-0.6800525322611426,
+-2.0190378853272453,
+1.4552942327590088,
+-2.5766701708787023,
+0.8890193234665666,
+-3.1408501302446963
+],
+"cpu_distance": 0.008358520315522582,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_03"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+-0.6800524966790782,
+-0.6576615683207145,
+-1.4552941178072039,
+-1.0274581963315441,
+0.8890193245106346,
+-3.140850223989175
+],
+"cpu_distance": 0.008358520315522469,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_03"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+2.950040951992399,
+0.6329215124377963,
+1.4356499904695275,
+1.072089361564787,
+-1.764072474399442,
+-3.1414151271929764
+],
+"cpu_distance": 0.008169999998149482,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L1/C0/Cube_02_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+2.950040889970949,
+1.9764922453045877,
+-1.4356498849790227,
+2.59981851329497,
+-1.7640724720380785,
+-3.1414151750330994
+],
+"cpu_distance": 0.008169999998150568,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L1/C0/Cube_01_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+2.950040933575079,
+1.046783740207898,
+1.483315855325606,
+-2.5300993329370636,
+1.7623476466822172,
+1.250109087358453e-07
+],
+"cpu_distance": 0.008169999998149482,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L1/C0/Cube_02_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+2.950040897583156,
+2.4335027707144388,
+-1.4833157747789787,
+-0.9501867193865658,
+1.762347643080684,
+5.20488541155828e-08
+],
+"cpu_distance": -0.014514622267629368,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+-0.6800525683061478,
+-2.4335026594726084,
+1.4833159488949752,
+0.9501872265496978,
+-0.8907441331985448,
+1.1161835589135194e-07
+],
+"cpu_distance": -0.0016574645333457538,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+-0.6800525043757242,
+-1.0467835427323458,
+-1.4833158677356353,
+2.5300998823820215,
+-0.8907441359266541,
+4.1629909297569156e-08
+],
+"cpu_distance": 0.008169999998149888,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L1/C0/Cube_02_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+-0.6800525456991515,
+-1.976531347103711,
+1.435766942454702,
+-2.599649419779515,
+0.8890193076002433,
+-3.140850131804016
+],
+"cpu_distance": 0.008169999998150008,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L1/C0/Cube_02_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+-0.6800525103132471,
+-0.6328545297424464,
+-1.4357668273709654,
+-1.0717925265800083,
+0.8890193112697586,
+-3.1408502259493996
+],
+"cpu_distance": 0.0081699999981497,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L1/C0/Cube_02_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+2.817650423784534,
+0.19730045607702618,
+2.109301757650906,
+0.8340254770039102,
+-1.896463029348832,
+-3.1412853029993233
+],
+"cpu_distance": 0.03850730449773996,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+2.817650334801506,
+2.1211793419294525,
+-2.109301649735356,
+3.1287500150147807,
+-1.8964630253958865,
+-3.1412853546314143
+],
+"cpu_distance": -0.008060037717057697,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+2.817650393740264,
+0.8542923236168267,
+2.1656348454816428,
+-3.019926925155184,
+1.8947381983490885,
+1.4537352122090397e-07
+],
+"cpu_distance": 0.03850730449773973,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+2.817650359440096,
+2.8217787814274047,
+-2.1656347754784617,
+-0.6561437290428254,
+1.8947381904404788,
+4.2081740758703745e-08
+],
+"cpu_distance": -0.044802081491873175,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-1.083355437995598,
+-2.821778646245097,
+2.165634894201692,
+0.6561443656822341,
+-0.48744128794783226,
+2.2408746236379784e-07
+],
+"cpu_distance": -0.03577026213448874,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-1.083355346671019,
+-0.8542921493178488,
+-2.1656348318314174,
+3.01992747623709,
+-0.48744129298333094,
+8.99705767665182e-08
+],
+"cpu_distance": 0.03850730449773791,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-1.0833553996458942,
+-2.1211838459090857,
+2.109642052742161,
+-3.128091822665439,
+0.48571646216708997,
+-3.139860905290244
+],
+"cpu_distance": 0.0005283859273356995,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-1.0833553640822169,
+-0.19703782751030952,
+-2.10964190530442,
+-0.8329540748159365,
+0.4857164703125125,
+-3.1398611222719324
+],
+"cpu_distance": 0.038507304497740605,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+2.817650423784534,
+0.19730045607702618,
+2.109301757650906,
+0.8340254770039102,
+-1.896463029348832,
+-3.1412853029993233
+],
+"cpu_distance": 0.03850730449773996,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+2.817650334801506,
+2.1211793419294525,
+-2.109301649735356,
+3.1287500150147807,
+-1.8964630253958865,
+-3.1412853546314143
+],
+"cpu_distance": -0.008060037717057697,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+2.817650393740264,
+0.8542923236168267,
+2.1656348454816428,
+-3.019926925155184,
+1.8947381983490885,
+1.4537352122090397e-07
+],
+"cpu_distance": 0.03850730449773973,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+2.817650359440096,
+2.8217787814274047,
+-2.1656347754784617,
+-0.6561437290428254,
+1.8947381904404788,
+4.2081740758703745e-08
+],
+"cpu_distance": -0.044802081491873175,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+-1.083355437995598,
+-2.821778646245097,
+2.165634894201692,
+0.6561443656822341,
+-0.48744128794783226,
+2.2408746236379784e-07
+],
+"cpu_distance": -0.03577026213448874,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+-1.083355346671019,
+-0.8542921493178488,
+-2.1656348318314174,
+3.01992747623709,
+-0.48744129298333094,
+8.99705767665182e-08
+],
+"cpu_distance": 0.03850730449773791,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_1"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+-1.0833553996458942,
+-2.1211838459090857,
+2.109642052742161,
+-3.128091822665439,
+0.48571646216708997,
+-3.139860905290244
+],
+"cpu_distance": 0.0005283859273356995,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+-1.0833553640822169,
+-0.19703782751030952,
+-2.10964190530442,
+-0.8329540748159365,
+0.4857164703125125,
+-3.1398611222719324
+],
+"cpu_distance": 0.038507304497740605,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L0/C0/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-1.889701725004655,
+-0.14188755266009068,
+1.548067336006702,
+1.7324997782712845,
+-0.3206298882718226,
+3.138826636310693
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-1.8897018181647223,
+1.3031210177624493,
+-1.5480672352051934,
+-2.899559504005394,
+-0.3206298971118562,
+3.138826661711832
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-1.8897017326007355,
+-0.01676787502694088,
+2.144377334115667,
+-2.1276091085086786,
+0.3189050698410174,
+8.553347807804812e-09
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-1.8897018013366522,
+1.9344157370266224,
+-2.1443772154922986,
+0.20996173929100026,
+0.31890503683034055,
+-8.599417844479262e-08
+],
+"cpu_distance": 0.02661964309750931,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_far",
+"carried": false,
+"q": [
+0.38770584831108135,
+-1.9344155438035928,
+2.1443773862967372,
+-0.20996137141872095,
+-1.958502519387859,
+-1.6160589311198237e-08
+],
+"cpu_distance": 0.02600184040016635,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_far",
+"carried": false,
+"q": [
+0.3877059726635368,
+0.016768039144339664,
+-2.1443772628652105,
+2.1276097379078056,
+-1.9585026370364393,
+-1.3043634350395905e-07
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_far",
+"carried": false,
+"q": [
+0.3877058949796779,
+-1.3032627399245005,
+1.547575977574029,
+2.8982675756518734,
+1.9567777195677136,
+3.141220777693812
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_far",
+"carried": false,
+"q": [
+0.3877059582661655,
+0.14130500109967992,
+-1.5475758998205258,
+-1.7343335623303577,
+1.95677780905031,
+3.1412206906811377
+],
+"cpu_distance": 0.06389999011920933,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-2.0816441165007413,
+-0.007272144829601146,
+1.4247326438788015,
+1.7222623438843918,
+-0.5125722734472755,
+3.1399616525939713
+],
+"cpu_distance": 0.03351699998394966,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/incoming/L1/C3/body"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-2.081644196830234,
+1.3263895623930244,
+-1.4247325477884591,
+-3.045119476705603,
+-0.5125722745782753,
+3.139961655054009
+],
+"cpu_distance": 0.033516999983951176,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/incoming/L1/C3/body"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-2.081644121426765,
+0.1149309027805101,
+2.0042477560750065,
+-2.1191783042209744,
+0.5108474518257031,
+3.219427435752209e-08
+],
+"cpu_distance": 0.033516999983950635,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/incoming/L1/C3/body"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-2.0816441829856447,
+1.9544417754188528,
+-2.0042476439697974,
+0.04980615929698384,
+0.5108474180784768,
+-4.10800962136193e-08
+],
+"cpu_distance": 0.02751587023901705,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_near",
+"carried": false,
+"q": [
+0.31556153138547405,
+-1.95444160299254,
+2.0042478105797663,
+-0.049805738098021024,
+-1.8863582035770805,
+-8.29940427493625e-09
+],
+"cpu_distance": 0.022813740694001196,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_near",
+"carried": false,
+"q": [
+0.3155616404494972,
+-0.11493073273547916,
+-2.0042476910714195,
+2.1191789261376686,
+-1.886358298515744,
+-1.1440055347478051e-07
+],
+"cpu_distance": 0.033516999983949934,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/incoming/L1/C3/body"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_near",
+"carried": false,
+"q": [
+0.315561574473183,
+-1.3264165845997493,
+1.4244562486897925,
+3.044515461863991,
+1.8846333996684148,
+3.1412956598563335
+],
+"cpu_distance": 0.03351699998395131,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/incoming/L1/C3/body"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "sight_near",
+"carried": false,
+"q": [
+0.3155616284173428,
+0.0069941180485249,
+-1.424456169882074,
+-1.7231681043070453,
+1.8846334721187716,
+3.1412955788142805
+],
+"cpu_distance": 0.033516999983950066,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/incoming/L1/C3/body"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-2.0582375422843096,
+0.11436527975797839,
+0.8683107066058184,
+2.156964961163445,
+-0.4891656928974317,
+3.139868359634839
+],
+"cpu_distance": 0.018456028817242242,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-2.0582376032382546,
+0.9337595578499185,
+-0.8683106066218231,
+3.074192010752542,
+-0.4891657034105603,
+3.139868376000913
+],
+"cpu_distance": 0.01845602881724316,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-2.0582375219000366,
+-0.02842675718668275,
+1.7329806039578077,
+-1.7045535010447472,
+0.48744085970751927,
+1.9602389933481845e-08
+],
+"cpu_distance": 0.018456028817241996,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-2.058237600871375,
+1.5805226874119311,
+-1.732980504252398,
+0.1524581450011917,
+0.48744084689629563,
+-2.8787239259031594e-10
+],
+"cpu_distance": 0.018456028817241708,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+0.32394098393906123,
+-1.580522507386715,
+1.7329806518965274,
+-0.15245766976616348,
+-1.894737637907495,
+-2.527695119880491e-08
+],
+"cpu_distance": 0.01845602881724196,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+0.32394109874747556,
+0.028426924962764666,
+-1.7329805362822093,
+1.704554116732087,
+-1.8947377637176213,
+-1.218759115850787e-07
+],
+"cpu_distance": 0.01845602881724239,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+0.3239410393068445,
+-0.9337328020487119,
+0.8679293469765046,
+-3.0748240596920926,
+1.8930128586967,
+3.141287132661672
+],
+"cpu_distance": 0.01845602881724213,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+0.32394108605032734,
+-0.1146954639711728,
+-0.8679292648607775,
+-2.1580027700059388,
+1.8930129239436662,
+3.141287082497672
+],
+"cpu_distance": 0.018456028817242422,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "insert",
+"carried": false,
+"q": [
+-2.4615405708419873,
+0.5036290635998286,
+1.0629806155058201,
+-1.5666093386485251,
+0.8907438781278607,
+6.275240993502962e-08
+],
+"cpu_distance": 0.008358520315522859,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_03"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "insert",
+"carried": false,
+"q": [
+-2.461540611934885,
+1.5045911871835669,
+-1.0629805139471866,
+-0.441610348825515,
+0.8907438610851433,
+3.7207633862834655e-08
+],
+"cpu_distance": 0.00835852031552304,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_03"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "insert",
+"carried": false,
+"q": [
+0.19155064915336117,
+-1.504591052761098,
+1.0629807005888008,
+0.4416108243750343,
+-1.7623473001978676,
+-1.6055833995665125e-08
+],
+"cpu_distance": 0.00835852031552156,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_03"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "insert",
+"carried": false,
+"q": [
+0.19155070820014775,
+-0.5036288682162384,
+-1.0629805904469345,
+1.5666099426587632,
+-1.762347352589091,
+-7.827574100005563e-08
+],
+"cpu_distance": 0.008358520315522934,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_03"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "lift",
+"carried": true,
+"q": [
+-2.461540559378233,
+0.5054864876045579,
+1.0050369584079455,
+-1.5105231055391166,
+0.8907438665468792,
+6.277829722733941e-08
+],
+"cpu_distance": 0.015620499346032374,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_01"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "lift",
+"carried": true,
+"q": [
+-2.4615405994559407,
+1.4525473888347662,
+-1.0050368573801736,
+-0.4475102051068487,
+0.890743850917084,
+4.029103450875482e-08
+],
+"cpu_distance": 0.015620499346032693,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_01"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "lift",
+"carried": true,
+"q": [
+0.1915506383021417,
+-1.452547255319934,
+1.0050370457841753,
+0.4475106822756185,
+-1.7623472875123058,
+-1.8889739550331797e-08
+],
+"cpu_distance": 0.015620499346032336,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_03"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "lift",
+"carried": true,
+"q": [
+0.1915506951648407,
+-0.5054862906499369,
+-1.0050369358448927,
+1.5105237104691973,
+-1.7623473395084535,
+-7.81637758962006e-08
+],
+"cpu_distance": 0.015620499346032405,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_01"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-2.0582375272888425,
+0.1544005495510823,
+0.7529809195543851,
+2.2322594808410017,
+-0.4891656757025533,
+3.13986836237423
+],
+"cpu_distance": 0.038507304497739675,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-2.0582375817391934,
+0.8656696217409579,
+-0.7529808192800029,
+3.0269521612868457,
+-0.48916568615974354,
+3.1398683780019514
+],
+"cpu_distance": 0.03850730449774009,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-2.058237501937211,
+-0.0337161772955854,
+1.6827167835029853,
+-1.6490002608945877,
+0.48744084000267796,
+1.9134092976713646e-08
+],
+"cpu_distance": 0.0385073044977392,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-2.0582375824259125,
+1.5310918195143959,
+-1.6827166849943658,
+0.15162519823657528,
+0.48744083046230235,
+4.916208329319716e-09
+],
+"cpu_distance": 0.03850730449773903,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "withdraw",
+"carried": true,
+"q": [
+0.32394096494212077,
+-1.531091639868375,
+1.682716830663777,
+-0.15162471521451293,
+-1.8947376169695778,
+-2.7914032862952354e-08
+],
+"cpu_distance": 0.03850730449773845,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "withdraw",
+"carried": true,
+"q": [
+0.3239410795073425,
+0.03371634492776998,
+-1.6827167156868768,
+1.6490008762397999,
+-1.8947377447483063,
+-1.2209025745946178e-07
+],
+"cpu_distance": 0.038507304497739425,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "withdraw",
+"carried": true,
+"q": [
+0.3239410232324955,
+-0.8656189444639395,
+0.7525552056844966,
+-3.0275637745300883,
+1.8930128426044597,
+3.141287128079587
+],
+"cpu_distance": 0.03850730449773891,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "withdraw",
+"carried": true,
+"q": [
+0.32394106555658553,
+-0.15474963605717118,
+-0.752555123168611,
+-2.2333227402408635,
+1.8930129016815727,
+3.141287084478134
+],
+"cpu_distance": 0.038507304497739,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "carry",
+"carried": true,
+"q": [
+-2.0582375272888425,
+0.1544005495510823,
+0.7529809195543851,
+2.2322594808410017,
+-0.4891656757025533,
+3.13986836237423
+],
+"cpu_distance": 0.038507304497739675,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "carry",
+"carried": true,
+"q": [
+-2.0582375817391934,
+0.8656696217409579,
+-0.7529808192800029,
+3.0269521612868457,
+-0.48916568615974354,
+3.1398683780019514
+],
+"cpu_distance": 0.03850730449774009,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "carry",
+"carried": true,
+"q": [
+-2.058237501937211,
+-0.0337161772955854,
+1.6827167835029853,
+-1.6490002608945877,
+0.48744084000267796,
+1.9134092976713646e-08
+],
+"cpu_distance": 0.0385073044977392,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "carry",
+"carried": true,
+"q": [
+-2.0582375824259125,
+1.5310918195143959,
+-1.6827166849943658,
+0.15162519823657528,
+0.48744083046230235,
+4.916208329319716e-09
+],
+"cpu_distance": 0.03850730449773903,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "carry",
+"carried": true,
+"q": [
+0.32394096494212077,
+-1.531091639868375,
+1.682716830663777,
+-0.15162471521451293,
+-1.8947376169695778,
+-2.7914032862952354e-08
+],
+"cpu_distance": 0.03850730449773845,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "carry",
+"carried": true,
+"q": [
+0.3239410795073425,
+0.03371634492776998,
+-1.6827167156868768,
+1.6490008762397999,
+-1.8947377447483063,
+-1.2209025745946178e-07
+],
+"cpu_distance": 0.038507304497739425,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "carry",
+"carried": true,
+"q": [
+0.3239410232324955,
+-0.8656189444639395,
+0.7525552056844966,
+-3.0275637745300883,
+1.8930128426044597,
+3.141287128079587
+],
+"cpu_distance": 0.03850730449773891,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "incoming/L2/C3",
+"phase": "carry",
+"carried": true,
+"q": [
+0.32394106555658553,
+-0.15474963605717118,
+-0.752555123168611,
+-2.2333227402408635,
+1.8930129016815727,
+3.141287084478134
+],
+"cpu_distance": 0.038507304497739,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/incoming/L2/C3/Cube_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.36482477717208,
+1.334671293342545,
+1.6705322397744053,
+0.1319298014396746,
+-0.20769595375564798,
+3.1372278601405306
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.364824686915413,
+2.888727510984973,
+-1.6705322916216812,
+1.9189376927662147,
+-0.2076960322289363,
+3.1372274285136337
+],
+"cpu_distance": -0.049711893957504534,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.3648247276393768,
+1.969021034274454,
+0.9777284162187172,
+-2.9467492527925425,
+0.20597116083543598,
+-1.581114887905244e-07
+],
+"cpu_distance": 0.02304210230009134,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.3648246888337434,
+2.8906339208085807,
+-0.9777282084399062,
+-1.9129057814561574,
+0.2059712102011142,
+-4.307097651867764e-07
+],
+"cpu_distance": -0.04977327567022337,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-2.3859192052766756,
+-2.890633960578304,
+0.977728544351975,
+1.912905903469687,
+-2.3264701782060264,
+-5.6934113867868064e-08
+],
+"cpu_distance": -0.04136926489836522,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-2.385919150224158,
+-1.9690208510557154,
+-0.9777284475806103,
+2.9467497878623874,
+-2.3264701763506146,
+-5.98279714658645e-08
+],
+"cpu_distance": 0.03656965838624712,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-2.385919211894404,
+-2.8877998765189306,
+1.6693329511230353,
+-1.9218698487205599,
+2.324745351239816,
+3.140733084839658
+],
+"cpu_distance": -0.04104478787950776,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-2.385919155242107,
+-1.3348030652737606,
+-1.6693328702238792,
+-0.13620080926567057,
+2.3247453237411815,
+3.140733041997793
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.2212881522823347,
+1.3529017770435043,
+1.5471477385215522,
+0.23887538531004093,
+-0.35123257772540395,
+3.1390863676736434
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.2212880704791278,
+2.797085367050025,
+-1.5471477255164883,
+1.8889870315788855,
+-0.3512326452743313,
+3.1390861251782427
+],
+"cpu_distance": -0.04294081494663272,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.2212881055537803,
+2.000399281996769,
+0.8209237350951297,
+-2.821322759364662,
+0.34950778237055147,
+-8.740882240232395e-08
+],
+"cpu_distance": 0.012937242536076407,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.2212880736929783,
+2.775410048384299,
+-0.8209235744341958,
+-1.9544863473020821,
+0.3495078211614855,
+-2.269667991328106e-07
+],
+"cpu_distance": -0.04169080724698174,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-2.482848071760325,
+-2.7754100358749385,
+0.8209238638450085,
+1.9544866501661566,
+-2.229541304845126,
+-3.9980435406761217e-08
+],
+"cpu_distance": -0.0285704479655381,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-2.482848026604228,
+-2.000399091070896,
+-0.8209237660155502,
+2.8213233381716956,
+-2.22954130175749,
+-4.480353066327325e-08
+],
+"cpu_distance": 0.02831350825655233,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-2.4828480802344663,
+-2.796644766666118,
+1.5465340869828168,
+-1.8903257963464455,
+2.227816477478722,
+3.140886644735132
+],
+"cpu_distance": -0.030866232800887836,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-2.4828480281727923,
+-1.3530117988760482,
+-1.5465340053262557,
+-0.24089064686980954,
+2.2278164513237604,
+3.140886603917493
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.2397950823343598,
+1.0073816226656076,
+1.7563456455896533,
+0.37505482446716654,
+-0.33272566692102234,
+3.138934849426878
+],
+"cpu_distance": 0.018456028817245063,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.2397950001673985,
+2.636726441129629,
+-1.75634564024921,
+2.258401045730844,
+-0.3327257109220474,
+3.138934589112055
+],
+"cpu_distance": -0.03408206306432504,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.2397950433047038,
+1.6042508215455937,
+1.3372749235511305,
+-2.9415254266259145,
+0.3310008553977166,
+-2.42682975937214e-08
+],
+"cpu_distance": 0.018456028817242415,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.2397950034158356,
+2.858207697771303,
+-1.3372747470853454,
+-1.5209328502211465,
+0.3310008943171865,
+-2.548558937220946e-07
+],
+"cpu_distance": -0.04659755332762658,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-2.470737085800113,
+-2.8582076682678896,
+1.337274995934579,
+1.5209331526184595,
+-2.2416522957824294,
+-4.386262242306316e-08
+],
+"cpu_distance": -0.037355259881384884,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-2.470737021803761,
+-1.6042506485127332,
+-1.337274892504743,
+2.9415260351985335,
+-2.2416522867102278,
+-6.624003034971793e-08
+],
+"cpu_distance": 0.018456028817243023,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-2.4707370770037405,
+-2.6363301725862844,
+1.7556747999918372,
+-2.259770111372511,
+2.2399274707739094,
+3.140868790058283
+],
+"cpu_distance": -0.012361243536051378,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-2.47073703149627,
+-1.0075698192583729,
+-1.7556747291842056,
+-0.3771808911948291,
+2.2399274418151407,
+3.1408687186719337
+],
+"cpu_distance": 0.018456028817242575,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "insert",
+"carried": false,
+"q": [
+0.8723310610225461,
+1.245312235896085,
+1.0887303489510032,
+0.8061279138607302,
+-0.7001896745590317,
+3.140503541465603
+],
+"cpu_distance": 0.008358520315522732,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_03"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "insert",
+"carried": false,
+"q": [
+0.8723310104669153,
+2.2701837131919866,
+-1.0887302865015336,
+1.958717006111426,
+-0.7001896957264209,
+3.1405034553450006
+],
+"cpu_distance": -0.006852174926900323,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "insert",
+"carried": false,
+"q": [
+0.8723310292616606,
+1.8559348381490928,
+0.49672335973433634,
+-2.352657889151135,
+0.6984648615092977,
+-5.3221986817675315e-09
+],
+"cpu_distance": 0.00835852031552689,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_03"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "insert",
+"carried": false,
+"q": [
+0.8723310134478321,
+2.325899712369891,
+-0.49672323139621843,
+-1.8291762072659739,
+0.6984648727522371,
+-5.108951661725314e-08
+],
+"cpu_distance": -6.245515091685139e-05,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "insert",
+"carried": false,
+"q": [
+-2.693926648757776,
+-2.3258996941413863,
+0.49672357349930785,
+1.8291765893894718,
+-2.018462699419062,
+-1.327063348099955e-08
+],
+"cpu_distance": -0.0005802588612092985,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "insert",
+"carried": false,
+"q": [
+-2.6939266251935297,
+-1.8559345998058678,
+-0.49672346923099653,
+2.3526585430290696,
+-2.0184626952437,
+-2.5409034432044564e-08
+],
+"cpu_distance": 0.008358520315523112,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_03"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "insert",
+"carried": false,
+"q": [
+-2.6939266512770983,
+-2.2700527373099457,
+1.088479475570593,
+-1.959004716098001,
+2.0167378731918086,
+3.1411551854980315
+],
+"cpu_distance": -0.014921286236568833,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "insert",
+"carried": false,
+"q": [
+-2.6939266192048694,
+-1.2454140730764858,
+-1.0884793974303157,
+-0.8066844877528481,
+2.0167378576001305,
+3.141155140188215
+],
+"cpu_distance": 0.008358520315523357,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_03"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "lift",
+"carried": true,
+"q": [
+0.8723310738630978,
+1.2072581425770341,
+1.105892677125861,
+0.8270196805045722,
+-0.700189663792782,
+3.1405035434252344
+],
+"cpu_distance": 0.008169999998149323,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C5/Cube_01_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "lift",
+"carried": true,
+"q": [
+0.8723310229813377,
+2.248049399720866,
+-1.1058926143064194,
+1.9980136490509945,
+-0.7001896831917462,
+3.1405034575188235
+],
+"cpu_distance": -0.003891921818113958,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "lift",
+"carried": true,
+"q": [
+0.8723310436906679,
+1.7876066235529846,
+0.5914643832332072,
+-2.37907069331346,
+0.6984648488761476,
+8.722231825686322e-10
+],
+"cpu_distance": 0.008169999998148427,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C5/Cube_02_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "lift",
+"carried": true,
+"q": [
+0.8723310252490668,
+2.34692484266008,
+-0.5914642545921867,
+-1.7554603159540876,
+0.6984648610741271,
+-5.3172289238290205e-08
+],
+"cpu_distance": -0.001482498049176037,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "lift",
+"carried": true,
+"q": [
+-2.6939266639851747,
+-2.346924807873439,
+0.5914645622623067,
+1.755460714274629,
+-2.018462685526555,
+-1.3076465688044436e-08
+],
+"cpu_distance": -0.00040654282377108886,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "lift",
+"carried": true,
+"q": [
+-2.693926636233142,
+-1.7876064008523078,
+-0.5914644573537506,
+2.379071333458393,
+-2.018462680707474,
+-2.8325426448816415e-08
+],
+"cpu_distance": 0.008169999998149657,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C5/Cube_02_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "lift",
+"carried": true,
+"q": [
+-2.6939266639281274,
+-2.2479217525619704,
+1.1056439924176962,
+-1.9983002175597777,
+2.016737859154089,
+3.1411551851895503
+],
+"cpu_distance": -0.012617378255481718,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "lift",
+"carried": true,
+"q": [
+-2.6939266318892776,
+-1.2073610888499537,
+-1.1056439149765716,
+-0.8275729533354332,
+2.016737844124278,
+3.1411551376477913
+],
+"cpu_distance": 0.00816999999814969,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C5/Cube_01_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "withdraw",
+"carried": true,
+"q": [
+1.239795099325531,
+0.9607588172081964,
+1.7719098366329167,
+0.4061134414028196,
+-0.3327256527719431,
+3.138934852093916
+],
+"cpu_distance": 0.038507304497742145,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "withdraw",
+"carried": true,
+"q": [
+1.2397950176150507,
+2.603643139615458,
+-1.771909830457781,
+2.3070485430254166,
+-0.3327256926964557,
+3.1389345950054643
+],
+"cpu_distance": -0.032003479290531114,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "withdraw",
+"carried": true,
+"q": [
+1.2397950611042292,
+1.5546232445943016,
+1.3873887123905515,
+-2.9420116312647027,
+0.33100083955806703,
+-1.6600582686265852e-08
+],
+"cpu_distance": 0.038507304497739474,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "withdraw",
+"carried": true,
+"q": [
+1.239795021178674,
+2.85431989829657,
+-1.387388534333826,
+-1.4669312629061428,
+0.3310008764113035,
+-2.5422994998081094e-07
+],
+"cpu_distance": -0.046393821274486616,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-2.4707371042741344,
+-2.8543198668595573,
+1.387388781391091,
+1.4669315656787392,
+-2.24165227707816,
+-4.374204554125072e-08
+],
+"cpu_distance": -0.03694540995569378,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-2.47073703897867,
+-1.5546230722460423,
+-1.387388676911184,
+2.9420122452902744,
+-2.241652267527618,
+-6.938343144469172e-08
+],
+"cpu_distance": 0.03850730449773992,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-2.4707370936722026,
+-2.6032620228971246,
+1.7712368919842714,
+-2.308400353326983,
+2.2399274520130525,
+3.1408687904977404
+],
+"cpu_distance": -0.008312130949654578,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-2.4707370492045286,
+-0.9609623493905515,
+-1.7712368227165511,
+-0.40822626519199057,
+2.2399274238422624,
+3.14086871490644
+],
+"cpu_distance": 0.03850730449773996,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "carry",
+"carried": true,
+"q": [
+1.239795099325531,
+0.9607588172081964,
+1.7719098366329167,
+0.4061134414028196,
+-0.3327256527719431,
+3.138934852093916
+],
+"cpu_distance": 0.038507304497742145,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "carry",
+"carried": true,
+"q": [
+1.2397950176150507,
+2.603643139615458,
+-1.771909830457781,
+2.3070485430254166,
+-0.3327256926964557,
+3.1389345950054643
+],
+"cpu_distance": -0.032003479290531114,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "carry",
+"carried": true,
+"q": [
+1.2397950611042292,
+1.5546232445943016,
+1.3873887123905515,
+-2.9420116312647027,
+0.33100083955806703,
+-1.6600582686265852e-08
+],
+"cpu_distance": 0.038507304497739474,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "carry",
+"carried": true,
+"q": [
+1.239795021178674,
+2.85431989829657,
+-1.387388534333826,
+-1.4669312629061428,
+0.3310008764113035,
+-2.5422994998081094e-07
+],
+"cpu_distance": -0.046393821274486616,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "carry",
+"carried": true,
+"q": [
+-2.4707371042741344,
+-2.8543198668595573,
+1.387388781391091,
+1.4669315656787392,
+-2.24165227707816,
+-4.374204554125072e-08
+],
+"cpu_distance": -0.03694540995569378,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "carry",
+"carried": true,
+"q": [
+-2.47073703897867,
+-1.5546230722460423,
+-1.387388676911184,
+2.9420122452902744,
+-2.241652267527618,
+-6.938343144469172e-08
+],
+"cpu_distance": 0.03850730449773992,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_1"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "carry",
+"carried": true,
+"q": [
+-2.4707370936722026,
+-2.6032620228971246,
+1.7712368919842714,
+-2.308400353326983,
+2.2399274520130525,
+3.1408687904977404
+],
+"cpu_distance": -0.008312130949654578,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L0/C5",
+"phase": "carry",
+"carried": true,
+"q": [
+-2.4707370492045286,
+-0.9609623493905515,
+-1.7712368227165511,
+-0.40822626519199057,
+2.2399274238422624,
+3.14086871490644
+],
+"cpu_distance": 0.03850730449773996,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L0/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-0.7556735783820816,
+0.20416157204150265,
+1.242339549222919,
+1.693834257526217,
+-2.3281943774946496,
+-3.1407299385313703
+],
+"cpu_distance": 0.06389999011920933,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-0.7556736427965514,
+1.371017617240895,
+-1.242339449693544,
+3.0116572187485744,
+-2.328194371814745,
+-3.140729949465518
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-0.7556735814616506,
+0.3331734020056585,
+1.7836972802623707,
+-2.1168705281072175,
+2.326469552805415,
+2.3114208502761358e-07
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-0.7556736333745548,
+1.9862860789591394,
+-1.7836972057901292,
+-0.2025886775554806,
+2.3264695214062856,
+1.7075118696752156e-07
+],
+"cpu_distance": 0.03388735158833152,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.7767664981414963,
+-1.986285907183129,
+1.7836972474500667,
+0.20258957396704735,
+-0.20597051878480466,
+5.349524534459249e-07
+],
+"cpu_distance": 0.019797183071557943,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.7767665877745085,
+-0.3331731674409544,
+-1.783697307944681,
+2.1168709524434197,
+-0.20597058366121512,
+8.841635334988496e-08
+],
+"cpu_distance": 0.06389999011920933,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.7767665432365334,
+-1.3711544294669642,
+1.2436195947236923,
+-3.0095603792967394,
+0.20424571629585042,
+-3.1371896770328545
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.7767665857899502,
+-0.20312048853630404,
+-1.24361937398305,
+-1.6903556900128187,
+0.2042457663670456,
+-3.1371900227720695
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-0.6587447614512323,
+0.30771712206037893,
+1.109376386784711,
+1.7233420852333845,
+-2.2312655545192377,
+-3.1408839598121183
+],
+"cpu_distance": 0.03351699998395008,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L2/C0/body"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-0.6587448180577233,
+1.3517382641187456,
+-1.1093762864383603,
+2.898073624047859,
+-2.2312655480418058,
+-3.1408839722952733
+],
+"cpu_distance": 0.03351699998394996,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L2/C0/body"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-0.6587447627314047,
+0.41755075805208186,
+1.6595712382948093,
+-2.0771218163234,
+2.2295407289254996,
+2.064886279740108e-07
+],
+"cpu_distance": 0.033516999983950406,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L2/C0/body"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-0.658744811547753,
+1.9619184041092579,
+-1.6595711618176439,
+-0.30234702814161274,
+2.2295407000069316,
+1.5079976334320122e-07
+],
+"cpu_distance": 0.03351699998395109,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L2/C0/body"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.920303171968306,
+-1.9619182483455935,
+1.6595712817228243,
+0.30234765987752565,
+-0.3495071911331684,
+3.0826165620112533e-07
+],
+"cpu_distance": 0.020575408101137494,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.9203032540828637,
+-0.417550523489147,
+-1.6595712720190698,
+2.077122253479793,
+-0.34950724726861626,
+5.7916847762129464e-08
+],
+"cpu_distance": 0.03351699998394975,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L2/C0/body"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.9203032138553509,
+-1.3518640632145777,
+1.1100682251325136,
+-2.8971154325168977,
+0.34778238628094593,
+-3.1390726531412914
+],
+"cpu_distance": 0.03351699998395122,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L2/C0/body"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.9203032515369864,
+-0.30720162160361086,
+-1.1100680581044289,
+-1.7216417665789987,
+0.3477824281241553,
+-3.1390728400759955
+],
+"cpu_distance": 0.03351699998395052,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L2/C0/body"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-0.6708557980140193,
+0.5021013770915137,
+0.383400214878757,
+2.254922948945473,
+-2.2433765791012905,
+-3.1408660478538604
+],
+"cpu_distance": 0.01845602881724259,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-0.6708558209269215,
+0.8650222727055796,
+-0.38340011906013727,
+2.6588023874325675,
+-2.2433765789042566,
+-3.1408660481145882
+],
+"cpu_distance": 0.018456028817242644,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-0.6708557746365811,
+0.29130038252290724,
+1.4187451867920355,
+-1.7100453903896426,
+2.241651748498459,
+2.0629296315632928e-07
+],
+"cpu_distance": 0.018456028817242127,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-0.6708558293351148,
+1.6195236066714882,
+-1.4187451008670349,
+-0.20077830949577358,
+2.2416517273658485,
+1.7836034160723102e-07
+],
+"cpu_distance": 0.018456028817242506,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.901796258323758,
+-1.6195234497541806,
+1.4187452378609162,
+0.20077888264767418,
+-0.3310002604603346,
+2.842203770114793e-07
+],
+"cpu_distance": 0.018456028817228687,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.9017963392087402,
+-0.2913001337858345,
+-1.4187452262975344,
+1.710045800903739,
+-0.3310003365516083,
+4.116050700275764e-08
+],
+"cpu_distance": 0.018456028817241597,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.901796314374538,
+-0.8656512223725468,
+0.38517729193150707,
+-2.658293087776197,
+0.3292754802561779,
+-3.1389196972276108
+],
+"cpu_distance": 0.0184560288172399,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.9017963314206652,
+-0.5010505923991859,
+-0.3851771323235438,
+-2.252539359899017,
+0.32927550217139645,
+-3.1389197674228195
+],
+"cpu_distance": 0.018456028817240375,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+-0.447666354470591,
+0.7855215201621535,
+0.6448168051992269,
+-1.4303381016892622,
+2.018462297317414,
+1.651488377163446e-07
+],
+"cpu_distance": 0.008358520315521503,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_03"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+-0.44766637856729297,
+1.395090919574642,
+-0.6448167194113505,
+-0.750273969024958,
+2.018462286262844,
+1.479313245233982e-07
+],
+"cpu_distance": 0.008358520315521244,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_03"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+2.269260432094786,
+-1.3950908396029467,
+0.64481701522939,
+0.7502743348344825,
+-0.6984644259178836,
+1.0179074116933862e-07
+],
+"cpu_distance": 0.008358520315520597,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_03"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+2.269260466399783,
+-0.785521232406738,
+-0.6448169530340264,
+1.4303386509155898,
+-0.6984644527778086,
+4.3091633372682736e-08
+],
+"cpu_distance": 0.008358520315522467,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_03"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+-0.4476663453329226,
+0.8006827270885166,
+0.5615502319483725,
+-1.362232735309601,
+2.0184622872158133,
+1.65021617704042e-07
+],
+"cpu_distance": 0.015620499346032558,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_03"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+-0.44766636685776273,
+1.3318034986468659,
+-0.5615501455049507,
+-0.7702531232427825,
+2.0184622776801957,
+1.5078899684439762e-07
+],
+"cpu_distance": 0.015620499346033098,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_03"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+2.269260423672896,
+-1.3318034327745727,
+0.5615504725505804,
+0.7702534663695437,
+-0.6984644156678868,
+9.615992224709657e-08
+],
+"cpu_distance": 0.01562049934603147,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_03"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+2.2692604540111327,
+-0.8006824240854291,
+-0.5615504100733166,
+1.3622333007856158,
+-0.6984644402900777,
+4.4594854031743125e-08
+],
+"cpu_distance": 0.015620499346032086,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_03"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-0.6708557603998733,
+0.2856551178802942,
+1.370778641822965,
+-1.6564335806696866,
+2.2416517345966707,
+2.0611898721156763e-07
+],
+"cpu_distance": 0.03850730449773894,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-0.6708558152742379,
+1.57021123247468,
+-1.3707785548012001,
+-0.19943248336207375,
+2.2416517152158892,
+1.8156968195626177e-07
+],
+"cpu_distance": 0.03850730449773961,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+1.9017962447513144,
+-1.5702110761041386,
+1.370778695868375,
+0.19943304393639893,
+-0.3310002448534144,
+2.767639379896991e-07
+],
+"cpu_distance": 0.03850730449772442,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+1.901796324571536,
+-0.28565486757180336,
+-1.3707786827447,
+1.6564339902708136,
+-0.33100032212034236,
+4.024500821486754e-08
+],
+"cpu_distance": 0.038507304497739196,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+-0.6708557603998733,
+0.2856551178802942,
+1.370778641822965,
+-1.6564335806696866,
+2.2416517345966707,
+2.0611898721156763e-07
+],
+"cpu_distance": 0.03850730449773894,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+-0.6708558152742379,
+1.57021123247468,
+-1.3707785548012001,
+-0.19943248336207375,
+2.2416517152158892,
+1.8156968195626177e-07
+],
+"cpu_distance": 0.03850730449773961,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+1.9017962447513144,
+-1.5702110761041386,
+1.370778695868375,
+0.19943304393639893,
+-0.3310002448534144,
+2.767639379896991e-07
+],
+"cpu_distance": 0.03850730449772442,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+1.901796324571536,
+-0.28565486757180336,
+-1.3707786827447,
+1.6564339902708136,
+-0.33100032212034236,
+4.024500821486754e-08
+],
+"cpu_distance": 0.038507304497739196,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C0/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.3648253772121057,
+0.20313245726469908,
+1.2436049176750865,
+1.6903959790762872,
+-0.20769542204699887,
+3.1372278800242057
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.3648253127148458,
+1.371153014320587,
+-1.243604836086686,
+3.0095851379178518,
+-0.20769541639718136,
+3.1372278413352532
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.3648253691457395,
+0.3331733357866491,
+1.7836973746464544,
+-2.116870308517588,
+0.20597060228056563,
+5.055080620763874e-08
+],
+"cpu_distance": 0.06389999011920933,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.3648253172328326,
+1.986286078728078,
+-1.7836972043913317,
+-0.20258868171705524,
+0.20597057095174431,
+-1.6330311414236576e-07
+],
+"cpu_distance": 0.019797147937656683,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-2.3859198583237937,
+-1.9862859339896155,
+1.7836974097293732,
+0.20258901299758358,
+-2.326469469227133,
+-5.911465006391836e-08
+],
+"cpu_distance": 0.03388737173629498,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-2.385919768690783,
+-0.33317319367668397,
+-1.783697270550057,
+2.1168710385112774,
+-2.326469534250915,
+-1.8397359502486665e-07
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-2.3859198181528374,
+-1.3710173574387623,
+1.242338648767574,
+-3.0116580388306073,
+2.3247446618546093,
+3.140733045995514
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-2.3859197756031763,
+-0.20416213177802067,
+-1.2423385879597881,
+-1.693835961735648,
+2.324744711997278,
+3.1407329496249403
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.2212887029521369,
+0.3072059871841213,
+1.110062488724541,
+1.7216564484751302,
+-0.35123209022062163,
+3.139086392703396
+],
+"cpu_distance": 0.033516999983950274,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L2/C5/body"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.2212886463044317,
+1.3518631817388993,
+-1.110062404118064,
+2.8971241197615125,
+-0.35123208375505977,
+3.1390863639553706
+],
+"cpu_distance": 0.03351699998395141,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L2/C5/body"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.2212886977708681,
+0.4175507031455181,
+1.659571321497948,
+-2.077121639988734,
+0.34950726849579494,
+4.7728859087214914e-08
+],
+"cpu_distance": 0.03351699998395028,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L2/C5/body"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.2212886489545172,
+1.9619184086424006,
+-1.6595711819930155,
+-0.30234696241459424,
+0.34950723961046215,
+-8.048036503893741e-08
+],
+"cpu_distance": 0.020575375073570355,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-2.482848674624825,
+-1.9619182676495484,
+1.659571367637799,
+0.30234738198569966,
+-2.229540651557342,
+-4.625696492510656e-08
+],
+"cpu_distance": 0.03351699998395287,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L2/C5/body"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-2.4828485925102686,
+-0.4175505478995589,
+-1.659571235028545,
+2.077122330987807,
+-2.229540707757988,
+-1.5433874844816842e-07
+],
+"cpu_distance": 0.03351699998395017,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L2/C5/body"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-2.482848636615411,
+-1.351737956230658,
+1.1093755819651498,
+-2.898074077292965,
+2.2278158428451578,
+3.140886604713761
+],
+"cpu_distance": 0.03351699998395107,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L2/C5/body"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-2.4828485989418287,
+-0.3077175520864408,
+-1.1093755171119373,
+-1.723343333089417,
+2.227815884714155,
+3.14088652413262
+],
+"cpu_distance": 0.0335169999839501,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L2/C5/body"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.2397955959580882,
+0.5010596110096293,
+0.3851622321449071,
+2.2525602530287117,
+-0.332725185267686,
+3.1389348530878243
+],
+"cpu_distance": 0.018456028817242242,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.2397955729364618,
+0.8656460505267543,
+-0.3851621371251648,
+2.65829818219993,
+-0.332725185074612,
+3.1389348524725147
+],
+"cpu_distance": 0.01845602881724352,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.2397956152624037,
+0.29130032107649884,
+1.4187452680433328,
+-1.7100452094888754,
+0.331000358675297,
+4.042150880678719e-08
+],
+"cpu_distance": 0.018456028817242162,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.2397955605638664,
+1.6195236140467184,
+-1.4187451492942582,
+-0.200778148568598,
+0.3310003375606412,
+-2.6687272391967554e-08
+],
+"cpu_distance": 0.018456028817241333,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-2.470737658869756,
+-1.6195234606720381,
+1.4187453095498341,
+0.20077864471860618,
+-2.241651650286424,
+-6.5298525697699e-08
+],
+"cpu_distance": 0.018456028817240164,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-2.470737577984775,
+-0.2913001693547961,
+-1.4187451792642911,
+1.7100459046391325,
+-2.2416517264430174,
+-1.6582285855548662e-07
+],
+"cpu_distance": 0.018456028817242287,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-2.47073760680118,
+-0.8650214307183397,
+0.38339828222886707,
+-2.658802284460364,
+2.2399268661380285,
+3.1408687079033193
+],
+"cpu_distance": 0.018456028817239876,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-2.4707375898270416,
+-0.5021023528446849,
+-0.3833982129930358,
+-2.2549248491943628,
+2.239926887973013,
+3.140868679049321
+],
+"cpu_distance": 0.018456028817241316,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "insert",
+"carried": false,
+"q": [
+0.8723314499112309,
+0.7855214538374504,
+0.6448169241719564,
+-1.4303380225329374,
+0.6984644929855977,
+5.5759294514956537e-08
+],
+"cpu_distance": 0.008358520315522849,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_03"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "insert",
+"carried": false,
+"q": [
+0.8723314258145249,
+1.395090956237345,
+-0.6448168149142095,
+-0.7502738042912536,
+0.6984644819341859,
+3.165738604593571e-08
+],
+"cpu_distance": 0.008358520315523098,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_03"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "insert",
+"carried": false,
+"q": [
+-2.693927070666775,
+-1.3950908484919493,
+0.6448170383844021,
+0.7502742945471113,
+-2.0184622302666404,
+-4.95879843853686e-08
+],
+"cpu_distance": 0.008358520315521348,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_03"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "insert",
+"carried": false,
+"q": [
+-2.6939270363617784,
+-0.7855212513372827,
+-0.6448169190765678,
+1.4303386729196585,
+-2.0184622571343134,
+-9.139976908656422e-08
+],
+"cpu_distance": 0.008358520315522103,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_03"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "lift",
+"carried": true,
+"q": [
+0.8723314590489002,
+0.800682653226982,
+0.5615503660417076,
+-1.3622326639285045,
+0.6984644828840216,
+5.5581208080468514e-08
+],
+"cpu_distance": 0.015620499346033009,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_03"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "lift",
+"carried": true,
+"q": [
+0.8723314375240552,
+1.3318035426319241,
+-0.561550257699583,
+-0.7702529448391213,
+0.6984644733510126,
+3.565769501889804e-08
+],
+"cpu_distance": 0.015620499346033132,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_03"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "lift",
+"carried": true,
+"q": [
+-2.6939270790886645,
+-1.3318034405966086,
+0.5615504925025991,
+0.7702534342666105,
+-2.018462220017387,
+-5.359885602018721e-08
+],
+"cpu_distance": 0.015620499346032764,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_03"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "lift",
+"carried": true,
+"q": [
+-2.6939270487504294,
+-0.8006824442885843,
+-0.5615503733951162,
+1.362233319726851,
+-2.018462244646384,
+-9.032901360228607e-08
+],
+"cpu_distance": 0.015620499346032064,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_01"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "withdraw",
+"carried": true,
+"q": [
+1.2397956294991115,
+0.28565505568774796,
+1.3707787235644178,
+-1.656433400016375,
+0.33100034477362117,
+4.00035360392792e-08
+],
+"cpu_distance": 0.03850730449773931,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "withdraw",
+"carried": true,
+"q": [
+1.2397955746247424,
+1.570211240439372,
+-1.3707786074471295,
+-0.19943230951856705,
+0.33100032540861957,
+-1.897674994921772e-08
+],
+"cpu_distance": 0.03850730449773839,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-2.4707376724422,
+-1.5702110864870142,
+1.3707787644983869,
+0.19943281750002306,
+-2.241651634681508,
+-6.838235089290379e-08
+],
+"cpu_distance": 0.03850730449773633,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-2.4707375926219792,
+-0.2856549040066314,
+-1.3707786348573636,
+1.6564340951191605,
+-2.241651712011998,
+-1.6620148679535873e-07
+],
+"cpu_distance": 0.03850730449773937,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "carry",
+"carried": true,
+"q": [
+1.2397956294991115,
+0.28565505568774796,
+1.3707787235644178,
+-1.656433400016375,
+0.33100034477362117,
+4.00035360392792e-08
+],
+"cpu_distance": 0.03850730449773931,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "carry",
+"carried": true,
+"q": [
+1.2397955746247424,
+1.570211240439372,
+-1.3707786074471295,
+-0.19943230951856705,
+0.33100032540861957,
+-1.897674994921772e-08
+],
+"cpu_distance": 0.03850730449773839,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "carry",
+"carried": true,
+"q": [
+-2.4707376724422,
+-1.5702110864870142,
+1.3707787644983869,
+0.19943281750002306,
+-2.241651634681508,
+-6.838235089290379e-08
+],
+"cpu_distance": 0.03850730449773633,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L3/C5",
+"phase": "carry",
+"carried": true,
+"q": [
+-2.4707375926219792,
+-0.2856549040066314,
+-1.3707786348573636,
+1.6564340951191605,
+-2.241651712011998,
+-1.6620148679535873e-07
+],
+"cpu_distance": 0.03850730449773937,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L3/C5/Cube_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_far",
+"carried": false,
+"q": [
+0.27324420239981606,
+0.6075449977309741,
+2.6283079960969804,
+-0.09521030834250999,
+-1.299276572043946,
+3.1413362688974997
+],
+"cpu_distance": 0.06036625177100644,
+"cpu_link": "link_5",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_far",
+"carried": false,
+"q": [
+0.2732440668845162,
+2.8390476946288334,
+-2.6283078860890488,
+2.929902849118478,
+-1.2992766502264383,
+3.141336165460581
+],
+"cpu_distance": -0.06310834579674479,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_far",
+"carried": false,
+"q": [
+0.2732441539234891,
+1.5187883296555,
+2.228394389901954,
+2.53600289087776,
+1.297551748194997,
+6.507914607212228e-08
+],
+"cpu_distance": 0.060395212681972954,
+"cpu_link": "link_5",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_far",
+"carried": false,
+"q": [
+0.2732441023597749,
+-2.7499975382254545,
+-2.228394303663989,
+-1.3047931910917345,
+1.2975518297722592,
+-4.292958655227608e-08
+],
+"cpu_distance": -0.03842568043185039,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_far",
+"carried": false,
+"q": [
+2.182386784859247,
+2.7499976102155363,
+2.228394425158438,
+1.304793797903094,
+-0.6115908909693224,
+1.2248375558243652e-07
+],
+"cpu_distance": -0.03749467018874654,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_far",
+"carried": false,
+"q": [
+2.1823868979405914,
+-1.5187881693193035,
+-2.228394328613108,
+-2.536002274009592,
+-0.6115908959887744,
+1.3364074957777916e-07
+],
+"cpu_distance": 0.038247555349333676,
+"cpu_link": "link_3",
+"cpu_obstacle": "pedestal/leg1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_far",
+"carried": false,
+"q": [
+2.1823868279661287,
+-2.8391324397273885,
+2.6285259674087413,
+-2.929388805862944,
+0.6098660811516812,
+-3.1402838375782727
+],
+"cpu_distance": -0.035632970168541264,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_far",
+"carried": false,
+"q": [
+2.1823868516209917,
+-0.607583369574543,
+-2.62852585296304,
+0.0961138332656537,
+0.609866020068139,
+-3.140283973181584
+],
+"cpu_distance": 0.060366181824257285,
+"cpu_link": "link_5",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_near",
+"carried": false,
+"q": [
+0.20387517713819925,
+0.610793114643013,
+2.4166783122638638,
+0.11318715542031477,
+-1.3686455970957203,
+3.1414035198432906
+],
+"cpu_distance": 0.03351699998394949,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L0/C2/body"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_near",
+"carried": false,
+"q": [
+0.20387506351897988,
+2.7509799923149227,
+-2.4166782066741965,
+2.8063567771609597,
+-1.3686456506426246,
+3.1414034230005496
+],
+"cpu_distance": -0.05158880589930721,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_near",
+"carried": false,
+"q": [
+0.20387513549763892,
+1.4137753494162348,
+2.081257493217052,
+2.7881527643317225,
+1.3669207713393385,
+7.536780843864221e-08
+],
+"cpu_distance": 0.033516999983950725,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L0/C2/body"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_near",
+"carried": false,
+"q": [
+0.2038750895368482,
+-2.9676959796666176,
+-2.0812574059332487,
+-1.234231643098319,
+1.3669208297326545,
+-3.029564421552777e-08
+],
+"cpu_distance": -0.04944072728654564,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_near",
+"carried": false,
+"q": [
+2.403111099834507,
+2.9676960609691267,
+2.0812575425264157,
+1.2342322085073052,
+-0.8323151979238204,
+9.334511208436425e-08
+],
+"cpu_distance": -0.0590867263077878,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_near",
+"carried": false,
+"q": [
+2.4031111975261608,
+-1.413775192530086,
+-2.081257448076319,
+-2.788152171448769,
+-0.832315191921146,
+7.895099107813053e-08
+],
+"cpu_distance": 0.03351699998395028,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L0/C2/body"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_near",
+"carried": false,
+"q": [
+2.403111129460214,
+-2.7510261781436895,
+2.416784068866816,
+-2.806110916604957,
+0.8305903772827183,
+-3.140756990699826
+],
+"cpu_distance": -0.02456034321153644,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "sight_near",
+"carried": false,
+"q": [
+2.403111164046667,
+-0.6107770784993991,
+-2.416783962196665,
+-0.11279205761466127,
+0.830590332424475,
+-3.1407570981925303
+],
+"cpu_distance": 0.0335169999839503,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "tray/outgoing/L0/C2/body"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+0.21109887602058874,
+0.10352028011683068,
+2.3840812810044323,
+0.6530555976248809,
+-1.361421928745493,
+3.1413966075060946
+],
+"cpu_distance": 0.018456028817242502,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+0.21109877528968335,
+2.223989548150266,
+-2.3840811800738204,
+-2.98243652770944,
+-1.3614219308654927,
+3.1413965538403126
+],
+"cpu_distance": -0.00514747972357861,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+0.21109883725066325,
+0.990928096007722,
+2.3583538891215454,
+2.933903625237579,
+1.3596970927998617,
+8.863630496236397e-08
+],
+"cpu_distance": 0.01845602881724279,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+0.21109881053208746,
+3.095127223294755,
+-2.3583538043564243,
+-0.7367731389988688,
+1.3596970972003488,
+-2.2761683204919336e-08
+],
+"cpu_distance": -0.056370322589983306,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+2.379197326062245,
+-3.0951271255060417,
+2.3583539473581627,
+0.7367736949876864,
+-0.808401413746096,
+1.1070071881391641e-07
+],
+"cpu_distance": -0.06565952720346262,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+2.3791974256138797,
+-0.9909279390793393,
+-2.3583538579231935,
+-2.933903037093761,
+-0.8084014118910696,
+4.7402853198263983e-08
+],
+"cpu_distance": 0.018456028817241704,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+2.379197368071889,
+-2.2239659747638867,
+2.3841881644971608,
+2.9826381074660233,
+0.8066765825450983,
+-3.1407159807514944
+],
+"cpu_distance": -0.0010434265003945314,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+2.3791973933186448,
+-0.10343040405954396,
+-2.384188054050878,
+-0.6527066549503644,
+0.8066765781748466,
+-3.140716129867161
+],
+"cpu_distance": 0.01845602881724317,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "insert",
+"carried": false,
+"q": [
+0.11276659005362655,
+0.583907229507937,
+1.6498710368571734,
+0.9068938133153477,
+-1.4597541858934078,
+3.1414890702065215
+],
+"cpu_distance": 0.008358520315523131,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_03"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "insert",
+"carried": false,
+"q": [
+0.11276651957167427,
+2.119688243076709,
+-1.64987093741359,
+2.6708547677548555,
+-1.4597541870679738,
+3.141489014126577
+],
+"cpu_distance": 0.008358520315521716,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_03"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "insert",
+"carried": false,
+"q": [
+0.11276656768610227,
+1.0688308674008065,
+1.6317221155409731,
+-2.7005526886285303,
+1.4580293576859171,
+9.465343842052221e-08
+],
+"cpu_distance": 0.008358520315522932,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_03"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "insert",
+"carried": false,
+"q": [
+0.11276653030739636,
+2.5885155707254777,
+-1.6317220255448102,
+-0.9567932599310724,
+1.4580293593858267,
+1.3489467320937365e-08
+],
+"cpu_distance": -0.026822427794431697,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "insert",
+"carried": false,
+"q": [
+2.7208418078809293,
+-2.5885154652123834,
+1.6317221996932503,
+0.9567937548438703,
+-1.150045865684169,
+7.290707415563702e-08
+],
+"cpu_distance": -0.0176211043162708,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/leg0"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "insert",
+"carried": false,
+"q": [
+2.7208418776465786,
+-1.068830681530959,
+-1.6317221080754052,
+2.700553255362009,
+-1.1500458645744671,
+1.531375914964883e-08
+],
+"cpu_distance": 0.008358520315522712,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_03"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "insert",
+"carried": false,
+"q": [
+2.7208418299100643,
+-2.1196995428640437,
+1.6499064294033694,
+-2.6707958380219194,
+1.1483210379727575,
+-3.1411812575103357
+],
+"cpu_distance": 0.008358520315522299,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_03"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "insert",
+"carried": false,
+"q": [
+2.7208418674151877,
+-0.5838871873731342,
+-1.6499063277928327,
+-0.9067954721413614,
+1.1483210362859877,
+-3.141181345051564
+],
+"cpu_distance": 0.008358520315522526,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_03"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "lift",
+"carried": true,
+"q": [
+0.11276660463664268,
+0.5542613974017487,
+1.6330213411395,
+0.9533893411153898,
+-1.459754173198089,
+3.1414890699933133
+],
+"cpu_distance": 0.0081699999981495,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L2/C2/Cube_01_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "lift",
+"carried": true,
+"q": [
+0.11276653482162402,
+2.0750997021490694,
+-1.633021241909842,
+2.698593613494495,
+-1.4597541722381013,
+3.14148901695416
+],
+"cpu_distance": 0.008169999998149912,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L2/C2/Cube_02_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "lift",
+"carried": true,
+"q": [
+0.11276658320185007,
+1.024222250576293,
+1.6487054322265164,
+-2.672927388372965,
+1.4580293448306705,
+9.569753389726543e-08
+],
+"cpu_distance": 0.008169999998149496,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L2/C2/Cube_01_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "lift",
+"carried": true,
+"q": [
+0.11276654570727596,
+2.5589706853030307,
+-1.6487053421847435,
+-0.9102650576674574,
+1.4580293433753333,
+1.529148807577485e-08
+],
+"cpu_distance": -0.0213833230387772,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "lift",
+"carried": true,
+"q": [
+2.720841792063844,
+-2.5589705778069036,
+1.648705516534907,
+0.9102655506872539,
+-1.1500458479862543,
+7.312827055017124e-08
+],
+"cpu_distance": -0.012199561117704927,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/leg0"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "lift",
+"carried": true,
+"q": [
+2.7208418624978776,
+-1.0242220635085437,
+-1.6487054251501594,
+2.672927953147834,
+-1.1500458489962073,
+1.2218908551631102e-08
+],
+"cpu_distance": 0.008169999998149704,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L2/C2/Cube_02_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "lift",
+"carried": true,
+"q": [
+2.7208418150287876,
+-2.075110359595936,
+1.633056692771702,
+-2.698535285112813,
+1.1483210204287255,
+-3.1411812586208736
+],
+"cpu_distance": 0.008169999998149836,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L2/C2/Cube_02_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "lift",
+"carried": true,
+"q": [
+2.7208418524146323,
+-0.5542406785595753,
+-1.6330565911096835,
+-0.9532917184378435,
+1.1483210218942341,
+-3.1411813470059196
+],
+"cpu_distance": 0.008169999998149933,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L2/C2/Cube_01_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "withdraw",
+"carried": true,
+"q": [
+0.21109890431997025,
+0.04876822311426787,
+2.359926487616576,
+0.7319624475887117,
+-1.3614219033429458,
+3.1413966054620763
+],
+"cpu_distance": 0.03850730449773895,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "withdraw",
+"carried": true,
+"q": [
+0.2110988047068103,
+2.1539785411581374,
+-2.359926387458923,
+-2.9365803123831773,
+-1.361421901699607,
+3.14139655838796
+],
+"cpu_distance": 0.006839858325410683,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "withdraw",
+"carried": true,
+"q": [
+0.21109886630358243,
+0.9210494148691462,
+2.382664869185347,
+2.9794713265773076,
+1.359697068044106,
+8.990590050217406e-08
+],
+"cpu_distance": 0.03850730449774018,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "withdraw",
+"carried": true,
+"q": [
+0.2110988409795569,
+3.040638449600797,
+-2.3826647845789752,
+-0.6579733845757776,
+1.3596970641955526,
+-2.0334262718080254e-08
+],
+"cpu_distance": -0.05840545295513521,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "withdraw",
+"carried": true,
+"q": [
+2.379197295495821,
+-3.040638346543803,
+2.3826649287520176,
+0.6579739365188697,
+-0.8084013803037271,
+1.1343084516113322e-07
+],
+"cpu_distance": -0.05956052974113185,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "withdraw",
+"carried": true,
+"q": [
+2.3791973961511985,
+-0.9210492561908774,
+-2.382664840359689,
+-2.979470741817716,
+-0.8084013821576086,
+4.1223019664471394e-08
+],
+"cpu_distance": 0.038507304497738995,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "withdraw",
+"carried": true,
+"q": [
+2.379197338267126,
+-2.1539490440493227,
+2.360030747454898,
+2.93677859265874,
+0.8066765484291656,
+-3.1407159823933934
+],
+"cpu_distance": 0.009458640441983192,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "withdraw",
+"carried": true,
+"q": [
+2.379197364881122,
+-0.04867181031523682,
+-2.3600306372138555,
+-0.7316226677884083,
+0.8066765522990864,
+-3.1407161331317415
+],
+"cpu_distance": 0.03850730449774038,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "carry",
+"carried": true,
+"q": [
+0.21109890431997025,
+0.04876822311426787,
+2.359926487616576,
+0.7319624475887117,
+-1.3614219033429458,
+3.1413966054620763
+],
+"cpu_distance": 0.03850730449773895,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "carry",
+"carried": true,
+"q": [
+0.2110988047068103,
+2.1539785411581374,
+-2.359926387458923,
+-2.9365803123831773,
+-1.361421901699607,
+3.14139655838796
+],
+"cpu_distance": 0.006839858325410683,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "carry",
+"carried": true,
+"q": [
+0.21109886630358243,
+0.9210494148691462,
+2.382664869185347,
+2.9794713265773076,
+1.359697068044106,
+8.990590050217406e-08
+],
+"cpu_distance": 0.03850730449774018,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "carry",
+"carried": true,
+"q": [
+0.2110988409795569,
+3.040638449600797,
+-2.3826647845789752,
+-0.6579733845757776,
+1.3596970641955526,
+-2.0334262718080254e-08
+],
+"cpu_distance": -0.05840545295513521,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "carry",
+"carried": true,
+"q": [
+2.379197295495821,
+-3.040638346543803,
+2.3826649287520176,
+0.6579739365188697,
+-0.8084013803037271,
+1.1343084516113322e-07
+],
+"cpu_distance": -0.05956052974113185,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "carry",
+"carried": true,
+"q": [
+2.3791973961511985,
+-0.9210492561908774,
+-2.382664840359689,
+-2.979470741817716,
+-0.8084013821576086,
+4.1223019664471394e-08
+],
+"cpu_distance": 0.038507304497738995,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_1"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "carry",
+"carried": true,
+"q": [
+2.379197338267126,
+-2.1539490440493227,
+2.360030747454898,
+2.93677859265874,
+0.8066765484291656,
+-3.1407159823933934
+],
+"cpu_distance": 0.009458640441983192,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "outgoing/L1/C2",
+"phase": "carry",
+"carried": true,
+"q": [
+2.379197364881122,
+-0.04867181031523682,
+-2.3600306372138555,
+-0.7316226677884083,
+0.8066765522990864,
+-3.1407161331317415
+],
+"cpu_distance": 0.03850730449774038,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/outgoing/L1/C2/Cube_1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-1.0534334839567991,
+1.004703881039073,
+2.405636025463812,
+-0.26979969172087603,
+-1.055157906568338,
+3.141072081248282
+],
+"cpu_distance": 0.05636322488920973,
+"cpu_link": "link_3",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-1.0534336197010075,
+3.138330691619778,
+-2.405635929823458,
+2.4078453903302055,
+-1.0551580229544348,
+3.1410719543741052
+],
+"cpu_distance": -0.06066222475806862,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-1.053433532188492,
+1.7025575011430174,
+1.8823168777583028,
+2.698311239587821,
+1.0534331005563207,
+3.6572523232081267e-08
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+-1.0534335984565182,
+-2.842894401837963,
+-1.8823167822009217,
+-1.5579738644444616,
+1.0534331981799285,
+-6.996657475610846e-08
+],
+"cpu_distance": -0.037004986516511455,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.0534327439347235,
+2.8428944664873104,
+1.8823169193766187,
+1.5579744029350788,
+-1.0534331736956757,
+5.3823146828335666e-08
+],
+"cpu_distance": -0.0442317358207268,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.0534328519396485,
+-1.7025573426797354,
+-1.8823168237937997,
+-2.698310653266376,
+-1.0534331844519507,
+6.557326770462168e-08
+],
+"cpu_distance": 0.06389999011920931,
+"cpu_link": "link_1",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.0534327571217599,
+-3.1383308094869413,
+2.4056362842337036,
+-2.4078438376816065,
+1.0517083536012146,
+-3.141069852805062
+],
+"cpu_distance": -0.06768742440801778,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_far",
+"carried": false,
+"q": [
+1.0534328151252925,
+-1.0047038053641857,
+-2.4056361886466706,
+0.2698016064777842,
+1.051708308091606,
+-3.141069902464389
+],
+"cpu_distance": 0.05639339156721089,
+"cpu_link": "link_3",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-1.1622498136247812,
+0.9664548424920127,
+2.205533175416708,
+-0.031392115681464716,
+-1.1639742385645766,
+3.1411966223307566
+],
+"cpu_distance": 0.022016999965949555,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "table/top"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-1.1622499263206247,
+2.9639898759306114,
+-2.2055330797887436,
+2.3821390614332802,
+-1.1639743215226885,
+3.1411965097105146
+],
+"cpu_distance": -0.06989612417551225,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-1.1622498557623842,
+1.638207102545996,
+1.7296939836693737,
+2.9152845294751355,
+1.162249426365717,
+4.8555627518709343e-08
+],
+"cpu_distance": 0.022016999965950558,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "table/top"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+-1.162249910260006,
+-3.0389042004769578,
+-1.7296938881144888,
+-1.5145869491098063,
+1.1622494988253411,
+-4.9891025533099764e-08
+],
+"cpu_distance": -0.05160507147761983,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.162249070779147,
+3.038904277278503,
+1.7296940364129174,
+1.514587474145209,
+-1.162249492511266,
+5.187584717347704e-08
+],
+"cpu_distance": -0.05698150278124814,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.1622491609956365,
+-1.638206941512509,
+-1.7296939408332879,
+-2.9152839452004957,
+-1.1622494906198357,
+4.930415631321239e-08
+],
+"cpu_distance": 0.02201699996595052,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "table/top"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.16224908180698,
+-2.9639898752191933,
+2.205533361839496,
+-2.382137838141059,
+1.160524668983995,
+-3.141194608675446
+],
+"cpu_distance": -0.06284465693134152,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "sight_near",
+"carried": false,
+"q": [
+1.1622491347316526,
+-0.9664546807489911,
+-2.205533266247413,
+0.03139357302638146,
+1.1605246274729204,
+-3.141194665071069
+],
+"cpu_distance": 0.02201699996595053,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "table/top"
+},
+{
+"slot": "table/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-1.1502816319414464,
+0.5024891202949986,
+2.3127014724767303,
+0.3254000484242665,
+-1.152006086270749,
+3.1411835568538278
+],
+"cpu_distance": 0.018456028817242714,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-1.1502817342234712,
+2.5764690348640897,
+-2.3127013768606455,
+2.8768229457788106,
+-1.152006117062875,
+3.141183465028039
+],
+"cpu_distance": -0.015421872512804732,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/leg3"
+},
+{
+"slot": "table/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-1.1502816706353964,
+1.2751453071046566,
+2.074894155594677,
+2.9331461608184703,
+1.1502812576356716,
+6.550616138412124e-08
+],
+"cpu_distance": 0.018456028817242565,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+-1.1502817110597048,
+-3.1113939178746994,
+-2.0748940600466423,
+-1.0968970593280978,
+1.1502812958161837,
+-4.8394559470921195e-08
+],
+"cpu_distance": -0.05619089435780032,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.1502808768862742,
+3.111393996850575,
+2.0748942131755577,
+1.0968975798322003,
+-1.1502812951973667,
+5.667194535874387e-08
+],
+"cpu_distance": -0.06163609032323968,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.150280968672174,
+-1.2751451469398603,
+-2.0748941176030438,
+-2.933145571196377,
+-1.1502812859940792,
+2.9195397655001898e-08
+],
+"cpu_distance": 0.018456028817242266,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.150280904620928,
+-2.57646893926531,
+2.3127016798909787,
+-2.8768217966787097,
+1.1485564682698968,
+-3.141181512601794
+],
+"cpu_distance": -0.015421849819098193,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/leg1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "pre_insert",
+"carried": false,
+"q": [
+1.1502809384306634,
+-0.5024888857407284,
+-2.312701584283374,
+-0.32539862554875265,
+1.1485564358946272,
+-3.1411816092230604
+],
+"cpu_distance": 0.018456028817242353,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+-1.3269024827743638,
+0.8473761850669819,
+1.5113290968277084,
+0.7819447491900249,
+-1.3286269151240289,
+3.141365001067289
+],
+"cpu_distance": 0.008358520315522712,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/table/L0/C0/Cube_03"
+},
+{
+"slot": "table/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+-1.326902548847628,
+2.2593610450723407,
+-1.5113290012183065,
+2.392617971374875,
+-1.328626928201552,
+3.141364935178764
+],
+"cpu_distance": -0.01027051744719254,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+-1.3269025075892111,
+1.355861320874654,
+1.3157504210485724,
+-2.6716114387296517,
+1.3269020904432294,
+7.47558250857594e-08
+],
+"cpu_distance": 0.00835852031552301,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/table/L0/C0/Cube_03"
+},
+{
+"slot": "table/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+-1.3269025420970078,
+2.590119655070035,
+-1.31575032550014,
+-1.2743690440721904,
+1.3269021050355656,
+1.2210481514784988e-09
+],
+"cpu_distance": -0.02807616606045657,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/leg3"
+},
+{
+"slot": "table/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+1.3269017290736818,
+-2.5901195629610205,
+1.3157505146868758,
+1.274369526842733,
+-1.3269021137645882,
+5.28666945776024e-08
+],
+"cpu_distance": -0.028076145942240685,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/leg1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+1.3269017871618374,
+-1.3558611340004936,
+-1.315750419122268,
+2.671612022917113,
+-1.3269021065822746,
+1.665755000601621e-08
+],
+"cpu_distance": 0.008358520315522823,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/table/L0/C0/Cube_03"
+},
+{
+"slot": "table/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+1.326901742735263,
+-2.259360934626896,
+1.5113291979935113,
+-2.3926171033253896,
+1.3251772861789632,
+-3.141363184286681
+],
+"cpu_distance": -0.010270496799003243,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "insert",
+"carried": false,
+"q": [
+1.326901780083527,
+-0.8473759839568915,
+-1.5113291023862558,
+-0.7819437700403515,
+1.3251772727315707,
+-3.141363252067725
+],
+"cpu_distance": 0.008358520315522573,
+"cpu_link": "left_gripper",
+"cpu_obstacle": "jig/table/L0/C0/Cube_03"
+},
+{
+"slot": "table/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+-1.3269024689510576,
+0.8128533608560877,
+1.508632497211428,
+0.8191641730992769,
+-1.3286269034843632,
+3.141365001408399
+],
+"cpu_distance": 0.015620499346032515,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_01"
+},
+{
+"slot": "table/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+-1.3269025345681662,
+2.2224092083736657,
+-1.5086324016031876,
+2.42687320904167,
+-1.3286269139319813,
+3.141364937602445
+],
+"cpu_distance": -0.003918148037451802,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+-1.3269024929373374,
+1.3105564888077996,
+1.3477189691597031,
+-2.6582751543338623,
+1.3269020780847525,
+7.658450495995339e-08
+],
+"cpu_distance": 0.015620499346033061,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_03"
+},
+{
+"slot": "table/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+-1.3269025276606057,
+2.5740603645660123,
+-1.347718873611379,
+-1.2263412052162854,
+1.3269020902591295,
+2.2210309147396856e-09
+],
+"cpu_distance": -0.025088262907669356,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/leg3"
+},
+{
+"slot": "table/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+1.3269017140026511,
+-2.574060270821592,
+1.3477190620719322,
+1.2263416873477793,
+-1.3269020976721484,
+5.2988564203104715e-08
+],
+"cpu_distance": -0.02508824254947943,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/leg1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+1.3269017730923682,
+-1.3105563016436141,
+-1.3477189665084177,
+2.658275737290028,
+-1.326902091283529,
+1.3948925570161919e-08
+],
+"cpu_distance": 0.015620499346032036,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_03"
+},
+{
+"slot": "table/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+1.326901728871265,
+-2.222409095801733,
+1.5086325983972664,
+-2.426872342682881,
+1.3251772700089246,
+-3.141363184817326
+],
+"cpu_distance": -0.003918127306879349,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "lift",
+"carried": true,
+"q": [
+1.3269017658395255,
+-0.8128531584985947,
+-1.5086325027890488,
+-0.8191631956434078,
+1.3251772586321806,
+-3.1413632543273957
+],
+"cpu_distance": 0.015620499346032449,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_03"
+},
+{
+"slot": "table/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-1.1502816074367694,
+0.43968864069837066,
+2.3090563383039626,
+0.39184566182165925,
+-1.1520060657039253,
+3.1411835559408523
+],
+"cpu_distance": 0.03850730449774011,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-1.1502817080376015,
+2.511187904114834,
+-2.3090562426908474,
+2.938458944128257,
+-1.152006089646763,
+3.1411834693722334
+],
+"cpu_distance": -0.0035346713533347812,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/leg3"
+},
+{
+"slot": "table/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-1.1502816455604794,
+1.219113897419696,
+2.110726086085439,
+2.9533456408795624,
+1.1502812355752923,
+6.763379989394025e-08
+],
+"cpu_distance": 0.038507304497739356,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+-1.1502816839739278,
+-3.1390744844565917,
+-2.1107259905383478,
+-1.0333845617706903,
+1.1502812673279532,
+-4.7207129316717555e-08
+],
+"cpu_distance": -0.057886108911153276,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+1.1502808505888131,
+3.1390745652873573,
+2.110726144865918,
+1.03338508021141,
+-1.1502812675347847,
+5.7909915973652915e-08
+],
+"cpu_distance": -0.06361744827914485,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+1.1502809424951694,
+-1.219113736822964,
+-2.110726049294991,
+-2.9533450511311656,
+-1.1502812585816917,
+2.5504021117228604e-08
+],
+"cpu_distance": 0.038507304497739536,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+1.1502808799238302,
+-2.5111877918936387,
+2.309056545043676,
+-2.9384578090460205,
+1.148556439406046,
+-3.141181512217863
+],
+"cpu_distance": -0.0035346462945733403,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/leg1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "withdraw",
+"carried": true,
+"q": [
+1.1502809123756617,
+-0.4396883933810667,
+-2.309056449433984,
+-0.39184425438862647,
+1.1485564114954157,
+-3.1411816132102763
+],
+"cpu_distance": 0.03850730449773961,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+-1.1502816074367694,
+0.43968864069837066,
+2.3090563383039626,
+0.39184566182165925,
+-1.1520060657039253,
+3.1411835559408523
+],
+"cpu_distance": 0.03850730449774011,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+-1.1502817080376015,
+2.511187904114834,
+-2.3090562426908474,
+2.938458944128257,
+-1.152006089646763,
+3.1411834693722334
+],
+"cpu_distance": -0.0035346713533347812,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/leg3"
+},
+{
+"slot": "table/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+-1.1502816455604794,
+1.219113897419696,
+2.110726086085439,
+2.9533456408795624,
+1.1502812355752923,
+6.763379989394025e-08
+],
+"cpu_distance": 0.038507304497739356,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+-1.1502816839739278,
+-3.1390744844565917,
+-2.1107259905383478,
+-1.0333845617706903,
+1.1502812673279532,
+-4.7207129316717555e-08
+],
+"cpu_distance": -0.057886108911153276,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+1.1502808505888131,
+3.1390745652873573,
+2.110726144865918,
+1.03338508021141,
+-1.1502812675347847,
+5.7909915973652915e-08
+],
+"cpu_distance": -0.06361744827914485,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/plate"
+},
+{
+"slot": "table/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+1.1502809424951694,
+-1.219113736822964,
+-2.110726049294991,
+-2.9533450511311656,
+-1.1502812585816917,
+2.5504021117228604e-08
+],
+"cpu_distance": 0.038507304497739536,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+1.1502808799238302,
+-2.5111877918936387,
+2.309056545043676,
+-2.9384578090460205,
+1.148556439406046,
+-3.141181512217863
+],
+"cpu_distance": -0.0035346462945733403,
+"cpu_link": "link_2",
+"cpu_obstacle": "pedestal/leg1"
+},
+{
+"slot": "table/L0/C0",
+"phase": "carry",
+"carried": true,
+"q": [
+1.1502809123756617,
+-0.4396883933810667,
+-2.309056449433984,
+-0.39184425438862647,
+1.1485564114954157,
+-3.1411816132102763
+],
+"cpu_distance": 0.03850730449773961,
+"cpu_link": "gripper_body",
+"cpu_obstacle": "jig/table/L0/C0/Cube_1"
+}
+]
+}
