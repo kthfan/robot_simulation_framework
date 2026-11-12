@@ -112,7 +112,8 @@ def test_robot_base_and_process(pair):
     assert np.allclose(world.robot.base, cfg.robot.base_pose, atol=TOL)
     assert world.process["standoff_far"] == cfg.standoff_far
     assert world.process["standoff_near"] == cfg.standoff_near
-    assert world.process["carry_tilt_deg"] == cfg.carry_tilt_deg
+    # The tilt is now 15 deg (user 2026-11-12: kept as insurance; cell_core had 0).
+    assert cfg.carry_tilt_deg == 0.0 and world.process["carry_tilt_deg"] == 15.0
 
 
 def test_grid_ids_match(pair):

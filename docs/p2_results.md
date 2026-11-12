@@ -37,34 +37,53 @@ kinematically; the `tm_tray.mount_height` audit threshold (0.733 m) predates
 D28. Collisions on as_built were not checked yet.
 
 ### M3 collision (CPU, exact meshes)
-| Gripper / rule | strict | as_built | recommended |
+Since 2026-11-12 the check covers the **pick and the place** of every slot, with
+the target tray where each phase has it (seated, shifted, or carried).
+
+| Gripper / sequence | strict | as_built | recommended |
 |---|---|---|---|
-| D29 gripper (`tm5s_egu50_no_air_cylinder.urdf`) | **PASS 37/37** (as D29 with cuRobo) | PASS 37/37 | — |
-| As installed, with push plate, D28 insert depth | FAIL 0/37 (`insert` everywhere) | — | — |
-| **As installed, insert stops 2 mm before the push plate meets the tray (default since 2026-11-12)** | **PASS 37/37** | **PASS 37/37** | **PASS 37/37** |
+| D29 gripper (`tm5s_egu50_no_air_cylinder.urdf`), D28 grasp | **PASS 37/37** (as D29 with cuRobo) | PASS 37/37 | — |
+| Installed gripper (push plate), D28 insert depth | FAIL 0/37 (`insert`: plate 9.5 mm into the tray) | — | — |
+| **Installed gripper, push-plate pick/place, 15° tilt (default)** | **PASS 37/37** | **PASS 37/37** | **PASS 37/37** |
+| ... same, 0° tilt | PASS 37/37 | — | — |
+| ... same, 30° tilt | PASS 37/37 | — | — |
+| ... 15° tilt applied at the withdraw pose (no back-out) | FAIL 11/37 (`carry`) | — | — |
 
-About 50 s per layout on the CPU.
+About 160 s per layout on the CPU (13 phases per slot).
 
-Why the D28 depth fails with the push plate: the plate spans flange z
-0.117–0.124 m; at the D28 insert (plate tip 0.218 m behind the rack face) the
-tray's front face is at flange z 0.1145, 9.5 mm behind the plate's tray-side
-face.
+#### The push-plate pick and place (user 2026-11-12)
+The push plate is fixed. Tilt alone could not settle the tray, so the arm
+pushes it with the plate; the plate shields the jaws' moving parts.
 
-**The rule (user 2026-11-12):** `insert_tip_depth` takes the shallowest of the
-D28 limits and `PLATE_FZ_TIP + TRAY_FRONT_DEPTH - push_front_z - margin`, with
-`push_front_z` read from the robot URDF's `air_cylinder_plate` collider
-(`cells/tm_tray/plugin/tm_tray/tool.py`) and `margin` from the layout's
-`process.push_plate.margin` (0.002). The tip stops at 0.2065 m (11.5 mm
-shallower), 71.5 mm past the tray's middle; the carried tray's place on the
-plate follows. A robot without the push plate keeps the D28 sequence exactly.
-Tests: the exact meshes measure 2.000 mm between the push plate and the target
-tray at insert; only `insert` and `lift` move, by 11.5 mm along the approach.
+| Phase | Plate tip depth | Target tray |
+|---|---|---|
+| pick `insert` | 204.5 mm | seated, assumed placed 2 mm shallow; plate 2.0 mm short of it |
+| pick `push` (jaws open) | 210.5 mm | pushed to 2 mm past its seat, touching the plate (contact allowed, no penetration) |
+| pick `lift`, `withdraw`, `carry` | — | carried, registered against the plate |
+| place `place_lift`, `place_down` | 206.5 mm | set down 2 mm shallower than its seat |
+| place `retreat` | — | seated 2 mm shallow |
+
+Parameters, `process.push_plate` in `cells/tm_tray/layouts/as_built.yaml`:
+`margin` 2 mm (until the real plate is measured), `overtravel` 2 mm and
+`place_offset` 2 mm (AI-Robotics-V2 D30). The push plate's position is read
+from the robot URDF. Audit checks: the insert tip stays past the tray middle
+(69.5 mm), the push ends before the rails leave the front columns (2.0 mm of a
+derived 8.5 mm), the push stroke is positive (6.0 mm). Without the push plate
+the sequence is cell_core's grasp exactly (tested).
+
+#### Tilt: back out first
+With tilt kept as insurance (15°, D14's design value), tilting at the withdraw
+pose fails: the carried tray's back end overhangs the plate tip by ~50 mm and is
+still 18 mm inside the shelf, so tilting lifts it into the label hanger of the
+jig above (−0.5 mm; only the top layers and the table passed). This was
+AI-Robotics-V2 M2's contingent check ("tilt does not foul the shelf above").
+The carry now backs out 50 mm first, so the tray's back end is 10 mm in front
+of the label plane (`TILT_CLEARANCE`), then tilts; 0°, 15° and 30° all pass.
 
 **Pending measurement:** if the push plate shares tm5s.usd's stray gripper
 offset, the real plate is 1.76 mm closer to the tray and 3.41 mm lower than
-modelled (real gap ~0.24 mm). Measure the gap between the push plate's lower
-edge and the plate's upper face: ~7.0 mm (model right) or ~3.6 mm (offset
-present). Then adjust the margin or the asset.
+modelled. Measure the gap between the push plate's lower edge and the plate's
+upper face: ~7.0 mm (model right) or ~3.6 mm (offset present).
 
 ### cuRobo cross-check (Kaggle T4, cuRobo dev/main `445ed42`)
 `tools/kaggle/make_crosscheck_cases.py` writes 352 configurations (every IK

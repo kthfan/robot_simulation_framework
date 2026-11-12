@@ -102,21 +102,35 @@ def process(world) -> list:
                          f"width-fit {fit:.4f} / open {open_:.4f} outside the jaw operating range "
                          f"[{r['min']}, {r['max']}]"))
     if pr.get("push_plate"):
-        from .sequence import push_kwargs, push_plate_limit, insert_tip_depth
+        from .sequence import depths, max_push_past_seat
         from .tool import tool_geometry
         tool = tool_geometry(world)
-        m = float(pr["push_plate"].get("margin", 0.0))
+        pp = pr["push_plate"]
         if not tool:
             out.append(Check("tm_tray.push_plate", "pass",
-                             f"the robot has no {pr['push_plate'].get('geometry')!r}; the D28 insert depth applies"))
+                             f"the robot has no {pp.get('geometry')!r}; the D28 insert depth applies"))
         else:
-            depth = insert_tip_depth(**push_kwargs(pr, tool))
-            past_middle = depth - A.JIG_Y_OFFSET
-            out.append(check("tm_tray.push_plate", m >= 0.0 and past_middle > 0.0,
-                             f"insert stops {m * 1e3:.1f} mm before the push plate meets the tray; plate tip "
-                             f"{depth * 1e3:.1f} mm behind the rack face, {past_middle * 1e3:.1f} mm past the tray middle",
-                             f"push-plate margin {m * 1e3:.1f} mm leaves the plate tip {past_middle * 1e3:.1f} mm "
-                             f"past the tray middle; it must be positive and the margin non-negative", past_middle))
+            d = depths(pr, tool)
+            m, over, off = (float(pp.get(k, 0.0)) for k in ("margin", "overtravel", "place_offset"))
+            past_middle = min(d["insert"], d["place"]) - A.JIG_Y_OFFSET
+            out.append(check("tm_tray.push_plate/insert", m >= 0.0 and off >= 0.0 and past_middle > 0.0,
+                             f"insert stops {m * 1e3:.1f} mm before a tray placed {off * 1e3:.1f} mm shallow; "
+                             f"plate tip {d['insert'] * 1e3:.1f} mm behind the rack face, "
+                             f"{past_middle * 1e3:.1f} mm past the tray middle",
+                             f"margin {m * 1e3:.1f} mm / place offset {off * 1e3:.1f} mm leave the plate tip "
+                             f"{past_middle * 1e3:.1f} mm past the tray middle; both must be >= 0 and the tip past it",
+                             past_middle))
+            limit = max_push_past_seat()
+            pushed = d["push"] - (A.PLATE_FZ_TIP - tool["push_front_z"]) - A.TRAY_FRONT_DEPTH
+            out.append(check("tm_tray.push_plate/push", 0.0 <= pushed < limit,
+                             f"the push ends {pushed * 1e3:.1f} mm past the seat (overtravel {over * 1e3:.1f} mm); "
+                             f"the rails leave the front columns at {limit * 1e3:.1f} mm",
+                             f"the push ends {pushed * 1e3:.1f} mm past the seat; the rails leave the front columns "
+                             f"at {limit * 1e3:.1f} mm", limit - pushed))
+            stroke = d["push"] - d["insert"]
+            out.append(check("tm_tray.push_plate/stroke", stroke > 0.0,
+                             f"push stroke {stroke * 1e3:.1f} mm (insert -> push)",
+                             f"push stroke {stroke * 1e3:.1f} mm: the push would not move forward", stroke))
     budget = G.tolerance_budget(use_recess=False)
     out.append(check("tm_tray.tolerance_pitch", budget["pitch_deg"] >= MIN_PITCH_DEG,
                      f"plate may pitch {budget['pitch_deg']:.2f} deg and still enter the corridor",

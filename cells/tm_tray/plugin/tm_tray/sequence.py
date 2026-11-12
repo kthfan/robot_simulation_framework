@@ -32,6 +32,7 @@ already covered them, because they are these poses.)
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
 from typing import Optional
 
 import numpy as np
@@ -132,42 +133,25 @@ def _jig_front_depth() -> float:
     return min(cols + [A.TRAY_FRONT_DEPTH])
 
 
-def push_plate_limit(push_front_z: float, push_margin: float) -> float:
-    """Deepest plate tip that keeps the push plate *push_margin* short of the tray.
-
-    The push plate's tray-side face is at flange z *push_front_z*. With the tip
-    *d* behind the rack face, the tray's front face is at flange z
-    ``PLATE_FZ_TIP - d + TRAY_FRONT_DEPTH``; it must stay at least
-    ``push_front_z + push_margin``.
-    """
-    return A.PLATE_FZ_TIP + A.TRAY_FRONT_DEPTH - push_front_z - push_margin
-
-
 def insert_tip_depth(back_margin: float = BACK_MARGIN,
-                     front_margin: float = FRONT_MARGIN,
-                     push_front_z: Optional[float] = None,
-                     push_margin: float = 0.0) -> float:
+                     front_margin: float = FRONT_MARGIN) -> float:
     """Plate tip depth behind the rack face when fully inserted.
 
     *back_margin* short of the tray's back edge, unless the gripper body would
     then come within *front_margin* of the jig: then it stops there (user
-    2026-10-06, D28: "if touched, stop it earlier"). With a push plate
-    (*push_front_z*, the tool has one), also *push_margin* short of the tray
-    front (user 2026-11-12: 2 mm, until the real plate is measured).
+    2026-10-06, D28: "if touched, stop it earlier"). The push plate's limits
+    are in :func:`depths`.
     """
     back = A.TRAY_BACK_DEPTH - back_margin
     body = _jig_front_depth() - front_margin - A.BODY_FZ_FRONT + A.PLATE_FZ_TIP
-    depth = min(back, body)
-    if push_front_z is not None:
-        depth = min(depth, push_plate_limit(push_front_z, push_margin))
-    return depth
+    return min(back, body)
 
 
 def insert_pose(slot: Slot, back_margin: float = BACK_MARGIN,
-                front_margin: float = FRONT_MARGIN, **push) -> np.ndarray:
-    """Fully inserted, the tip at :func:`insert_tip_depth` (*push*: its push-plate arguments)."""
+                front_margin: float = FRONT_MARGIN) -> np.ndarray:
+    """Fully inserted, the tip at :func:`insert_tip_depth` (D28, no push plate)."""
     tip_dist = (slot.label_plane_dist + A.LABEL_PROUD_OF_FACE
-                + insert_tip_depth(back_margin, front_margin, **push))
+                + insert_tip_depth(back_margin, front_margin))
     return _pose(slot, tip_dist - A.PLATE_FZ_TIP, insertion_flange_z(slot))
 
 
@@ -177,8 +161,8 @@ def pre_insert_pose(slot: Slot, gap: float = PRE_INSERT_GAP) -> np.ndarray:
     return _pose(slot, tip_dist - A.PLATE_FZ_TIP, insertion_flange_z(slot))
 
 
-def lift_pose(slot: Slot, lift: float = LIFT_HEIGHT, **push) -> np.ndarray:
-    T = insert_pose(slot, **push)
+def lift_pose(slot: Slot, lift: float = LIFT_HEIGHT) -> np.ndarray:
+    T = insert_pose(slot)
     T[2, 3] += lift
     return T
 
@@ -210,41 +194,160 @@ def carry_pose(slot: Slot, tilt_deg: float = 0.0,
     return T
 
 
-def push_kwargs(process: dict, tool: Optional[dict]) -> dict:
-    """The push-plate arguments of :func:`insert_tip_depth` for *tool* (see
-    :func:`tool.tool_geometry`); empty when the tool has no push plate."""
-    if not tool or tool.get("push_front_z") is None:
-        return {}
-    return {"push_front_z": tool["push_front_z"],
-            "push_margin": float((process.get("push_plate") or {}).get("margin", 0.0))}
-
-
 def grasp_sequence(process: dict, slot: Slot, near_rise: float = 0.0, tool: Optional[dict] = None) -> dict:
-    """The seven flange poses that pick the tray out of *slot*, in order.
+    """The pick's flange poses by phase (:func:`pick_phases`).
 
-    Standoffs, the carry tilt and the push-plate margin come from *process*;
-    *tool* carries the gripper geometry read from the robot's URDF
-    (:func:`tool.tool_geometry`). A cell rebuilt with different optics,
-    clearances, retention or gripper produces different poses without touching
-    this module.
+    Without a push plate these are cell_core's seven grasp poses exactly; with
+    one, ``insert`` stops short of the tray and a ``push`` phase follows.
+    Standoffs, the carry tilt and the push-plate parameters come from *process*;
+    *tool* is the gripper geometry read from the robot's URDF
+    (:func:`tool.tool_geometry`).
     """
-    push = push_kwargs(process, tool)
-    return {
-        "sight_far": sighting_pose(slot, process["standoff_far"]),
-        "sight_near": sighting_pose(slot, process["standoff_near"], near_rise),
-        "pre_insert": pre_insert_pose(slot),
-        "insert": insert_pose(slot, **push),
-        "lift": lift_pose(slot, **push),
-        "withdraw": withdraw_pose(slot),
-        "carry": carry_pose(slot, process.get("carry_tilt_deg", 0.0)),
-    }
+    return {p.name: p.T for p in pick_phases(process, slot, tool, near_rise)}
 
 
 def release_sequence(process: dict, slot: Slot, near_rise: float = 0.0, tool: Optional[dict] = None) -> dict:
-    """The flange poses that place a tray into *slot*, in order.
+    """The place's flange poses by phase (:func:`place_phases`).
 
-    Literally :func:`grasp_sequence`'s poses, reordered. See the module
-    docstring for why this is a reordering and not a derivation.
+    Without a push plate these are the grasp poses reversed (cell_core): the tray
+    goes down where it was picked up. With one, it goes down ``place_offset``
+    shallower, so they differ.
     """
-    poses = grasp_sequence(process, slot, near_rise, tool)
-    return {phase: poses[phase] for phase in RELEASE_PHASES}
+    return {p.name: p.T for p in place_phases(process, slot, tool)}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pick and place with the push plate (user 2026-11-12)
+# ─────────────────────────────────────────────────────────────────────────────
+# The push plate does not move. On pick the arm stops short of the tray, then
+# advances with the jaws open so the plate pushes the tray back on its columns:
+# the tray ends registered against the plate, which is what tilt could not do.
+# On place the tray is set down slightly shallower than its seat, so the next
+# pick has room to push. Parameters, ``process.push_plate``:
+#
+#   margin        insert stops this far before the plate meets the tray (2 mm)
+#   overtravel    the push ends this far past the tray's nominal seat (D30: 2 mm)
+#   place_offset  a placed tray rests this far shallower than its seat (D30: 2 mm)
+#
+# "Depth" is behind the rack face along the approach axis.
+
+#: Deepest a tray may be pushed past its seat before its rails leave the front
+#: columns (rails rest on the column tops, D17).
+def max_push_past_seat() -> float:
+    col_front_inner = min(c[1] - s[1] / 2.0 for part, (c, s) in A.JIG_BOXES.items()
+                          if part.startswith("col") and c[1] > 0)
+    return A.TRAY_Y / 2.0 - col_front_inner
+
+
+@dataclass(frozen=True)
+class Phase:
+    """One step of a pick or place: the flange pose and where the target tray is.
+
+    ``tray`` is ``"seated"`` (on its jig, ``shift`` metres toward the robot from
+    its nominal seat) or ``"carried"`` (on the plate, its centre at flange z
+    ``carried_z``). ``contact`` marks a phase in which the push plate touches the
+    tray on purpose.
+    """
+    name: str
+    T: np.ndarray
+    tray: str
+    shift: float = 0.0
+    carried_z: float = 0.0
+    contact: bool = False
+
+
+def _push_params(process: dict, tool: Optional[dict]):
+    if not tool or tool.get("push_front_z") is None:
+        return None
+    pp = process.get("push_plate") or {}
+    return {"face": float(tool["push_front_z"]), "margin": float(pp.get("margin", 0.0)),
+            "overtravel": float(pp.get("overtravel", 0.0)), "place_offset": float(pp.get("place_offset", 0.0))}
+
+
+def depths(process: dict, tool: Optional[dict]) -> dict:
+    """Plate-tip depths of the pick and place: ``insert``, ``push``, ``place``.
+
+    Without a push plate the D28 sequence: one depth, no push.
+    """
+    d28 = insert_tip_depth()
+    pp = _push_params(process, tool)
+    if pp is None:
+        return {"insert": d28, "push": None, "place": d28}
+    K = A.PLATE_FZ_TIP - pp["face"]          # tip ahead of the push face
+    f0 = A.TRAY_FRONT_DEPTH                  # nominal tray front
+    return {"insert": min(d28, f0 - pp["place_offset"] - pp["margin"] + K),
+            "push": min(d28, f0 + pp["overtravel"] + K),
+            "place": min(d28, f0 - pp["place_offset"] + K)}
+
+
+def _at_depth(slot: Slot, depth: float, lift: float = 0.0) -> np.ndarray:
+    tip_dist = slot.label_plane_dist + A.LABEL_PROUD_OF_FACE + depth
+    return _pose(slot, tip_dist - A.PLATE_FZ_TIP, insertion_flange_z(slot) + lift)
+
+
+#: Clearance between the carried tray's back end and the label plane before the
+#: plate tilts (2026-11-12): tilting while the tray still reaches into the shelf
+#: lifts its back end into the jig above (M2's contingent check, now triggered).
+TILT_CLEARANCE = 0.010
+
+
+def tilt_retreat(carried_z: float) -> float:
+    """How far to back out from ``withdraw`` before tilting, so the carried tray's
+    back end is ``TILT_CLEARANCE`` in front of the label plane."""
+    back_ahead_of_tip = carried_z + A.TRAY_Y / 2.0 - A.PLATE_FZ_TIP
+    tip_depth_at_withdraw = -(A.LABEL_PROUD_OF_FACE + PRE_INSERT_GAP)
+    back_depth = tip_depth_at_withdraw + back_ahead_of_tip
+    return max(0.0, back_depth + A.LABEL_PROUD_OF_FACE + TILT_CLEARANCE)
+
+
+def tilted_carry_pose(slot: Slot, tilt_deg: float, carried_z: float) -> np.ndarray:
+    """:func:`carry_pose`, backed out first when there is a tilt (see TILT_CLEARANCE)."""
+    T = carry_pose(slot, tilt_deg)
+    if tilt_deg:
+        a = slot.approach_vec / np.linalg.norm(slot.approach_vec)
+        T[:3, 3] -= a * tilt_retreat(carried_z)
+    return T
+
+
+def pick_phases(process: dict, slot: Slot, tool: Optional[dict] = None, near_rise: float = 0.0) -> list:
+    """The pick, phase by phase; the D28 grasp when the tool has no push plate."""
+    pp = _push_params(process, tool)
+    d = depths(process, tool)
+    tilt = process.get("carry_tilt_deg", 0.0)
+    seated = pp["place_offset"] if pp else 0.0           # worst case: a tray we placed shallow
+    if pp:
+        carried_z = pp["face"] + A.TRAY_Y / 2.0          # registered against the plate
+    else:
+        carried_z = A.PLATE_FZ_TIP + A.JIG_Y_OFFSET - d["insert"]
+    out = [Phase("sight_far", sighting_pose(slot, process["standoff_far"]), "seated", seated),
+           Phase("sight_near", sighting_pose(slot, process["standoff_near"], near_rise), "seated", seated),
+           Phase("pre_insert", pre_insert_pose(slot), "seated", seated),
+           Phase("insert", _at_depth(slot, d["insert"]), "seated", seated)]
+    top = d["insert"]
+    if pp:
+        out.append(Phase("push", _at_depth(slot, d["push"]), "seated",
+                         -(d["push"] - (A.PLATE_FZ_TIP - pp["face"]) - A.TRAY_FRONT_DEPTH), contact=True))
+        top = d["push"]
+    out += [Phase("lift", _at_depth(slot, top, LIFT_HEIGHT), "carried", carried_z=carried_z),
+            Phase("withdraw", withdraw_pose(slot), "carried", carried_z=carried_z),
+            Phase("carry", tilted_carry_pose(slot, tilt, carried_z), "carried", carried_z=carried_z)]
+    return out
+
+
+def place_phases(process: dict, slot: Slot, tool: Optional[dict] = None) -> list:
+    """The place, phase by phase: arrive carried, set down, retreat."""
+    pp = _push_params(process, tool)
+    d = depths(process, tool)
+    tilt = process.get("carry_tilt_deg", 0.0)
+    if pp:
+        carried_z = pp["face"] + A.TRAY_Y / 2.0
+        placed = d["place"] - (A.PLATE_FZ_TIP - pp["face"])     # tray front depth when set down
+        shift = A.TRAY_FRONT_DEPTH - placed                    # > 0: shallower than its seat
+    else:
+        carried_z = A.PLATE_FZ_TIP + A.JIG_Y_OFFSET - d["place"]
+        shift = 0.0
+    return [Phase("carry", tilted_carry_pose(slot, tilt, carried_z), "carried", carried_z=carried_z),
+            Phase("withdraw", withdraw_pose(slot), "carried", carried_z=carried_z),
+            Phase("place_lift", _at_depth(slot, d["place"], LIFT_HEIGHT), "carried", carried_z=carried_z),
+            Phase("place_down", _at_depth(slot, d["place"]), "seated", shift, contact=bool(pp)),
+            Phase("retreat", pre_insert_pose(slot), "seated", shift)]

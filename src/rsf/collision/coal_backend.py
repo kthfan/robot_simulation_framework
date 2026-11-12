@@ -152,9 +152,14 @@ class CoalChecker:
 
     # ── world ──────────────────────────────────────────────────────────────
     def set_obstacles(self, solids: Iterable[Solid]) -> None:
+        """Replace the obstacles. Geometry is built once per shape and reused."""
         self.obstacles = []
+        cache = self.__dict__.setdefault("_shape_cache", {})
         for s in solids:
-            g, c, r = make_geometry(s.shape)
+            key = id(s.shape)
+            if key not in cache:
+                cache[key] = (s.shape,) + tuple(make_geometry(s.shape))   # keep the shape alive
+            _, g, c, r = cache[key]
             self.obstacles.append(_Geom(s.name, g, np.asarray(s.T, float), c, r, s))
         self._obs_c = np.array([(o.T_local[:3, :3] @ o.centre + o.T_local[:3, 3]) for o in self.obstacles]) \
             if self.obstacles else np.zeros((0, 3))

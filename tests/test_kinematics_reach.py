@@ -71,7 +71,7 @@ def test_grasp_targets_equal_the_original_sequence(preset):
     """With the D29 gripper (no push plate) the targets are cell_core's."""
     from rsf.model import registry
     cfg = REF.load_preset(preset)
-    world = load_world(LAYOUTS / f"{preset}.yaml", {"robot.urdf": NO_AIR})
+    world = load_world(LAYOUTS / f"{preset}.yaml", {"robot.urdf": NO_AIR, "process.carry_tilt_deg": 0.0})
     fn = registry.get("targets", "tm_tray.grasp")
     for s in REF.enumerate_slots(cfg):
         mine = fn(world, world.feature(s.key))
@@ -83,11 +83,11 @@ def test_grasp_targets_equal_the_original_sequence(preset):
 
 @pytest.mark.parametrize("preset", ["as_built", "recommended", "strict"])
 def test_every_slot_is_reachable_with_the_current_sequence(worlds, preset):
-    """Kinematically, with the D28 sequence (insert ~30 mm shallower, lift
-    21.25 mm), every slot is reachable on all three mounts, as_built included."""
+    """Kinematically, every pose of the pick and place (push plate, 15 deg tilt)
+    is reachable at every slot on all three mounts, as_built included."""
     world = worlds[preset]
-    s = reach.summary(reach.sweep(world, load_arm(world), "tm_tray.grasp"))
-    assert (s["reachable"], s["poses_reachable"]) == (37, 259), s["unreachable"]
+    s = reach.summary(reach.sweep(world, load_arm(world), "tm_tray.cycle"))
+    assert s["reachable"] == 37 and s["poses_reachable"] == s["poses"] == 37 * 13, s["unreachable"]
 
 
 def test_pre_d28_sequence_reproduces_findings_04(worlds):
@@ -112,24 +112,33 @@ def test_pre_d28_sequence_reproduces_findings_04(worlds):
     assert bad == {"outgoing/L3/C0": ["insert", "lift"], "outgoing/L3/C5": ["insert", "lift"]}
 
 
-def test_push_plate_moves_only_insert_and_lift(worlds):
-    """With the installed push plate, insert and lift stop shallower along the
-    approach axis by the push-plate limit; every other pose is cell_core's."""
+def test_pick_with_the_push_plate(worlds):
+    """With the push plate the pick is cell_core's grasp except: insert stops 2 mm
+    before a tray placed 2 mm shallow, a push follows to 2 mm past the seat, the
+    tray is lifted from there, and the tilted carry backs out first."""
     from rsf.model import registry
     import rsf_plugins.tm_tray.sequence as SEQ
     from rsf_plugins.tm_tray.tool import tool_geometry
     cfg = REF.load_preset("strict")
     world = worlds["strict"]
     tool = tool_geometry(world)
-    shift = RS.insert_tip_depth() - SEQ.insert_tip_depth(**SEQ.push_kwargs(world.process, tool))
-    assert shift == pytest.approx(0.218 - 0.20647, abs=1e-4)
+    d = SEQ.depths(world.process, tool)
+    K = 0.321 - tool["push_front_z"]
+    f0 = RS.A.TRAY_FRONT_DEPTH
+    assert d["insert"] == pytest.approx(f0 - 0.004 + K, abs=1e-12)
+    assert d["push"] == pytest.approx(f0 + 0.002 + K, abs=1e-12)
+    assert d["place"] == pytest.approx(f0 - 0.002 + K, abs=1e-12)
     fn = registry.get("targets", "tm_tray.grasp")
     for s in REF.enumerate_slots(cfg)[::5]:
         mine, ref = fn(world, world.feature(s.key)), RS.grasp_sequence(cfg, s)
+        assert list(mine) == ["sight_far", "sight_near", "pre_insert", "insert", "push", "lift", "withdraw", "carry"]
         a = s.approach_vec / np.linalg.norm(s.approach_vec)
-        for p in ref:
-            d = mine[p][:3, 3] - ref[p][:3, 3]
-            if p in ("insert", "lift"):
-                assert np.allclose(d, -shift * a, atol=1e-12) and np.allclose(mine[p][:3, :3], ref[p][:3, :3])
-            else:
-                assert np.allclose(mine[p], ref[p], atol=1e-12), (s.key, p)
+        for p in ("sight_far", "sight_near", "pre_insert", "withdraw"):
+            assert np.allclose(mine[p], ref[p], atol=1e-12), (s.key, p)
+        for p, depth in (("insert", d["insert"]), ("push", d["push"])):
+            assert np.allclose(mine[p][:3, 3] - ref["insert"][:3, 3], (depth - RS.insert_tip_depth()) * a, atol=1e-12)
+        assert np.allclose(mine["lift"][:3, 3] - mine["push"][:3, 3], [0, 0, RS.LIFT_HEIGHT], atol=1e-12)
+        tilted = RS.carry_pose(s, 15.0)
+        assert np.allclose(mine["carry"][:3, :3], tilted[:3, :3], atol=1e-12)
+        assert np.allclose(mine["carry"][:3, 3], tilted[:3, 3] - SEQ.tilt_retreat(tool["push_front_z"] + RS.A.TRAY_Y / 2) * a,
+                           atol=1e-12)

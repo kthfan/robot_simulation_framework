@@ -46,9 +46,8 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("layout")
     ap.add_argument("--slot", default="incoming/L0/C0")
-    ap.add_argument("--phase", default="insert")
-    ap.add_argument("--push-margin", type=lambda v: None if v == "none" else float(v), nargs="*", default=[None, 0.002],
-                    help="one panel each: 'none' = no push-plate stop (D28 rule), a number = stop the push plate that far from the tray")
+    ap.add_argument("--panels", nargs="*", default=["insert:none", "insert:0.002", "push:0.002"],
+                    help="one panel each, PHASE:MARGIN; MARGIN 'none' = no push plate (D28 rule)")
     ap.add_argument("--band", type=float, default=0.045)
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
@@ -75,17 +74,26 @@ def main(argv=None) -> int:
             grip.append((nm, "jaw" if link != "gripper_body" else (nm if nm in COLORS else "body"), C))
     push = next((C for n, k, C in grip if n == "air_cylinder_plate"), None)
 
-    panels = a.push_margin
+    panels = [(ph, None if m == "none" else float(m)) for ph, m in (x.split(":") for x in a.panels)]
     fig, axes = plt.subplots(len(panels), 1, figsize=(13, 5.2 * len(panels)))
     axes = np.atleast_1d(axes)
-    for ax, pm in zip(axes, panels):
+    for ax, (phase_name, pm) in zip(axes, panels):
         tool = tool_geometry(world) if pm is not None else {}
         process = dict(world.process, push_plate=dict(world.process.get("push_plate") or {}, margin=pm or 0.0))
-        depth = SEQ.insert_tip_depth(**SEQ.push_kwargs(process, tool))
-        label = (f"D28 rule only (no push-plate stop): plate tip {depth * 1e3:.1f} mm behind the rack face" if pm is None
-                 else f"push plate stopped {pm * 1e3:.0f} mm short of the tray: plate tip {depth * 1e3:.1f} mm behind the rack face")
-        T = SEQ.grasp_sequence(process, slot_of(world.feature(a.slot)), tool=tool)[a.phase]
-        cell = boxes_in_flange(world, a.slot, T, a.band)
+        phases = {p.name: p for p in SEQ.pick_phases(process, slot_of(world.feature(a.slot)), tool)}
+        ph = phases[phase_name]
+        depth = SEQ.depths(process, tool)["push" if phase_name == "push" else "insert"]
+        label = (f"D28 rule only (no push plate stop): plate tip {depth * 1e3:.1f} mm behind the rack face" if pm is None
+                 else f"margin {pm * 1e3:.0f} mm: plate tip {depth * 1e3:.1f} mm behind the rack face, "
+                      f"tray {ph.shift * 1e3:+.1f} mm from its seat (+ = toward the robot)")
+        T = ph.T
+        world_ph = world
+        tray = world.object_at(a.slot)
+        if ph.tray == "seated" and ph.shift and tray is not None:
+            from dataclasses import replace as _r
+            moved = _r(tray, T=tray.T @ se3.make_T(None, (0.0, ph.shift, 0.0)))
+            world_ph = world.with_object(moved)
+        cell = boxes_in_flange(world_ph, a.slot, T, a.band)
         tray_boxes = [C for n, k, C in cell if k == "tray"]
         for name, kind, C in cell + grip:
             if kind != "jaw" and (C[:, 0].max() < -a.band or C[:, 0].min() > a.band):
@@ -112,7 +120,7 @@ def main(argv=None) -> int:
                         xytext=(0.15, 0.085), arrowprops=dict(arrowstyle="->"), fontsize=11)
         ax.set_xlim(-0.01, 0.40); ax.set_ylim(-0.075, 0.10); ax.set_aspect("equal"); ax.grid(True, lw=0.3)
         ax.set_xlabel("flange z (m): approach"); ax.set_ylabel("flange y (m): up")
-        ax.set_title(f"{a.slot} at {a.phase} -- {label}", fontsize=11)
+        ax.set_title(f"{a.slot} at {phase_name} -- {label}", fontsize=11)
     handles = [plt.Rectangle((0, 0), 1, 1, color=c, alpha=0.6) for c in COLORS.values()]
     fig.legend(handles, ["tray (rails + recessed body)", "target jig", "plate", "push plate", "gripper body",
                          "jaws (dashed: outside the section)", "shelf"], loc="lower center", ncol=7, frameon=False)

@@ -1,32 +1,38 @@
-"""M3: is every slot's grasp sequence collision-free in the cell? (CPU port)
+"""M3: is every slot's pick and place collision-free in the cell? (CPU port)
 
 Port of AI-Robotics-V2 ``program/collision/check_cell.py`` onto the framework:
 EAIK branches (``rsf.kinematics``), exact meshes on the CPU
 (``rsf.collision.coal_backend``) instead of cuRobo, and contact rules instead of
 three checkers and one world per obstacle group. Semantics kept (D28, D29):
 
-* every exact, in-limit IK branch of every grasp phase is a candidate;
+* every exact, in-limit IK branch of every phase is a candidate;
 * everything keeps ``MARGIN`` except the target jig and target tray (margin 0,
   the plate goes under the tray); the jaws may touch the target tray (they clamp
   its sides); the arm base rests on its mount plate;
-* from ``lift`` on the target tray leaves its jig and rides on the plate,
-  attached to the flange; it must keep ``MARGIN`` from everything but its own
-  jig (margin 0);
-* a slot passes when ``pre_insert -> insert -> lift`` have one continuous branch
-  chain and every other phase has at least one passing branch;
+* while carried, the target tray rides on the plate, attached to the flange; it
+  must keep ``MARGIN`` from everything but its own jig (margin 0);
+* a pick passes when ``pre_insert -> insert [-> push] -> lift`` have one
+  continuous branch chain, a place when ``place_lift -> place_down -> retreat``
+  do, and every other phase has at least one passing branch;
 * self-collision: exact link meshes, non-adjacent bodies (cuRobo used spheres).
+
+With the push plate (user 2026-11-12) each phase also says where the target
+tray is (:class:`sequence.Phase`): on its jig, shifted (placed shallow, pushed
+deep), or registered against the plate. In ``push`` and ``place_down`` the
+plate touches the tray on purpose: contact is allowed, penetration is not.
 
 The jaws are at the open command throughout (``JAW_Q_OPEN``), as in M3.
 """
 from __future__ import annotations
 
-import math
+from dataclasses import replace
 from typing import Optional
 
 import numpy as np
 
 from rsf.collision import ContactPolicy, ContactRule
 from rsf.collision.coal_backend import CoalChecker
+from rsf.core import se3
 from rsf.planning.chain import ContinuityRule, best_chain
 from rsf.model.urdf import UrdfModel
 
@@ -37,27 +43,29 @@ from .geometry import slot_of
 from .tool import tool_geometry
 
 MARGIN = 0.005
-CHAIN = ("pre_insert", "insert", "lift")
-CARRIED_PHASES = ("lift", "withdraw", "carry")
+#: Touching counts as contact, not penetration, up to this (numerical) depth.
+CONTACT_TOL = 1e-6
+PICK_CHAIN = ("pre_insert", "insert", "push", "lift")
+PLACE_CHAIN = ("place_lift", "place_down", "retreat")
+CARRIED_PHASES = ("lift", "withdraw", "carry")    # D28 grasp, kept for tools that use it
 JAWS = ("right_gripper_joint", "left_gripper_joint")
 JAW_LINKS = ("right_gripper", "left_gripper")
 CONTINUITY = ContinuityRule(sign_joints=(2, 4), max_step=1.0)
 
 
-def carried_tray_pose(tip_depth: Optional[float] = None) -> np.ndarray:
+def carried_tray_pose(centre_z: float) -> np.ndarray:
     """Tray frame (rails' underside centre; x across, y along, z up) in the flange
-    frame while it rides on the plate: recess on the plate's upper face, at the
-    depth :func:`sequence.insert_pose` picked it up (cell_core.scene.carried_tray_box)."""
+    frame while it rides on the plate: recess on the plate's upper face, tray
+    centre at flange z *centre_z* (cell_core.scene.carried_tray_box)."""
     R = F.USD_FLANGE_R0.T        # tray x -> flange x, tray y -> flange -z, tray z -> flange y
-    depth = SEQ.insert_tip_depth() if tip_depth is None else tip_depth
-    p = (0.0, A.PLATE_FY_TOP - A.TRAY_RECESS, A.PLATE_FZ_TIP + A.JIG_Y_OFFSET - depth)
-    return F.make_pose(R, p)
+    return F.make_pose(R, (0.0, A.PLATE_FY_TOP - A.TRAY_RECESS, centre_z))
 
 
-def policy(key: str, *, carried: bool) -> ContactPolicy:
+def policy(key: str, *, contact: bool = False) -> ContactPolicy:
     rules = [
         ContactRule(allow=True, links=JAW_LINKS, names=(f"tray/{key}/*",), label="jaws clamp the target tray"),
-        ContactRule(margin=0.0, names=(f"tray/{key}/*",), label="target tray"),
+        ContactRule(margin=-CONTACT_TOL if contact else 0.0, names=(f"tray/{key}/*",),
+                    label="target tray (pushed)" if contact else "target tray"),
         ContactRule(margin=0.0, names=(f"jig/{key}/*",), label="target jig"),
         ContactRule(allow=True, links=("link_0",), tags=("robot_seat",), label="base on its mount"),
     ]
@@ -90,9 +98,8 @@ class CellChecker:
         d.update({j: self.jaw for j in JAWS})
         return d
 
-    def judge(self, key: str, phase: str, q6) -> dict:
-        carried = phase in CARRIED_PHASES
-        self.checker.policy = policy(key, carried=carried)
+    def judge(self, key: str, phase, q6) -> dict:
+        self.checker.policy = policy(key, contact=phase.contact)
         self.checker._rule_cache.clear()
         r = self.checker.check(self._q(q6), group=lambda n: group_of(n, key))
         rest = [p.slack + MARGIN for g, p in r.nearest_by_group.items() if not g.startswith("target/")]
@@ -106,33 +113,50 @@ class CellChecker:
                 "self": [(v.link, v.obstacle, round(v.distance, 5)) for v in r.self_violations[:5]],
                 "groups": {g: round(p.distance, 5) for g, p in sorted(r.nearest_by_group.items())}}
 
-    def _world_for(self, key: str, carried: bool):
+    def _setup(self, key: str, phase) -> None:
+        """The world as *phase* has it: the target tray seated (shifted) or carried."""
         tray = self.world.object_at(key)
-        if carried and tray is not None:
-            solids = self.world.solids(exclude_objects=[tray.name])
-            self.checker.set_obstacles(solids)
-            depth = SEQ.insert_tip_depth(**SEQ.push_kwargs(self.world.process, self.tool))
-            self.checker.attach("tray", "flange", tray.solids, carried_tray_pose(depth))
-        else:
+        if tray is None:
             self.checker.set_obstacles(self.world.solids())
             self.checker.detach("tray")
+            return
+        others = self.world.solids(exclude_objects=[tray.name])
+        if phase.tray == "carried":
+            self.checker.set_obstacles(others)
+            self.checker.attach("tray", "flange", tray.solids, carried_tray_pose(phase.carried_z))
+        else:
+            moved = replace(tray, T=tray.T @ se3.make_T(None, (0.0, phase.shift, 0.0)))  # jig +y: toward the robot
+            self.checker.set_obstacles(others + moved.world_solids())
+            self.checker.detach("tray")
+
+    def _run(self, key: str, phases: list) -> dict:
+        out = {}
+        for ph in phases:
+            self._setup(key, ph)
+            out[ph.name] = [self.judge(key, ph, q) for q in self.arm.ik(ph.T, expand_turns=False)]
+        self.checker.detach("tray")
+        return out
+
+    def _chain(self, results: dict, names) -> tuple:
+        names = [n for n in names if n in results]
+        idx, qs = best_chain([results[n] for n in names], self.arm.lower, self.arm.upper, CONTINUITY)
+        return names, idx, qs
 
     def check_slot(self, feature) -> dict:
         key = feature.key
-        poses = SEQ.grasp_sequence(self.world.process, slot_of(feature), tool=self.tool)
-        phases = {}
-        for carried in (False, True):
-            names = [p for p in SEQ.GRASP_PHASES if (p in CARRIED_PHASES) == carried]
-            self._world_for(key, carried)
-            for p in names:
-                phases[p] = [self.judge(key, p, q) for q in self.arm.ik(poses[p], expand_turns=False)]
-        self.checker.detach("tray")
-        missing = [p for p in SEQ.GRASP_PHASES if not any(b["ok"] for b in phases[p])]
-        idx, qs = best_chain([phases[p] for p in CHAIN], self.arm.lower, self.arm.upper, CONTINUITY)
-        return {"slot": key, "ok": idx is not None and not missing, "missing": missing,
-                "chain": None if idx is None else list(idx),
-                "chain_q": None if qs is None else [[round(float(v), 6) for v in q] for q in qs],
-                "phases": phases}
+        slot = slot_of(feature)
+        pick = self._run(key, SEQ.pick_phases(self.world.process, slot, self.tool))
+        place = self._run(key, SEQ.place_phases(self.world.process, slot, self.tool))
+        missing = ([f"pick/{p}" for p, bs in pick.items() if not any(b["ok"] for b in bs)]
+                   + [f"place/{p}" for p, bs in place.items() if not any(b["ok"] for b in bs)])
+        pn, pidx, pqs = self._chain(pick, PICK_CHAIN)
+        ln, lidx, lqs = self._chain(place, PLACE_CHAIN)
+        rnd = lambda qs: None if qs is None else [[round(float(v), 6) for v in q] for q in qs]  # noqa: E731
+        return {"slot": key, "ok": pidx is not None and lidx is not None and not missing, "missing": missing,
+                "chain": None if pidx is None else list(pidx), "chain_phases": pn, "chain_q": rnd(pqs),
+                "place_chain": None if lidx is None else list(lidx), "place_chain_phases": ln,
+                "place_chain_q": rnd(lqs),
+                "phases": {"pick": pick, "place": place}}
 
 
 def check_cell(world, arm=None, select=None) -> dict:
@@ -142,5 +166,6 @@ def check_cell(world, arm=None, select=None) -> dict:
     slots = [cc.check_slot(f) for f in world.features(select or {"kind": "slot"})]
     n_ok = sum(s["ok"] for s in slots)
     return {"layout": world.name, "robot": str(world.robot.urdf.name), "margin": MARGIN, "jaw": cc.jaw,
+            "process": dict(world.process), "tool": cc.tool,
             "verdict": "pass" if n_ok == len(slots) else "fail", "passed": n_ok, "total": len(slots),
             "slots": slots}

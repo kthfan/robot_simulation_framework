@@ -13,11 +13,16 @@ plugins: [../plugin/tm_tray]
 process:
   standoff_far: 0.35      # far AprilGrid read, camera to label (m)
   standoff_near: 0.2768   # near read; plate-free standoff (D24, D28)
-  carry_tilt_deg: 0.0     # plate tilt while carrying (degrees; D4/D14)
+  carry_tilt_deg: 15.0    # plate tilt while carrying, degrees: insurance on top of the push
+                          # (user 2026-11-12); D14's design value. Tilts after backing out.
   jaw_operating_range: {min: 0.0210, max: 0.06085}   # assets/asset_spec.yaml
-  # Insert stops this far before the push plate meets the tray front (user
-  # 2026-11-12: 2 mm until the real plate is measured; see docs/p2_results.md).
-  push_plate: {geometry: air_cylinder_plate, margin: 0.002}
+  # The fixed push plate (user 2026-11-12). Pick: insert stops `margin` before
+  # the plate meets a tray placed `place_offset` shallow, then the arm pushes the
+  # tray (jaws open) until it is `overtravel` past its seat and registered
+  # against the plate. Place: set down `place_offset` shallower than the seat.
+  # margin 2 mm until the real plate is measured (docs/p2_results.md);
+  # overtravel and place_offset are AI-Robotics-V2 D30's 2 mm.
+  push_plate: {geometry: air_cylinder_plate, margin: 0.002, overtravel: 0.002, place_offset: 0.002}
 
 entities:
   floor:

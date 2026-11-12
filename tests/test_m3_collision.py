@@ -42,7 +42,8 @@ def test_carried_tray_is_the_original_carried_box(no_air):
     for s in REF.enumerate_slots(cfg)[::7]:
         T = RQ.grasp_sequence(cfg, s)["lift"]
         ref = RS.carried_tray_box(T)
-        pts = np.vstack([x.moved(T @ carried_tray_pose(RQ.insert_tip_depth())).corners()
+        centre = RQ.A.PLATE_FZ_TIP + RQ.A.JIG_Y_OFFSET - RQ.insert_tip_depth()
+        pts = np.vstack([x.moved(T @ carried_tray_pose(centre)).corners()
                          for x in no_air.object_at(s.key).solids])
         loc = (pts - ref.T[:3, 3]) @ ref.T[:3, :3]
         assert np.allclose(loc.min(0), -ref.size / 2, atol=1e-12) and np.allclose(loc.max(0), ref.size / 2, atol=1e-12)
@@ -66,40 +67,69 @@ def test_without_the_push_plate_stop_the_plate_hits_the_tray(with_air):
     world = load_world(CELL / "layouts" / "strict.yaml", {"process.push_plate": {}})
     r = check_cell(world, select=["incoming/L0/C0"])
     s = r["slots"][0]
-    assert not s["ok"] and s["missing"] == ["insert"]
-    tray_hits = [v for b in s["phases"]["insert"] for v in b["violations"]
+    assert not s["ok"] and "pick/insert" in s["missing"]
+    tray_hits = [v for b in s["phases"]["pick"]["insert"] for v in b["violations"]
                  if v[1].startswith("tray/incoming/L0/C0/")]
     assert tray_hits and {v[0] for v in tray_hits} == {"gripper_body"}
     assert min(v[2] for v in tray_hits) == pytest.approx(-0.0095, abs=2e-4)
 
 
-def test_push_plate_stop_keeps_2mm_and_passes(with_air):
-    """With process.push_plate.margin = 2 mm the sample slots pass, and the exact
-    meshes put the push plate 2 mm from the target tray at insert."""
+def _plate_to_tray(world, key, phase):
+    """Exact distance push plate -> target tray at *phase* (tray where the phase has it)."""
+    from dataclasses import replace
+    from rsf.collision.coal_backend import make_geometry, signed_distance
+    from rsf.core import se3
     from rsf.kinematics import load_arm
     from rsf.model.urdf import UrdfModel
     from rsf.model.world import solids_from_urdf
-    from rsf_plugins.tm_tray.collision_check import check_cell
     from rsf_plugins.tm_tray.geometry import slot_of
-    from rsf_plugins.tm_tray.sequence import grasp_sequence
+    from rsf_plugins.tm_tray.sequence import pick_phases
     from rsf_plugins.tm_tray.tool import tool_geometry
-    assert with_air.process["push_plate"]["margin"] == 0.002
+    ph = {p.name: p for p in pick_phases(world.process, slot_of(world.feature(key)), tool_geometry(world))}[phase]
+    arm = load_arm(world)
+    q = arm.ik(ph.T, expand_turns=False)[0]
+    model = UrdfModel.from_file(world.robot.urdf)
+    fk, fk0 = model.fk(dict(zip(arm.joint_names, q))), model.fk()
+    plate = [s.moved(world.robot.base @ fk["gripper_body"] @ np.linalg.inv(fk0["gripper_body"]))
+             for s in solids_from_urdf(model) if s.name.endswith("air_cylinder_plate")]
+    tray = world.object_at(key)
+    tray = replace(tray, T=tray.T @ se3.make_T(None, (0.0, ph.shift, 0.0)))
+    return min(signed_distance(make_geometry(p.shape)[0], p.T, make_geometry(t.shape)[0], t.T)
+               for p in plate for t in tray.world_solids())
+
+
+def test_push_plate_gap_and_push(with_air):
+    """insert: 2 mm from a tray placed 2 mm shallow; push: touching a tray 2 mm deep."""
+    assert with_air.process["push_plate"] == {"geometry": "air_cylinder_plate", "margin": 0.002,
+                                             "overtravel": 0.002, "place_offset": 0.002}
+    assert _plate_to_tray(with_air, "outgoing/L1/C2", "insert") == pytest.approx(0.002, abs=1e-6)
+    assert _plate_to_tray(with_air, "outgoing/L1/C2", "push") == pytest.approx(0.0, abs=1e-6)
+
+
+def test_pick_and_place_pass_with_the_push_plate(with_air):
+    from rsf_plugins.tm_tray.collision_check import check_cell
     r = check_cell(with_air, select=SAMPLE)
     assert (r["passed"], r["total"]) == (4, 4), {s["slot"]: s["missing"] for s in r["slots"]}
-    arm = load_arm(with_air)
-    key = "outgoing/L1/C2"
-    T = grasp_sequence(with_air.process, slot_of(with_air.feature(key)), tool=tool_geometry(with_air))["insert"]
-    q = arm.ik(T, expand_turns=False)[0]
-    model = UrdfModel.from_file(with_air.robot.urdf)
-    plate = [s for s in solids_from_urdf(model) if s.name.endswith("air_cylinder_plate")]
-    fk = model.fk(dict(zip(arm.joint_names, q)))
-    pose = with_air.robot.base @ fk["gripper_body"]
-    plate_world = [s.moved(pose @ np.linalg.inv(model.fk()["gripper_body"])) for s in plate]
-    tray = with_air.object_at(key).world_solids()
-    from rsf.collision.coal_backend import make_geometry, signed_distance
-    d = min(signed_distance(make_geometry(p.shape)[0], p.T, make_geometry(t.shape)[0], t.T)
-            for p in plate_world for t in tray)
-    assert d == pytest.approx(0.002, abs=1e-6)
+    s = r["slots"][0]
+    assert s["chain_phases"] == ["pre_insert", "insert", "push", "lift"]
+    assert s["place_chain_phases"] == ["place_lift", "place_down", "retreat"]
+
+
+def test_tilting_inside_the_shelf_would_hit_the_jig_above(with_air):
+    """Why the carry backs out before tilting: tilted at the withdraw pose, the
+    tray's back end (still 18 mm inside the shelf) rises into the jig above."""
+    from rsf_plugins.tm_tray import sequence as SEQ
+    from rsf_plugins.tm_tray.collision_check import check_cell
+    orig = SEQ.tilt_retreat
+    SEQ.tilt_retreat = lambda z: 0.0
+    try:
+        s = check_cell(with_air, select=["incoming/L0/C0"])["slots"][0]
+    finally:
+        SEQ.tilt_retreat = orig
+    assert "pick/carry" in s["missing"]
+    hits = {v[1].split("/")[1] + "/" + v[1].split("/")[2] for b in s["phases"]["pick"]["carry"]
+            for v in b["violations"] if v[0] == "attached/tray"}
+    assert "incoming/L1" in hits
 
 
 @pytest.mark.slow
