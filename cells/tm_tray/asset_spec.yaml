@@ -1,0 +1,58 @@
+# How the TM tray cell's assets are assembled (tools/assemble_tm_tray_assets.py).
+# Provenance and the evidence for each choice: docs/assets.md.
+
+robot:
+  name: tm5s
+  chain_urdf: v13/tm5s_v13.urdf        # calibrated joint origins, limits, inertials
+  mesh_source: tm_description/meshes/tm5s/collision
+  license_file: tm_description/../LICENSE   # BSD-3-Clause, TECHMAN ROBOT INC.
+  link_meshes:
+    link_0: tm5s-base_c.stl
+    link_1: tm5s-j1_c.stl
+    link_2: tm5s-a1_c.stl
+    link_3: tm5s-a2_c.stl
+    link_4: tm5s-j5_c.stl
+    link_5: tm5s-j6_c.stl
+    link_6: tm5s-io_c.stl
+  effort: {joint_1: 157, joint_2: 157, joint_3: 157, joint_4: 54, joint_5: 54, joint_6: 34}
+  tip_link: flange
+
+tool:
+  name: egu50
+  urdf: egu50/egu50_v2.urdf            # D29-corrected joints and colliders
+  mount:
+    parent: flange
+    rpy: [-1.5707963267948966, 0.0, 0.0]   # gripper -y = flange +z (approach), +z = flange +y (up)
+    xyz: [0.0, 0.0, 0.0]
+  body_parts:                           # egu50 collider file -> part name
+    gripper_body_collisions_Cube.obj: body
+    gripper_body_collisions_Cube_01.obj: plate
+    d455_collisions_Cube.obj: d455
+  jaws:                                 # jaw link -> v13 collider files (jaw link frame)
+    right_gripper: [Cube_2.obj, Cube_01_2.obj]
+    left_gripper: [Cube_3.obj, Cube_01_3.obj]
+  options:
+    air_cylinder:                       # v13 colliders in the link_6 frame
+      parts:
+        air_cylinder_plate: Cube_1.obj
+        air_cylinder_body: Cube_01_1.obj
+      frame: link_6
+  # Jaw joint values used in operation. The hardware range is the URDF limit;
+  # with the air cylinder installed the jaws must not close below
+  # `min`: the left jaw meets the push plate at q ~ 0.0156; min keeps 5 mm
+  # (checked by tests/test_tm_tray_assets.py).
+  operating_range: {min: 0.0210, max: 0.06085}
+
+variants:                               # output file -> options turned on
+  tm5s_egu50.urdf: [air_cylinder]       # as installed (user 2026-11-12)
+  tm5s_egu50_no_air_cylinder.urdf: []   # the gripper validated in D29/D30
+
+objects:
+  tray_jig_with_label:
+    urdf: jig/tray_jig_with_label.urdf
+  tray:
+    generator: recessed_tray            # rsf.model.primitives
+    # AI-Robotics-V2 cell_core.assets, measured from tray.usd (user 2026-11-12:
+    # keep the original setting).
+    params: {width: 0.1329, length: 0.2470, height: 0.0851, recess: 0.0025, rail: 0.0065}
+    mass: 1.2

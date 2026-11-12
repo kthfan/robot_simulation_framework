@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot name="tray_jig_with_label">
-  <link name="jig">
+  <link name="tray_jig_with_label">
     <visual name="Cube">
       <geometry>
         <mesh filename="meshes/Cube.obj" />

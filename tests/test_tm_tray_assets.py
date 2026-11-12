@@ -16,7 +16,9 @@ from rsf.core import se3
 from rsf.model.urdf import UrdfModel
 
 ASSETS = Path(__file__).resolve().parents[1] / "cells" / "tm_tray" / "assets"
-FULL = ASSETS / "tm5s_egu50.urdf"
+SPEC = ASSETS.parent / "asset_spec.yaml"
+FULL = ASSETS / "tm5s_egu50.urdf"                       # as installed: with the air cylinder
+NO_AIR = ASSETS / "tm5s_egu50_no_air_cylinder.urdf"     # the D29/D30 gripper
 ARM = [f"joint_{i}" for i in range(1, 7)]
 JAWS = ["right_gripper_joint", "left_gripper_joint"]
 
@@ -41,9 +43,13 @@ def extent_in(model: UrdfModel, geo_name: str, frame: str, q=None):
     raise KeyError(geo_name)
 
 
-@pytest.fixture(scope="module")
-def full() -> UrdfModel:
-    return UrdfModel.from_file(FULL)
+@pytest.fixture(scope="module", params=[FULL, NO_AIR], ids=["air_cylinder", "no_air_cylinder"])
+def full(request) -> UrdfModel:
+    return UrdfModel.from_file(request.param)
+
+
+def collision_names(model: UrdfModel) -> set:
+    return {g.name for link in model.links.values() for g in link.collisions}
 
 
 def test_every_mesh_resolves(full):
@@ -114,8 +120,66 @@ def test_jaws_and_plate_have_no_stray_mount_offset(full):
 def test_jig_boxes_match_cell_core():
     """cell_core.assets.JIG_BOXES (copied from tray_jig_with_label.usd)."""
     jig = UrdfModel.from_file(ASSETS / "tray_jig_with_label" / "tray_jig_with_label.urdf")
-    V = np.vstack([obj_vertices(g.path) for g in jig.links["jig"].collisions])
+    V = np.vstack([obj_vertices(g.path) for g in jig.links["tray_jig_with_label"].collisions])
     assert np.allclose(V.min(0), [-0.078, -0.135, -0.030], atol=1e-4)
     assert np.allclose(V.max(0), [0.078, 0.1582, 0.035], atol=1e-4)
     base = obj_vertices(ASSETS / "tray_jig_with_label" / "meshes" / "Cube.obj")
     assert np.allclose(base.max(0) - base.min(0), [0.156, 0.27, 0.005], atol=1e-6)
+
+
+# ── air cylinder (installed, user 2026-11-12) ────────────────────────────────
+def test_default_model_carries_the_air_cylinder():
+    assert {"air_cylinder_plate", "air_cylinder_body"} <= collision_names(UrdfModel.from_file(FULL))
+    assert not {"air_cylinder_plate", "air_cylinder_body"} & collision_names(UrdfModel.from_file(NO_AIR))
+
+
+def _overlap(a, b) -> bool:
+    return bool(np.all(a[0] < b[1]) and np.all(b[0] < a[1]))
+
+
+def jaw_contact_q(model: UrdfModel, step: float = 1e-4) -> float:
+    """Smallest jaw value at which no jaw collider overlaps the push plate."""
+    plate = extent_in(model, "air_cylinder_plate", "flange")
+    lo, hi = model.limits(JAWS)
+    for q in np.arange(lo.max(), hi.min(), step):
+        qd = {j: q for j in JAWS}
+        if not any(_overlap(extent_in(model, f"{jaw}_{k}", "flange", qd), plate)
+                   for jaw in ("right_gripper", "left_gripper") for k in (0, 1)):
+            return float(q)
+    raise AssertionError("jaws overlap the push plate over the whole range")
+
+
+def test_jaw_operating_range_keeps_clear_of_the_push_plate():
+    """The jaws can reach the push plate when nearly closed; the operating range
+    must stop 5 mm short, and still contain the width-fit and open commands (D30)."""
+    import yaml
+    rng = yaml.safe_load(SPEC.read_text())["tool"]["operating_range"]
+    model = UrdfModel.from_file(FULL)
+    contact = jaw_contact_q(model)
+    lo, hi = model.limits(JAWS)
+    assert contact > lo.max()                      # the hazard exists at the hardware limit
+    assert rng["min"] >= contact + 0.005 - 1e-9
+    assert rng["min"] <= 0.0413 <= 0.057675 <= rng["max"] <= hi.min() + 1e-9
+
+
+def test_air_cylinder_clears_d455():
+    model = UrdfModel.from_file(FULL)
+    d455 = extent_in(model, "d455", "flange")
+    for part in ("air_cylinder_plate", "air_cylinder_body"):
+        assert not _overlap(extent_in(model, part, "flange"), d455)
+
+
+# ── tray (original cell_core values, user 2026-11-12) ────────────────────────
+def test_tray_is_the_measured_tray():
+    """cell_core.assets: 0.1329 wide, 0.2470 long, 0.0851 high, rails 6.5 mm,
+    underside recessed 2.5 mm between them."""
+    tray = UrdfModel.from_file(ASSETS / "tray" / "tray.urdf")
+    parts = {g.name: obj_vertices(g.path) for g in tray.links["tray"].collisions}
+    V = np.vstack(list(parts.values()))
+    assert np.allclose(V.max(0) - V.min(0), [0.1329, 0.2470, 0.0851], atol=1e-6)
+    assert parts["body"][:, 2].min() == pytest.approx(0.0025, abs=1e-6)
+    for rail in ("rail_left", "rail_right"):
+        r = parts[rail]
+        assert r[:, 0].max() - r[:, 0].min() == pytest.approx(0.0065, abs=1e-6)
+        assert r[:, 2].min() == pytest.approx(0.0, abs=1e-9)
+    assert tray.links["tray"].mass == pytest.approx(1.2)

@@ -5,14 +5,34 @@
       <mass value="1.2" />
       <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001" />
     </inertial>
-    <visual name="tray">
+    <visual name="rail_left">
       <geometry>
-        <mesh filename="meshes/tray.obj" />
+        <mesh filename="meshes/rail_left.obj" />
       </geometry>
     </visual>
-    <collision name="tray">
+    <visual name="rail_right">
       <geometry>
-        <mesh filename="meshes/tray.obj" />
+        <mesh filename="meshes/rail_right.obj" />
+      </geometry>
+    </visual>
+    <visual name="body">
+      <geometry>
+        <mesh filename="meshes/body.obj" />
+      </geometry>
+    </visual>
+    <collision name="rail_left">
+      <geometry>
+        <mesh filename="meshes/rail_left.obj" />
+      </geometry>
+    </collision>
+    <collision name="rail_right">
+      <geometry>
+        <mesh filename="meshes/rail_right.obj" />
+      </geometry>
+    </collision>
+    <collision name="body">
+      <geometry>
+        <mesh filename="meshes/body.obj" />
       </geometry>
     </collision>
   </link>

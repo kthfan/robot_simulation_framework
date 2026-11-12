@@ -139,6 +139,18 @@
         <mesh filename="egu50/meshes/d455.obj" />
       </geometry>
     </visual>
+    <visual name="air_cylinder_plate">
+      <origin xyz="0.00011638004786032098 8.624109061026055e-09 6.175002579473658e-05" rpy="1.5703387269650668 1.9463877424824333e-07 0.0008624100012266484" />
+      <geometry>
+        <mesh filename="egu50/meshes/air_cylinder_plate.obj" />
+      </geometry>
+    </visual>
+    <visual name="air_cylinder_body">
+      <origin xyz="0.00011638004786032098 8.624109061026055e-09 6.175002579473658e-05" rpy="1.5703387269650668 1.9463877424824333e-07 0.0008624100012266484" />
+      <geometry>
+        <mesh filename="egu50/meshes/air_cylinder_body.obj" />
+      </geometry>
+    </visual>
     <collision name="body">
       <origin xyz="0.0 -0.0465 0.0" rpy="0.0 -0.0 0.0" />
       <geometry>
@@ -155,6 +167,18 @@
       <origin xyz="0.0 -0.0937 0.11383" rpy="0.0 -0.0 0.0" />
       <geometry>
         <mesh filename="egu50/meshes/d455.obj" />
+      </geometry>
+    </collision>
+    <collision name="air_cylinder_plate">
+      <origin xyz="0.00011638004786032098 8.624109061026055e-09 6.175002579473658e-05" rpy="1.5703387269650668 1.9463877424824333e-07 0.0008624100012266484" />
+      <geometry>
+        <mesh filename="egu50/meshes/air_cylinder_plate.obj" />
+      </geometry>
+    </collision>
+    <collision name="air_cylinder_body">
+      <origin xyz="0.00011638004786032098 8.624109061026055e-09 6.175002579473658e-05" rpy="1.5703387269650668 1.9463877424824333e-07 0.0008624100012266484" />
+      <geometry>
+        <mesh filename="egu50/meshes/air_cylinder_body.obj" />
       </geometry>
     </collision>
   </link>

@@ -228,9 +228,10 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 2. **建議新增 feature：per-obstacle(群組) margin ＋ link×obstacle 允許接觸矩陣（類似 MoveIt ACM）**。原專案為了「target jig/tray margin 0、其他 5 mm、jaw 可碰 target tray」必須建 3 個 checker、每組重新 load world、逐組呼叫，成本 ×(群組數×mesh 種類)。在 kernel 內以 obstacle id → margin / link mask 查表即可一次算完。
 3. ~~Cartesian 直線精度~~：使用者確認 `ToolPoseBound` 已有 `center_weight`，在 cost 階段將 motion 拉到區間中央；
    real-time 端以此做 insert/withdraw，benchmark 時開啟。離線端（CPU）仍用 EAIK walk。
-4. **CPU 路徑**：cuRobo 的 solver 依賴 CUDA kernel（`curobolib/kernels` 的 8 個 `.cu`）與 Warp kernel（約 145 個 `wp.launch`）。
-   Warp kernel 本身支援 `device="cpu"`，若把 `.cu` 部分（kinematics / 部分 geometry / optimization）補上 Warp 或 torch 實作，
-   cuRobo 的 FK、碰撞（含 mesh check）、IK 有機會在 CPU 執行，離線流程即可直接用 cuRobo。值得做可行性評估（contingent，由使用者決定）。
+4. **CPU 路徑**：已評估，見 `docs/curobo_cpu_port.md`。Python 端的 CUDA kernel 是 53 個 `.cuh` `__global__`（約 13.5k 行，
+   經 `curobolib/backends` 代理分派，可並列新增 `warp_backend`）；Warp kernel 在 CPU 上大致可跑（已實測 cuboid 正確，
+   mesh 障礙有一個「球心在外、表面穿入回傳 0」的疑點待 GPU 比對）。估計：裝置管線＋FK＋self-collision＋parity 測試 3–4 週
+   （得到 CPU 上的 cuRobo 碰撞與 mesh check）；再加 IK/TrajOpt/MotionPlanner 4–6 週。建議先做前者。
 5. 原專案 `fix/self_collision_bug`（0 pair 除以零）在 dev/main 已有 guard（`self_collision_params.py:71`），不需再 merge。
 
 ### 6.2 EAIK（kthfan fork, robust.1）＋ robot_arm_motion_planner
@@ -290,7 +291,10 @@ P0–P2 先做；P3 起每個階段開始前再細化 todo。
 - D30 作為 M6 的參考決策。
 - `ToolPoseBound` 已有 `center_weight`（§6.1 #3）。
 
+- Tray 尺寸：保留原設定（0.1329 × 0.2470 × 0.0851，2.5 mm recess）。
+- 實機已裝 air cylinder：預設模型包含；夾爪實際運行不會全關 → `tool.operating_range`（min 0.021）。
+- 實作原則：保持彈性與可擴充性（資產組合改由 `cells/<cell>/asset_spec.yaml` 宣告；幾何生成器放在 `rsf.model.primitives`）。
+
 ### 仍待確認
-- Tray 尺寸：使用者給 0.25 × 0.13 × 0.9，解讀為 0.25 × 0.13 × **0.09**；與原專案量測值（0.247 × 0.1329 × 0.0851）不同，影響 jaw width-fit。
-- Air cylinder（v13 內含，D30 稱尚未建置）：預設不含，另提供含 air cylinder 的變體；是否已實裝？
-- cuRobo CPU 化（§6.1 #4）是否值得投入。
+- cuRobo CPU 移植是否進行、範圍（見 `docs/curobo_cpu_port.md` §4），以及是否把 kthfan/curobo 加入此 session。
+- Air cylinder 碰撞 mesh 是否也帶有 tm5s.usd 的安裝偏移（需實機量測）。
