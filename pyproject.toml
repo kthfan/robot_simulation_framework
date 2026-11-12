@@ -15,7 +15,7 @@ mujoco = ["mujoco>=3.2"]
 eaik = ["eaik @ git+https://github.com/kthfan/EAIK.git@v1.2.2+robust.1", "motion_planner @ git+https://github.com/kthfan/robot_arm_motion_planner.git", "urchin"]
 collision = ["coal>=3", "trimesh>=4"]
 curobo = []  # installed from kthfan/curobo dev/main; GPU only
-test = ["pytest>=8", "trimesh>=4"]
+test = ["pytest>=8", "trimesh>=4", "coal>=3", "mujoco>=3.2"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
