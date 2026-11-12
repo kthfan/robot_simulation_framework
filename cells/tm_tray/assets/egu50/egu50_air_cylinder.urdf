@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<robot name="egu50_air_cylinder">
+  <link name="gripper_base" />
+  <link name="gripper_body">
+    <inertial>
+      <origin xyz="0.0026128 -0.1053171 -0.0104483" rpy="0.0 -0.0 0.0" />
+      <mass value="1.49" />
+      <inertia ixx="0.0082277" ixy="0.0008049" ixz="2.19e-05" iyy="0.0023777" iyz="-9.7e-05" izz="0.0094396" />
+    </inertial>
+    <visual name="body">
+      <origin xyz="0.0 -0.0465 0.0" rpy="0.0 -0.0 0.0" />
+      <geometry>
+        <mesh filename="meshes/body.obj" />
+      </geometry>
+    </visual>
+    <visual name="plate">
+      <origin xyz="0.0 -0.1605 -0.041" rpy="0.0 -0.0 0.0" />
+      <geometry>
+        <mesh filename="meshes/plate.obj" />
+      </geometry>
+    </visual>
+    <visual name="d455">
+      <origin xyz="0.0 -0.0937 0.11383" rpy="0.0 -0.0 0.0" />
+      <geometry>
+        <mesh filename="meshes/d455.obj" />
+      </geometry>
+    </visual>
+    <visual name="air_cylinder_plate">
+      <origin xyz="0.00011638004786032097 8.624109053387519e-09 6.175002579476503e-05" rpy="1.5703387269650668 1.946387742482432e-07 0.000862410001226648" />
+      <geometry>
+        <mesh filename="meshes/air_cylinder_plate.obj" />
+      </geometry>
+    </visual>
+    <visual name="air_cylinder_body">
+      <origin xyz="0.00011638004786032097 8.624109053387519e-09 6.175002579476503e-05" rpy="1.5703387269650668 1.946387742482432e-07 0.000862410001226648" />
+      <geometry>
+        <mesh filename="meshes/air_cylinder_body.obj" />
+      </geometry>
+    </visual>
+    <collision name="body">
+      <origin xyz="0.0 -0.0465 0.0" rpy="0.0 -0.0 0.0" />
+      <geometry>
+        <mesh filename="meshes/body.obj" />
+      </geometry>
+    </collision>
+    <collision name="plate">
+      <origin xyz="0.0 -0.1605 -0.041" rpy="0.0 -0.0 0.0" />
+      <geometry>
+        <mesh filename="meshes/plate.obj" />
+      </geometry>
+    </collision>
+    <collision name="d455">
+      <origin xyz="0.0 -0.0937 0.11383" rpy="0.0 -0.0 0.0" />
+      <geometry>
+        <mesh filename="meshes/d455.obj" />
+      </geometry>
+    </collision>
+    <collision name="air_cylinder_plate">
+      <origin xyz="0.00011638004786032097 8.624109053387519e-09 6.175002579476503e-05" rpy="1.5703387269650668 1.946387742482432e-07 0.000862410001226648" />
+      <geometry>
+        <mesh filename="meshes/air_cylinder_plate.obj" />
+      </geometry>
+    </collision>
+    <collision name="air_cylinder_body">
+      <origin xyz="0.00011638004786032097 8.624109053387519e-09 6.175002579476503e-05" rpy="1.5703387269650668 1.946387742482432e-07 0.000862410001226648" />
+      <geometry>
+        <mesh filename="meshes/air_cylinder_body.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="right_gripper">
+    <visual name="right_gripper_0">
+      <geometry>
+        <mesh filename="meshes/right_gripper_0.obj" />
+      </geometry>
+    </visual>
+    <visual name="right_gripper_1">
+      <geometry>
+        <mesh filename="meshes/right_gripper_1.obj" />
+      </geometry>
+    </visual>
+    <collision name="right_gripper_0">
+      <geometry>
+        <mesh filename="meshes/right_gripper_0.obj" />
+      </geometry>
+    </collision>
+    <collision name="right_gripper_1">
+      <geometry>
+        <mesh filename="meshes/right_gripper_1.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="left_gripper">
+    <visual name="left_gripper_0">
+      <geometry>
+        <mesh filename="meshes/left_gripper_0.obj" />
+      </geometry>
+    </visual>
+    <visual name="left_gripper_1">
+      <geometry>
+        <mesh filename="meshes/left_gripper_1.obj" />
+      </geometry>
+    </visual>
+    <collision name="left_gripper_0">
+      <geometry>
+        <mesh filename="meshes/left_gripper_0.obj" />
+      </geometry>
+    </collision>
+    <collision name="left_gripper_1">
+      <geometry>
+        <mesh filename="meshes/left_gripper_1.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="gripper_fixed" type="fixed">
+    <parent link="gripper_base" />
+    <child link="gripper_body" />
+  </joint>
+  <joint name="right_gripper_joint" type="prismatic">
+    <origin xyz="0.02614 -0.0880107 0.02911" rpy="0.0 -0.0 -1.5707964" />
+    <parent link="gripper_body" />
+    <child link="right_gripper" />
+    <axis xyz="0.0 1.0 0.0" />
+    <limit lower="0.00985" upper="0.06085" effort="100.0" velocity="0.1" />
+  </joint>
+  <joint name="left_gripper_joint" type="prismatic">
+    <origin xyz="-0.0261453 -0.0880107 -0.029113" rpy="-3.1415926071795868 -0.0 -1.5707964" />
+    <parent link="gripper_body" />
+    <child link="left_gripper" />
+    <axis xyz="0.0 1.0 0.0" />
+    <limit lower="0.00985" upper="0.06085" effort="100.0" velocity="0.1" />
+  </joint>
+</robot>

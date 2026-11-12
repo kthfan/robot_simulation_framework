@@ -1,0 +1,265 @@
+<?xml version="1.0"?>
+<robot name="tray_jig_with_label">
+  <link name="jig">
+    <visual name="Cube">
+      <geometry>
+        <mesh filename="meshes/Cube.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_01">
+      <geometry>
+        <mesh filename="meshes/Cube_01.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_02">
+      <geometry>
+        <mesh filename="meshes/Cube_02.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_03">
+      <geometry>
+        <mesh filename="meshes/Cube_03.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_04">
+      <geometry>
+        <mesh filename="meshes/Cube_04.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_1">
+      <geometry>
+        <mesh filename="meshes/Cube_1.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_01_1">
+      <geometry>
+        <mesh filename="meshes/Cube_01_1.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_02_1">
+      <geometry>
+        <mesh filename="meshes/Cube_02_1.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_03_1">
+      <geometry>
+        <mesh filename="meshes/Cube_03_1.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_04_1">
+      <geometry>
+        <mesh filename="meshes/Cube_04_1.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_05">
+      <geometry>
+        <mesh filename="meshes/Cube_05.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_06">
+      <geometry>
+        <mesh filename="meshes/Cube_06.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_07">
+      <geometry>
+        <mesh filename="meshes/Cube_07.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube">
+      <geometry>
+        <mesh filename="meshes/Cube.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_01">
+      <geometry>
+        <mesh filename="meshes/Cube_01.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_02">
+      <geometry>
+        <mesh filename="meshes/Cube_02.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_03">
+      <geometry>
+        <mesh filename="meshes/Cube_03.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_04">
+      <geometry>
+        <mesh filename="meshes/Cube_04.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_1">
+      <geometry>
+        <mesh filename="meshes/Cube_1.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_01_1">
+      <geometry>
+        <mesh filename="meshes/Cube_01_1.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_02_1">
+      <geometry>
+        <mesh filename="meshes/Cube_02_1.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_03_1">
+      <geometry>
+        <mesh filename="meshes/Cube_03_1.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_04_1">
+      <geometry>
+        <mesh filename="meshes/Cube_04_1.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_05">
+      <geometry>
+        <mesh filename="meshes/Cube_05.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_06">
+      <geometry>
+        <mesh filename="meshes/Cube_06.obj" />
+      </geometry>
+    </visual>
+    <visual name="Cube_07">
+      <geometry>
+        <mesh filename="meshes/Cube_07.obj" />
+      </geometry>
+    </visual>
+    <collision name="Cube">
+      <geometry>
+        <mesh filename="meshes/Cube.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_01">
+      <geometry>
+        <mesh filename="meshes/Cube_01.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_02">
+      <geometry>
+        <mesh filename="meshes/Cube_02.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_03">
+      <geometry>
+        <mesh filename="meshes/Cube_03.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_04">
+      <geometry>
+        <mesh filename="meshes/Cube_04.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_1">
+      <geometry>
+        <mesh filename="meshes/Cube_1.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_01_1">
+      <geometry>
+        <mesh filename="meshes/Cube_01_1.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_02_1">
+      <geometry>
+        <mesh filename="meshes/Cube_02_1.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_03_1">
+      <geometry>
+        <mesh filename="meshes/Cube_03_1.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_04_1">
+      <geometry>
+        <mesh filename="meshes/Cube_04_1.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_05">
+      <geometry>
+        <mesh filename="meshes/Cube_05.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_06">
+      <geometry>
+        <mesh filename="meshes/Cube_06.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_07">
+      <geometry>
+        <mesh filename="meshes/Cube_07.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube">
+      <geometry>
+        <mesh filename="meshes/Cube.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_01">
+      <geometry>
+        <mesh filename="meshes/Cube_01.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_02">
+      <geometry>
+        <mesh filename="meshes/Cube_02.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_03">
+      <geometry>
+        <mesh filename="meshes/Cube_03.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_04">
+      <geometry>
+        <mesh filename="meshes/Cube_04.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_1">
+      <geometry>
+        <mesh filename="meshes/Cube_1.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_01_1">
+      <geometry>
+        <mesh filename="meshes/Cube_01_1.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_02_1">
+      <geometry>
+        <mesh filename="meshes/Cube_02_1.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_03_1">
+      <geometry>
+        <mesh filename="meshes/Cube_03_1.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_04_1">
+      <geometry>
+        <mesh filename="meshes/Cube_04_1.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_05">
+      <geometry>
+        <mesh filename="meshes/Cube_05.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_06">
+      <geometry>
+        <mesh filename="meshes/Cube_06.obj" />
+      </geometry>
+    </collision>
+    <collision name="Cube_07">
+      <geometry>
+        <mesh filename="meshes/Cube_07.obj" />
+      </geometry>
+    </collision>
+  </link>
+</robot>

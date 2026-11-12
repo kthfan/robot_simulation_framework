@@ -1,6 +1,6 @@
 # Robot Simulation Framework — 實作計畫 (Draft v0.1)
 
-狀態：**草案，待使用者確認**（見 §9 待決問題）
+狀態：**v0.2，已納入使用者 2026-11-12 的決定**（§9）
 日期：2026-11-12
 
 ---
@@ -8,16 +8,20 @@
 ## 0. 目標與輸入/輸出
 
 ```
-3D 檔 (URDF / mesh / USD / [STEP])  ┐
-layout (場景配置 YAML)              ├─► 編譯 ─► 自動點位 ─► 路徑生成 ─► 模擬驗證 ─► 實機程式
-workflow (流程 YAML)                ┘                                             (TMscript / ROS2 / RobotServer)
+3D 檔 (URDF / mesh / USD)          ┐
+layout (場景配置 YAML)              ├─► 編譯 ─► 自動點位 ─► 路徑生成 ─► 模擬驗證 ─► 程式/軌跡輸出
+workflow (流程 YAML)                ┘          (CPU)        (CPU)                  (實機格式由使用者設計，暫緩)
                                                          ▲
                                      real-time 規劃 (感測修正 / 重規劃 / MPC) ─┘
 ```
 
 - **路徑規劃兩個目標**
-  1. 離線：自動點位（teach points）＋路徑生成，輸出可在實機執行、且已在模擬中驗證的程式。
-  2. 線上：real-time 路徑規劃（定位修正、動態障礙、重規劃 / MPC）。
+  1. 離線：自動點位（teach points）＋路徑生成，輸出已在模擬中驗證的點位與軌跡。
+     **執行環境無 GPU**；生成不必 real-time，新的靜態障礙出現時可隨時自動重新生成。
+  2. 線上：real-time 路徑規劃（定位修正、移動物進入工作區、重規劃 / MPC）。
+     **執行環境有 GPU（cuRobo）**；**延後實作**，但介面現在就預留。
+- **定位**（AprilGrid）目的是補償架點與實機的誤差，兩種模式都要：
+  (a) 執行前量測 → 修正點位並重新生成；(b) 執行中量測 → 線上局部修正。
 - **虛擬環境可替換**：CPU 環境以 MuJoCo（物理）＋ RViz / web viewer（視覺化）為主，保留 Isaac Sim。
 - **後續**：agent 協助架點。
 - **第一個測試目標**：原專案 TM5S tray cell（37 slots, strict preset）。
@@ -30,7 +34,7 @@ workflow (流程 YAML)                ┘                                       
 |---|---|---|
 | `cell_core`（assets/config/frames/geometry/sequence/scheduler/scene） | `cells/tm_tray/` plugin ＋ 通用 `rsf.model` | 通用部分抽成框架；TM tray 專屬（rack 產生器、plate-insert 技能）成為 plugin |
 | `env_adapter` → Isaac 產生器參數 | `rsf.compile.usd` | 改成「Cell model → 各後端」的編譯器，一個來源 |
-| `protocol.py`（ROS2 JSON 軌跡 seam, D9/D30） | `rsf.drivers.ros2_json` | 保留為一種 transport |
+| `protocol.py`（ROS2 JSON 軌跡 seam, D9/D30） | `rsf.drivers.ros2_json` | 保留為一種 transport；D30 的 transfer/judge 準則作為驗收參考 |
 | `check_cell.py`（M3 mesh 碰撞, margin ladder, 分組） | `rsf.collision` + `rsf.planning.validate` | 改用 cuRobo dev/main 原生 mesh check（§6.1） |
 | `paths.py` / `transfer.py` / `planner.py`（M6） | `rsf.planning.path` | EAIK walk 改用 `RobustIK`；評估 cuRobo tool bound 取代 |
 | `judge.py`（placement/slip/contacts/tracking/caps） | `rsf.sim.judge` | 後端無關 |
@@ -185,7 +189,11 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 ```
 
 - **佈局評估工具**（reach sweep / reach volume / 基座高度掃描，D19/D23）：輸入 layout 變體，回傳 slot 覆蓋率與最差 margin；這也是 agent 架點的主要工具。
-- **CPU / GPU 分工**：EAIK（CPU、毫秒級、精確）負責「可不可達」與分支列舉；cuRobo（GPU）負責碰撞與最佳化。CPU 環境下 cuRobo 段落由 CPU fallback（MuJoCo/coal 碰撞 + RRT-Connect）提供功能正確性，效能與最終結果在 Kaggle GPU 驗證。
+- **CPU / GPU 分工（依使用者決定）**：離線的自動點位與路徑生成**全部在 CPU**：EAIK（RobustIK）負責可達性與分支列舉、
+  CPU 碰撞（MuJoCo / coal，exact mesh）、CPU free-space planner（RRT-Connect + shortcut + 時間參數化）。
+  cuRobo 用在 GPU 端（real-time），並在 Kaggle 上對離線結果做交叉驗證（同一 world、同一 margin 的 mesh 判定應一致）。
+  若日後 cuRobo 能在 CPU 執行（見 §6.1 #4），離線也可改用 cuRobo。
+- **重新生成**：layout 或 world 改變（新增靜態障礙、定位修正後的 slot pose）→ 只重算受影響的 task/segment（依賴圖快取）。
 
 ## 4. Real-time 路徑規劃（線上）
 
@@ -195,7 +203,7 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 2. **重規劃**：偏差大或 world 改變（depth 掃描到新障礙）→ cuRobo `plan_pose` / `plan_cspace`（warm start，CUDA graph），在 GPU 上目標 < 100 ms。
 3. **反應式**：動態障礙 → cuRobo `ModelPredictiveControl` + perception ESDF；安全層做速度縮放/停止。
 
-需求（延遲、障礙類型、是否有人進入工作區）待確認（§9 Q5）。
+此部分延後實作；GPU 環境，含「移動物進入工作區」。
 
 ## 5. 虛擬環境（可替換）
 
@@ -218,8 +226,11 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 可優化/回饋（**需在 Kaggle GPU 驗證**）：
 1. **原專案的手刻 mesh 檢查可大幅簡化**：`check_cell.Curobo` 以 `RobotCollisionChecker` + `update_link_mesh` 自建 gripper mesh、拔 jaw link + `lock_joints`、carried tray 用 SAT 自算。dev/main 已有 `extra_collision_meshes`、`get_mesh_collision_links/distance`、`AttachmentManager`（附著物 mesh 寫進保留三角形槽）、`disable_link_collision`。
 2. **建議新增 feature：per-obstacle(群組) margin ＋ link×obstacle 允許接觸矩陣（類似 MoveIt ACM）**。原專案為了「target jig/tray margin 0、其他 5 mm、jaw 可碰 target tray」必須建 3 個 checker、每組重新 load world、逐組呼叫，成本 ×(群組數×mesh 種類)。在 kernel 內以 obstacle id → margin / link mask 查表即可一次算完。
-3. **Cartesian 直線 insert/withdraw**：評估 `ToolPoseBound.line` + multi-waypoint 能否達到原 EAIK walk 的精度（1 mm / 0.5°以內，plate 在 jig 內只有數 mm 空間）。若最佳化器只能做到 tolerance 邊界，建議 cuRobo 增加「exact Cartesian path projection」後處理（以 IK 投影回直線）。
-4. **CPU 路徑**：cuRobo 全部 solver 依賴 CUDA kernel（`curobolib/kernels`），沒有 CPU fallback。若需在 CPU 做開發/CI，可考慮在 cuRobo 補一個純 torch 的 FK + sphere 碰撞 reference backend（慢但可測）。先列為 contingent。
+3. ~~Cartesian 直線精度~~：使用者確認 `ToolPoseBound` 已有 `center_weight`，在 cost 階段將 motion 拉到區間中央；
+   real-time 端以此做 insert/withdraw，benchmark 時開啟。離線端（CPU）仍用 EAIK walk。
+4. **CPU 路徑**：cuRobo 的 solver 依賴 CUDA kernel（`curobolib/kernels` 的 8 個 `.cu`）與 Warp kernel（約 145 個 `wp.launch`）。
+   Warp kernel 本身支援 `device="cpu"`，若把 `.cu` 部分（kinematics / 部分 geometry / optimization）補上 Warp 或 torch 實作，
+   cuRobo 的 FK、碰撞（含 mesh check）、IK 有機會在 CPU 執行，離線流程即可直接用 cuRobo。值得做可行性評估（contingent，由使用者決定）。
 5. 原專案 `fix/self_collision_bug`（0 pair 除以零）在 dev/main 已有 guard（`self_collision_params.py:71`），不需再 merge。
 
 ### 6.2 EAIK（kthfan fork, robust.1）＋ robot_arm_motion_planner
@@ -246,15 +257,19 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 |---|---|---|---|
 | **P0** | Repo 骨架、pyproject/extras、CI(CPU)、Kaggle GPU runner、介面定義、`rsf.core` | CPU 測試綠燈；Kaggle 跑通 cuRobo smoke | CPU + Kaggle |
 | **P1** | Cell model schema + loaders + audit；TM tray 移植成 `cells/tm_tray`（rack generator plugin、3 presets） | 由 YAML 產生的 box world 與原 `cell_core.scene.cell_boxes` 一致到 1e-12；所有 slot frames 一致 | CPU |
-| **P2** | Kinematics（RobustIK）＋ collision backends（cuRobo mesh / MuJoCo CPU）；scene compilers（cuRobo、MJCF） | reach sweep strict 37/37（EAIK）；M3 collision 37/37（cuRobo, Kaggle）；CPU checker 與 cuRobo 結論一致 | CPU + Kaggle |
+| **P2** | Kinematics（RobustIK）＋ collision backends（CPU exact mesh 為主、cuRobo 交叉驗證）；scene compilers（MJCF、cuRobo） | reach sweep strict 37/37（EAIK）；M3 collision 37/37（CPU）；Kaggle 上 cuRobo 結論一致 | CPU + Kaggle |
 | **P3** | 自動點位：skill expand、候選、IK 分支、篩選、分支鏈選擇；layout 評估工具 | 37 slots 全部產生 teach points，`chain_q` 與原 M3 相同或更好 | CPU (+Kaggle) |
-| **P4** | 路徑生成：free / line / sweep / carry / jaw、時間參數化、validate；移植 M6 transfer；EAIK walk vs cuRobo tool-bound benchmark | scenario `all` dry run 全部通過 validate + caps | Kaggle |
+| **P4** | 路徑生成（CPU）：free（RRT-Connect）/ line / sweep / carry / jaw、時間參數化、validate；移植 M6 transfer；障礙變更時自動重新生成 | scenario `all` dry run 全部通過 validate + caps（D30 準則） | CPU |
 | **P5** | Sim：Kinematic、MuJoCo（物理/相機）、Isaac adapter；judge；viz（viser + RViz adapter） | MuJoCo 中 transfer 通過 5 項 judge；Isaac adapter 能載入同一 world | CPU (+Isaac 主機) |
-| **P6** | Codegen：TMscript / ROS2 / RobotServer；round-trip（匯出 → 解析 → 模擬） | 匯出程式在 KinematicSim/MuJoCo 重播誤差 < 容許 | CPU |
-| **P7** | Real-time：定位修正、cuRobo 重規劃、MPC + ESDF、安全層；延遲 benchmark | 擾動 slot pose / 插入障礙物仍完成流程；延遲達標 | Kaggle |
+| **P6** | 定位：AprilGrid locator；執行前修正 → 重新生成、執行中局部修正（CPU） | 擾動 slot pose 後仍通過 judge | CPU |
+| — | ~~Codegen~~ 暫緩，實機程式格式交給使用者設計；框架只輸出中立的點位表與時間化軌跡（JSON） | | |
+| **P7** | Real-time（**延後**）：cuRobo 重規劃、MPC + ESDF、移動物、安全層；延遲 benchmark | 插入障礙物/移動物仍完成流程；延遲達標 | GPU / Kaggle |
 | **P8** | Agent：tool API（MCP）、agent 協助架點（提案 → 驗證 → 渲染 → 人確認） | agent 能為新 slot 產生並驗證點位 | — |
 
 P0–P2 先做；P3 起每個階段開始前再細化 todo。
+
+**P0 進度（2026-11-12）**：`rsf.core.se3`、`rsf.model.urdf`（解析/FK/編輯/輸出）、TM tray 資產組合
+（`tools/assemble_tm_tray_assets.py`，見 `docs/assets.md`）與其測試；Kaggle CLI 認證已確認可用。
 
 ## 8. 測試策略
 
@@ -264,4 +279,18 @@ P0–P2 先做；P3 起每個階段開始前再細化 todo。
 
 ## 9. 待決問題
 
-見對話中的問題清單（確認後更新本節）。
+### 已決定（使用者 2026-11-12）
+- 3D 輸入：URDF、mesh、USD。
+- 實機程式格式：暫緩，由使用者設計。
+- 離線（自動點位、路徑生成）無 GPU；real-time 有 GPU，延後實作（含移動物進入工作區）。
+- 新的靜態障礙：離線隨時自動重新生成，不需 real-time。
+- 定位：補償架點與實機誤差，執行前與執行中兩種模式都要。
+- CPU fallback：依提議（功能正確等級的 CPU 碰撞 + RRT-Connect，cuRobo 交叉驗證）。
+- 原專案的限制（air-gapped、numpy 1.26、git 由使用者操作、CrossHost）不再適用。
+- D30 作為 M6 的參考決策。
+- `ToolPoseBound` 已有 `center_weight`（§6.1 #3）。
+
+### 仍待確認
+- Tray 尺寸：使用者給 0.25 × 0.13 × 0.9，解讀為 0.25 × 0.13 × **0.09**；與原專案量測值（0.247 × 0.1329 × 0.0851）不同，影響 jaw width-fit。
+- Air cylinder（v13 內含，D30 稱尚未建置）：預設不含，另提供含 air cylinder 的變體；是否已實裝？
+- cuRobo CPU 化（§6.1 #4）是否值得投入。
