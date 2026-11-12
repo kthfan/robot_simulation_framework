@@ -183,3 +183,12 @@ def test_tray_is_the_measured_tray():
         assert r[:, 0].max() - r[:, 0].min() == pytest.approx(0.0065, abs=1e-6)
         assert r[:, 2].min() == pytest.approx(0.0, abs=1e-9)
     assert tray.links["tray"].mass == pytest.approx(1.2)
+
+
+def test_gripper_cuboids_become_boxes(full):
+    """Every gripper collider is a cuboid mesh; they become exact box shapes
+    (oriented ones too: the v13 colliders carry a ~1 mrad calibration turn)."""
+    from rsf.model.world import solids_from_urdf
+    kinds = {s.name.split("/")[-1]: s.shape.kind for s in solids_from_urdf(full)
+             if s.name.split("/")[0] in ("gripper_body", "right_gripper", "left_gripper")}
+    assert kinds and set(kinds.values()) == {"box"}, kinds

@@ -186,18 +186,42 @@ def _obj_vertices(path: Path) -> Optional[np.ndarray]:
 
 
 def _as_box(path: Path, scale) -> Optional[tuple]:
-    """``(centre, size)`` if the mesh is exactly an axis-aligned box (8 corners)."""
+    """``(T_box, size)`` if the mesh is exactly a rectangular cuboid (8 corners, any
+    orientation): ``T_box`` puts the box centre and axes in the mesh frame."""
     V = _obj_vertices(path)
     if V is None or len(V) != 8:
         return None
     if scale is not None:
         V = V * np.asarray(scale, float)
-    lo, hi = V.min(0), V.max(0)
-    corners = {tuple(np.round(c, 9)) for c in V}
-    want = {tuple(np.round([x, y, z], 9)) for x in (lo[0], hi[0]) for y in (lo[1], hi[1]) for z in (lo[2], hi[2])}
-    if corners != want:
+    import itertools
+    d = (V - V[0])[1:]
+    found = None
+    for i, j, k in itertools.combinations(range(7), 3):
+        E = d[[i, j, k]]
+        L = np.linalg.norm(E, axis=1)
+        if np.any(L < 1e-9):
+            continue
+        U = E / L[:, None]
+        if max(abs(U[0] @ U[1]), abs(U[0] @ U[2]), abs(U[1] @ U[2])) > 1e-6:
+            continue
+        want = np.array([V[0] + a * E[0] + b * E[1] + c * E[2] for a in (0, 1) for b in (0, 1) for c in (0, 1)])
+        dist = np.linalg.norm(want[:, None, :] - V[None, :, :], axis=2)
+        if dist.min(axis=1).max() <= 1e-7 * max(1.0, L.max()) and len(set(dist.argmin(axis=1))) == 8:
+            found = (U, L)
+            break
+    if found is None:
         return None
-    return (lo + hi) / 2.0, hi - lo
+    U, L = found
+    # canonical axes: each box axis takes the frame axis it is closest to, pointing positive
+    order = np.argmax(np.abs(U), axis=1)
+    if len(set(order)) == 3:
+        perm = np.argsort(order)
+        U, L = U[perm], L[perm]
+        U = U * np.sign(U[np.arange(3), np.arange(3)])[:, None]
+    R = U.T.copy()
+    if np.linalg.det(R) < 0:
+        R[:, 2] = -R[:, 2]
+    return se3.make_T(R, V.mean(axis=0)), L.copy()
 
 
 def solids_from_urdf(model, *, prefix: str = "", entity: str = "", tags=frozenset(),
@@ -219,7 +243,7 @@ def solids_from_urdf(model, *, prefix: str = "", entity: str = "", tags=frozense
             elif g.kind == "mesh":
                 b = _as_box(g.path, g.scale) if boxes and g.path is not None else None
                 if b is not None:
-                    T = T @ se3.make_T(None, b[0])
+                    T = T @ b[0]
                     shape = Shape.box(b[1])
                 else:
                     shape = Shape.mesh(g.path, g.scale)
