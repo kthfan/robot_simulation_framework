@@ -101,6 +101,22 @@ def process(world) -> list:
                          f"width-fit {fit:.4f} and open {open_:.4f} lie in [{r['min']}, {r['max']}]",
                          f"width-fit {fit:.4f} / open {open_:.4f} outside the jaw operating range "
                          f"[{r['min']}, {r['max']}]"))
+    if pr.get("push_plate"):
+        from .sequence import push_kwargs, push_plate_limit, insert_tip_depth
+        from .tool import tool_geometry
+        tool = tool_geometry(world)
+        m = float(pr["push_plate"].get("margin", 0.0))
+        if not tool:
+            out.append(Check("tm_tray.push_plate", "pass",
+                             f"the robot has no {pr['push_plate'].get('geometry')!r}; the D28 insert depth applies"))
+        else:
+            depth = insert_tip_depth(**push_kwargs(pr, tool))
+            past_middle = depth - A.JIG_Y_OFFSET
+            out.append(check("tm_tray.push_plate", m >= 0.0 and past_middle > 0.0,
+                             f"insert stops {m * 1e3:.1f} mm before the push plate meets the tray; plate tip "
+                             f"{depth * 1e3:.1f} mm behind the rack face, {past_middle * 1e3:.1f} mm past the tray middle",
+                             f"push-plate margin {m * 1e3:.1f} mm leaves the plate tip {past_middle * 1e3:.1f} mm "
+                             f"past the tray middle; it must be positive and the margin non-negative", past_middle))
     budget = G.tolerance_budget(use_recess=False)
     out.append(check("tm_tray.tolerance_pitch", budget["pitch_deg"] >= MIN_PITCH_DEG,
                      f"plate may pitch {budget['pitch_deg']:.2f} deg and still enter the corridor",

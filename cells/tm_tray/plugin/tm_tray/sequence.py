@@ -32,6 +32,7 @@ already covered them, because they are these poses.)
 from __future__ import annotations
 
 import math
+from typing import Optional
 
 import numpy as np
 
@@ -131,24 +132,42 @@ def _jig_front_depth() -> float:
     return min(cols + [A.TRAY_FRONT_DEPTH])
 
 
+def push_plate_limit(push_front_z: float, push_margin: float) -> float:
+    """Deepest plate tip that keeps the push plate *push_margin* short of the tray.
+
+    The push plate's tray-side face is at flange z *push_front_z*. With the tip
+    *d* behind the rack face, the tray's front face is at flange z
+    ``PLATE_FZ_TIP - d + TRAY_FRONT_DEPTH``; it must stay at least
+    ``push_front_z + push_margin``.
+    """
+    return A.PLATE_FZ_TIP + A.TRAY_FRONT_DEPTH - push_front_z - push_margin
+
+
 def insert_tip_depth(back_margin: float = BACK_MARGIN,
-                     front_margin: float = FRONT_MARGIN) -> float:
+                     front_margin: float = FRONT_MARGIN,
+                     push_front_z: Optional[float] = None,
+                     push_margin: float = 0.0) -> float:
     """Plate tip depth behind the rack face when fully inserted.
 
     *back_margin* short of the tray's back edge, unless the gripper body would
     then come within *front_margin* of the jig: then it stops there (user
-    2026-10-06, D28: "if touched, stop it earlier").
+    2026-10-06, D28: "if touched, stop it earlier"). With a push plate
+    (*push_front_z*, the tool has one), also *push_margin* short of the tray
+    front (user 2026-11-12: 2 mm, until the real plate is measured).
     """
     back = A.TRAY_BACK_DEPTH - back_margin
     body = _jig_front_depth() - front_margin - A.BODY_FZ_FRONT + A.PLATE_FZ_TIP
-    return min(back, body)
+    depth = min(back, body)
+    if push_front_z is not None:
+        depth = min(depth, push_plate_limit(push_front_z, push_margin))
+    return depth
 
 
 def insert_pose(slot: Slot, back_margin: float = BACK_MARGIN,
-                front_margin: float = FRONT_MARGIN) -> np.ndarray:
-    """Fully inserted, the tip at :func:`insert_tip_depth`."""
+                front_margin: float = FRONT_MARGIN, **push) -> np.ndarray:
+    """Fully inserted, the tip at :func:`insert_tip_depth` (*push*: its push-plate arguments)."""
     tip_dist = (slot.label_plane_dist + A.LABEL_PROUD_OF_FACE
-                + insert_tip_depth(back_margin, front_margin))
+                + insert_tip_depth(back_margin, front_margin, **push))
     return _pose(slot, tip_dist - A.PLATE_FZ_TIP, insertion_flange_z(slot))
 
 
@@ -158,8 +177,8 @@ def pre_insert_pose(slot: Slot, gap: float = PRE_INSERT_GAP) -> np.ndarray:
     return _pose(slot, tip_dist - A.PLATE_FZ_TIP, insertion_flange_z(slot))
 
 
-def lift_pose(slot: Slot, lift: float = LIFT_HEIGHT) -> np.ndarray:
-    T = insert_pose(slot)
+def lift_pose(slot: Slot, lift: float = LIFT_HEIGHT, **push) -> np.ndarray:
+    T = insert_pose(slot, **push)
     T[2, 3] += lift
     return T
 
@@ -191,29 +210,41 @@ def carry_pose(slot: Slot, tilt_deg: float = 0.0,
     return T
 
 
-def grasp_sequence(process: dict, slot: Slot, near_rise: float = 0.0) -> dict:
+def push_kwargs(process: dict, tool: Optional[dict]) -> dict:
+    """The push-plate arguments of :func:`insert_tip_depth` for *tool* (see
+    :func:`tool.tool_geometry`); empty when the tool has no push plate."""
+    if not tool or tool.get("push_front_z") is None:
+        return {}
+    return {"push_front_z": tool["push_front_z"],
+            "push_margin": float((process.get("push_plate") or {}).get("margin", 0.0))}
+
+
+def grasp_sequence(process: dict, slot: Slot, near_rise: float = 0.0, tool: Optional[dict] = None) -> dict:
     """The seven flange poses that pick the tray out of *slot*, in order.
 
-    Standoffs and the carry tilt come from *process*, so a cell rebuilt with
-    different optics, clearances or retention produces different poses without
-    touching this module.
+    Standoffs, the carry tilt and the push-plate margin come from *process*;
+    *tool* carries the gripper geometry read from the robot's URDF
+    (:func:`tool.tool_geometry`). A cell rebuilt with different optics,
+    clearances, retention or gripper produces different poses without touching
+    this module.
     """
+    push = push_kwargs(process, tool)
     return {
         "sight_far": sighting_pose(slot, process["standoff_far"]),
         "sight_near": sighting_pose(slot, process["standoff_near"], near_rise),
         "pre_insert": pre_insert_pose(slot),
-        "insert": insert_pose(slot),
-        "lift": lift_pose(slot),
+        "insert": insert_pose(slot, **push),
+        "lift": lift_pose(slot, **push),
         "withdraw": withdraw_pose(slot),
         "carry": carry_pose(slot, process.get("carry_tilt_deg", 0.0)),
     }
 
 
-def release_sequence(process: dict, slot: Slot, near_rise: float = 0.0) -> dict:
+def release_sequence(process: dict, slot: Slot, near_rise: float = 0.0, tool: Optional[dict] = None) -> dict:
     """The flange poses that place a tray into *slot*, in order.
 
     Literally :func:`grasp_sequence`'s poses, reordered. See the module
     docstring for why this is a reordering and not a derivation.
     """
-    poses = grasp_sequence(process, slot, near_rise)
+    poses = grasp_sequence(process, slot, near_rise, tool)
     return {phase: poses[phase] for phase in RELEASE_PHASES}

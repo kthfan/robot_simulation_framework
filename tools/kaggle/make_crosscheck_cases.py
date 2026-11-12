@@ -43,12 +43,13 @@ def main(argv=None) -> int:
     import rsf_plugins.tm_tray.sequence as SEQ
     from rsf_plugins.tm_tray.collision_check import CARRIED_PHASES
     from rsf_plugins.tm_tray.geometry import slot_of
+    from rsf_plugins.tm_tray.tool import tool_geometry
     ck = CoalChecker(world.robot.urdf, world.robot.base,
                      ContactPolicy(0.0, [ContactRule(allow=True, links=("link_0",))]), cutoff=CAP)
     cases = []
     for key in SLOTS:
         f = world.feature(key)
-        poses = SEQ.grasp_sequence(world.process, slot_of(f))
+        poses = SEQ.grasp_sequence(world.process, slot_of(f), tool=tool_geometry(world))
         for carried in (False, True):
             tray = world.object_at(key)
             ck.set_obstacles(world.solids(exclude_objects=[tray.name] if carried else []))

@@ -34,6 +34,7 @@ from . import frames as F
 from . import hardware as A
 from . import sequence as SEQ
 from .geometry import slot_of
+from .tool import tool_geometry
 
 MARGIN = 0.005
 CHAIN = ("pre_insert", "insert", "lift")
@@ -43,12 +44,13 @@ JAW_LINKS = ("right_gripper", "left_gripper")
 CONTINUITY = ContinuityRule(sign_joints=(2, 4), max_step=1.0)
 
 
-def carried_tray_pose() -> np.ndarray:
+def carried_tray_pose(tip_depth: Optional[float] = None) -> np.ndarray:
     """Tray frame (rails' underside centre; x across, y along, z up) in the flange
     frame while it rides on the plate: recess on the plate's upper face, at the
     depth :func:`sequence.insert_pose` picked it up (cell_core.scene.carried_tray_box)."""
     R = F.USD_FLANGE_R0.T        # tray x -> flange x, tray y -> flange -z, tray z -> flange y
-    p = (0.0, A.PLATE_FY_TOP - A.TRAY_RECESS, A.PLATE_FZ_TIP + A.JIG_Y_OFFSET - SEQ.insert_tip_depth())
+    depth = SEQ.insert_tip_depth() if tip_depth is None else tip_depth
+    p = (0.0, A.PLATE_FY_TOP - A.TRAY_RECESS, A.PLATE_FZ_TIP + A.JIG_Y_OFFSET - depth)
     return F.make_pose(R, p)
 
 
@@ -81,6 +83,7 @@ class CellChecker:
         self.world, self.arm, self.jaw = world, arm, jaw
         self.model = UrdfModel.from_file(world.robot.urdf)
         self.checker = CoalChecker(self.model, world.robot.base, ContactPolicy(MARGIN), cutoff=0.06)
+        self.tool = tool_geometry(world)
 
     def _q(self, q6) -> dict:
         d = dict(zip(self.arm.joint_names, np.asarray(q6, float)))
@@ -108,14 +111,15 @@ class CellChecker:
         if carried and tray is not None:
             solids = self.world.solids(exclude_objects=[tray.name])
             self.checker.set_obstacles(solids)
-            self.checker.attach("tray", "flange", tray.solids, carried_tray_pose())
+            depth = SEQ.insert_tip_depth(**SEQ.push_kwargs(self.world.process, self.tool))
+            self.checker.attach("tray", "flange", tray.solids, carried_tray_pose(depth))
         else:
             self.checker.set_obstacles(self.world.solids())
             self.checker.detach("tray")
 
     def check_slot(self, feature) -> dict:
         key = feature.key
-        poses = SEQ.grasp_sequence(self.world.process, slot_of(feature))
+        poses = SEQ.grasp_sequence(self.world.process, slot_of(feature), tool=self.tool)
         phases = {}
         for carried in (False, True):
             names = [p for p in SEQ.GRASP_PHASES if (p in CARRIED_PHASES) == carried]

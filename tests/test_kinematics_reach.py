@@ -63,11 +63,15 @@ def test_ik_finds_the_configuration_it_came_from(arm):
         assert any(np.abs(w).max() < 1e-6 for w in wrapped)
 
 
+NO_AIR = str((ROOT / "cells" / "tm_tray" / "assets" / "tm5s_egu50_no_air_cylinder.urdf").resolve())
+
+
 @pytest.mark.parametrize("preset", ["as_built", "recommended", "strict"])
-def test_grasp_targets_equal_the_original_sequence(worlds, preset):
+def test_grasp_targets_equal_the_original_sequence(preset):
+    """With the D29 gripper (no push plate) the targets are cell_core's."""
     from rsf.model import registry
     cfg = REF.load_preset(preset)
-    world = worlds[preset]
+    world = load_world(LAYOUTS / f"{preset}.yaml", {"robot.urdf": NO_AIR})
     fn = registry.get("targets", "tm_tray.grasp")
     for s in REF.enumerate_slots(cfg):
         mine = fn(world, world.feature(s.key))
@@ -106,3 +110,26 @@ def test_pre_d28_sequence_reproduces_findings_04(worlds):
         if miss:
             bad[s.key] = miss
     assert bad == {"outgoing/L3/C0": ["insert", "lift"], "outgoing/L3/C5": ["insert", "lift"]}
+
+
+def test_push_plate_moves_only_insert_and_lift(worlds):
+    """With the installed push plate, insert and lift stop shallower along the
+    approach axis by the push-plate limit; every other pose is cell_core's."""
+    from rsf.model import registry
+    import rsf_plugins.tm_tray.sequence as SEQ
+    from rsf_plugins.tm_tray.tool import tool_geometry
+    cfg = REF.load_preset("strict")
+    world = worlds["strict"]
+    tool = tool_geometry(world)
+    shift = RS.insert_tip_depth() - SEQ.insert_tip_depth(**SEQ.push_kwargs(world.process, tool))
+    assert shift == pytest.approx(0.218 - 0.20647, abs=1e-4)
+    fn = registry.get("targets", "tm_tray.grasp")
+    for s in REF.enumerate_slots(cfg)[::5]:
+        mine, ref = fn(world, world.feature(s.key)), RS.grasp_sequence(cfg, s)
+        a = s.approach_vec / np.linalg.norm(s.approach_vec)
+        for p in ref:
+            d = mine[p][:3, 3] - ref[p][:3, 3]
+            if p in ("insert", "lift"):
+                assert np.allclose(d, -shift * a, atol=1e-12) and np.allclose(mine[p][:3, :3], ref[p][:3, :3])
+            else:
+                assert np.allclose(mine[p], ref[p], atol=1e-12), (s.key, p)

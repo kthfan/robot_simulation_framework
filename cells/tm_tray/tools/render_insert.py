@@ -47,8 +47,8 @@ def main(argv=None) -> int:
     ap.add_argument("layout")
     ap.add_argument("--slot", default="incoming/L0/C0")
     ap.add_argument("--phase", default="insert")
-    ap.add_argument("--push-margin", type=float, nargs="*", default=[None, 0.002],
-                    help="panels: None = the current sequence, a number = stop the push plate that far from the tray")
+    ap.add_argument("--push-margin", type=lambda v: None if v == "none" else float(v), nargs="*", default=[None, 0.002],
+                    help="one panel each: 'none' = no push-plate stop (D28 rule), a number = stop the push plate that far from the tray")
     ap.add_argument("--band", type=float, default=0.045)
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
@@ -61,7 +61,7 @@ def main(argv=None) -> int:
     import rsf_plugins.tm_tray.sequence as SEQ
     from rsf_plugins.tm_tray import hardware as A
     from rsf_plugins.tm_tray.geometry import slot_of
-    orig = SEQ.insert_tip_depth
+    from rsf_plugins.tm_tray.tool import tool_geometry
     # flange frame: robot geometry is defined there; the URDF root frame is not the flange
     m = UrdfModel.from_file(world.robot.urdf)
     fk0 = m.fk({"right_gripper_joint": A.JAW_Q_OPEN, "left_gripper_joint": A.JAW_Q_OPEN})
@@ -79,15 +79,12 @@ def main(argv=None) -> int:
     fig, axes = plt.subplots(len(panels), 1, figsize=(13, 5.2 * len(panels)))
     axes = np.atleast_1d(axes)
     for ax, pm in zip(axes, panels):
-        if pm is None:
-            SEQ.insert_tip_depth = orig
-            label = f"current sequence (D28): plate tip {orig() * 1e3:.1f} mm behind the rack face"
-        else:
-            lim = A.PLATE_FZ_TIP + A.JIG_Y_OFFSET - A.TRAY_Y / 2 - push[:, 2].max() - pm
-            SEQ.insert_tip_depth = lambda *x, _l=lim, **k: min(orig(*x, **k), _l)
-            label = (f"push plate stopped {pm * 1e3:.0f} mm short of the tray: plate tip "
-                     f"{SEQ.insert_tip_depth() * 1e3:.1f} mm behind the rack face")
-        T = SEQ.grasp_sequence(world.process, slot_of(world.feature(a.slot)))[a.phase]
+        tool = tool_geometry(world) if pm is not None else {}
+        process = dict(world.process, push_plate=dict(world.process.get("push_plate") or {}, margin=pm or 0.0))
+        depth = SEQ.insert_tip_depth(**SEQ.push_kwargs(process, tool))
+        label = (f"D28 rule only (no push-plate stop): plate tip {depth * 1e3:.1f} mm behind the rack face" if pm is None
+                 else f"push plate stopped {pm * 1e3:.0f} mm short of the tray: plate tip {depth * 1e3:.1f} mm behind the rack face")
+        T = SEQ.grasp_sequence(process, slot_of(world.feature(a.slot)), tool=tool)[a.phase]
         cell = boxes_in_flange(world, a.slot, T, a.band)
         tray_boxes = [C for n, k, C in cell if k == "tray"]
         for name, kind, C in cell + grip:
@@ -122,7 +119,6 @@ def main(argv=None) -> int:
     fig.suptitle(f"Side section |x| < {a.band * 1e3:.0f} mm (flange frame), jaws open; red hatching = overlap", fontsize=13)
     fig.tight_layout(rect=(0, 0.04, 1, 0.97))
     fig.savefig(a.out, dpi=110)
-    SEQ.insert_tip_depth = orig
     return 0
 
 

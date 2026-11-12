@@ -37,18 +37,34 @@ kinematically; the `tm_tray.mount_height` audit threshold (0.733 m) predates
 D28. Collisions on as_built were not checked yet.
 
 ### M3 collision (CPU, exact meshes)
-| Gripper | Result | Time |
-|---|---|---|
-| D29 gripper (`tm5s_egu50_no_air_cylinder.urdf`) | **PASS 37/37** (as D29 with cuRobo) | ~50 s |
-| As installed, with air cylinder (`tm5s_egu50.urdf`) | **FAIL 0/37** — `insert` everywhere | ~50 s |
-| With air cylinder, insert stopped 10 mm before the push plate meets the tray (experiment) | PASS 37/37 | ~52 s |
-| ... stopped 2 mm before (experiment) | PASS 37/37 | ~50 s |
+| Gripper / rule | strict | as_built | recommended |
+|---|---|---|---|
+| D29 gripper (`tm5s_egu50_no_air_cylinder.urdf`) | **PASS 37/37** (as D29 with cuRobo) | PASS 37/37 | — |
+| As installed, with push plate, D28 insert depth | FAIL 0/37 (`insert` everywhere) | — | — |
+| **As installed, insert stops 2 mm before the push plate meets the tray (default since 2026-11-12)** | **PASS 37/37** | **PASS 37/37** | **PASS 37/37** |
 
-Why the air cylinder fails: its push plate spans flange z 0.117–0.124 m. At
-the D28 insert (plate tip 0.218 m behind the rack face) the tray's front face
-is at flange z 0.1145, so the push plate is 9.5 mm inside the tray. Stopping
-10 mm short puts the tip at 0.1985 m (2 mm short: 0.2065 m), still 64–72 mm past
-the tray's middle. **The sequence is unchanged pending a decision.**
+About 50 s per layout on the CPU.
+
+Why the D28 depth fails with the push plate: the plate spans flange z
+0.117–0.124 m; at the D28 insert (plate tip 0.218 m behind the rack face) the
+tray's front face is at flange z 0.1145, 9.5 mm behind the plate's tray-side
+face.
+
+**The rule (user 2026-11-12):** `insert_tip_depth` takes the shallowest of the
+D28 limits and `PLATE_FZ_TIP + TRAY_FRONT_DEPTH - push_front_z - margin`, with
+`push_front_z` read from the robot URDF's `air_cylinder_plate` collider
+(`cells/tm_tray/plugin/tm_tray/tool.py`) and `margin` from the layout's
+`process.push_plate.margin` (0.002). The tip stops at 0.2065 m (11.5 mm
+shallower), 71.5 mm past the tray's middle; the carried tray's place on the
+plate follows. A robot without the push plate keeps the D28 sequence exactly.
+Tests: the exact meshes measure 2.000 mm between the push plate and the target
+tray at insert; only `insert` and `lift` move, by 11.5 mm along the approach.
+
+**Pending measurement:** if the push plate shares tm5s.usd's stray gripper
+offset, the real plate is 1.76 mm closer to the tray and 3.41 mm lower than
+modelled (real gap ~0.24 mm). Measure the gap between the push plate's lower
+edge and the plate's upper face: ~7.0 mm (model right) or ~3.6 mm (offset
+present). Then adjust the margin or the asset.
 
 ### cuRobo cross-check (Kaggle T4, cuRobo dev/main `445ed42`)
 `tools/kaggle/make_crosscheck_cases.py` writes 352 configurations (every IK

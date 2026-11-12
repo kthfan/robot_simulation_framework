@@ -15,6 +15,9 @@ process:
   standoff_near: 0.2768   # near read; plate-free standoff (D24, D28)
   carry_tilt_deg: 0.0     # plate tilt while carrying (degrees; D4/D14)
   jaw_operating_range: {min: 0.0210, max: 0.06085}   # assets/asset_spec.yaml
+  # Insert stops this far before the push plate meets the tray front (user
+  # 2026-11-12: 2 mm until the real plate is measured; see docs/p2_results.md).
+  push_plate: {geometry: air_cylinder_plate, margin: 0.002}
 
 entities:
   floor:
