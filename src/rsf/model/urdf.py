@@ -256,6 +256,22 @@ class UrdfModel:
         del self.links[name]
         self._reindex()
 
+    def subchain(self, tip: str, base: Optional[str] = None, geometry: bool = False) -> "UrdfModel":
+        """Only the links from *base* (default root) to *tip*: a serial chain.
+
+        Without *geometry* the links are bare, which is what analytic IK
+        solvers want.
+        """
+        base = base or self.root
+        joints = self.chain(tip, base)
+        names = [base] + [self.joints[j].child for j in joints]
+        links = {}
+        for n in names:
+            src = self.links[n]
+            links[n] = copy.deepcopy(src) if geometry else Link(n)
+        return UrdfModel(f"{self.name}_{base}_{tip}", links,
+                         {j: copy.deepcopy(self.joints[j]) for j in joints}, self.source)
+
     # ── output ──────────────────────────────────────────────────────────────
     def to_xml(self, mesh_dir: Optional[Path] = None, relative_to: Optional[Path] = None) -> str:
         """URDF text. Mesh paths are written relative to *relative_to* when given."""
