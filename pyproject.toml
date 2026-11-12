@@ -23,6 +23,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+addopts = "-m 'not slow'"
 markers = [
     "gpu: needs CUDA (run on Kaggle)",
     "slow: long-running",
