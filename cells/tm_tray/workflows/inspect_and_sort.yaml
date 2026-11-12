@@ -1,0 +1,28 @@
+# AI-Robotics-V2 D1: every incoming tray goes to the inspection table, dwells
+# there until inspection completes, then goes to the outgoing rack.
+# Sources are drained top shelf first, column 0 first; the outgoing rack is
+# filled from the bottom up (cell_core.SequentialScheduler). When the incoming
+# rack is empty the cell requests a refill; when the outgoing rack is full it
+# requests removal. Both stop the run.
+schema: rsf.workflow/1
+name: inspect_and_sort
+
+sets:
+  incoming:   {kind: slot, role: incoming}
+  outgoing:   {kind: slot, role: outgoing}
+  inspection: {kind: slot, role: inspection}
+
+initial:
+  tray: [incoming]
+
+scheduler:
+  type: rsf.ordered
+  params:
+    bind:
+      source:      {set: incoming, order: [-height, column], state: occupied, on_none: request_refill}
+      destination: {set: outgoing, order: [height, column],  state: empty,    on_none: request_removal}
+
+cycle:
+  - {skill: transfer, args: {object: tray, from: $source, to: $inspection}}
+  - {skill: wait, args: {signal: inspection_done}}     # D1: trigger undecided; a signal stub
+  - {skill: transfer, args: {object: tray, from: $inspection, to: $destination}}

@@ -123,8 +123,13 @@ def build_object(name: str, spec: dict, src: Path, out: Path) -> UrdfModel:
     mdir = out / name / "meshes"
     if "urdf" in spec:
         s = UrdfModel.from_file(src / spec["urdf"])
-        geos = [mesh(copy_mesh(g.path, mdir), g.origin, Path(g.filename).stem)
-                for link in s.links.values() for g in link.visuals + link.collisions]
+        geos, seen = [], set()
+        for link in s.links.values():
+            # Collision geometry if the source has any, else its visuals; once per file.
+            for g in (link.collisions or link.visuals):
+                if g.path not in seen:
+                    seen.add(g.path)
+                    geos.append(mesh(copy_mesh(g.path, mdir), g.origin, Path(g.filename).stem))
         return UrdfModel(name, {name: Link(name, visuals=list(geos), collisions=list(geos), mass=spec.get("mass"))}, {})
     boxes = getattr(primitives, spec["generator"])(**spec["params"])
     return UrdfModel(name, {name: primitives.box_link(name, boxes, mdir, spec.get("mass"))}, {})

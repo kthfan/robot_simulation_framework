@@ -1,0 +1,62 @@
+# as_built with the mounting leg extended just enough to service every slot.
+#
+# This preset differs from as_built.yaml in exactly ONE number -- leg_height --
+# and a test enforces that. Chosen by the user (2026-09-29) as the scenario to
+# evaluate first; recommended.yaml (0.7765) stays as the fallback.
+#
+# Why 0.735 (evaluate.py --scan origin_z, 259-pose sweep, 2026-09-29):
+#   0.733  35/37  outgoing/L3/C0 and /C5 still out of reach
+#   0.734  37/37  first height with full coverage
+#   0.735  37/37  worst pose 3.3 mm OUTSIDE the q=0 reach sphere (proxy only)
+# That leaves ~1 mm of height margin, against 18.1 mm of sphere margin at
+# 0.7765. Anything the kinematic sweep does not model -- collisions, path
+# feasibility between phases, rack registration -- has almost no budget here.
+# If the sim shows that, move to recommended.yaml.
+name: strict
+description: >-
+  as_built with a 0.5285 m leg, putting the robot origin at 0.735 m, about 1 mm
+  above the lowest mount that sweeps 37/37 slots. Minimal margin.
+
+robot:
+  # 0.1765 + 0.5285 + 0.03 = 0.735
+  base_size: 0.1765
+  leg_height: 0.5285
+  plate_thickness: 0.03
+
+incoming:
+  name: incoming
+  role: incoming
+  approach: [1.0, 0.0, 0.0]
+  face_distance: 0.792
+  width: 0.800
+  depth: 0.308
+  layer_heights: [0.82, 1.07, 1.32]
+  n_jigs: 4
+  plane_thickness: 0.020
+  cylinder_radius: 0.020
+  jig_gap: 0.016
+
+outgoing:
+  name: outgoing
+  role: outgoing
+  approach: [-1.0, 0.0, 0.0]
+  face_distance: 0.792
+  width: 1.160
+  depth: 0.308
+  layer_heights: [0.55, 0.80, 1.05, 1.30]
+  n_jigs: 6
+  plane_thickness: 0.020
+  cylinder_radius: 0.020
+  jig_gap: 0.016
+
+table:
+  face_distance: 0.85
+  height: 0.7
+  depth: 0.36
+  jig_x: 0.0
+  approach: [0.0, 1.0, 0.0]
+  plane_thickness: 0.020
+  confirmed: false
+
+standoff_far: 0.35
+standoff_near: 0.2768

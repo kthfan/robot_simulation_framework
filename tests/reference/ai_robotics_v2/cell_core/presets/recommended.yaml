@@ -1,0 +1,64 @@
+# D19: as_built with the mounting leg extended by 100 mm.
+#
+# This preset differs from as_built.yaml in exactly ONE number -- leg_height --
+# and a test enforces that. If you need to change anything else, change it in
+# as_built.yaml (if it is a measurement) or make a third preset (if it is a
+# design proposal).
+#
+# Why 0.57 and not the 0.5335 that would just clear the threshold:
+#   findings/04 §3.1  full slot coverage begins at origin_z 0.733-0.734
+#   findings/04 §3.2  at 0.7765 the worst-case reach margin over all 222 swept
+#                     poses is 18.1 mm, versus -3.8 mm right at the threshold
+# The margin is the budget for what the kinematic sweep does not model:
+# collisions, path feasibility between phases, dynamics, and rack registration.
+name: recommended
+description: >-
+  as_built with a 0.57 m leg, putting the robot origin at 0.7765 m. Sweeps
+  222/222 poses and 37/37 slots with 18.1 mm of worst-case reach margin.
+
+robot:
+  # 0.1765 + 0.57 + 0.03 = 0.7765
+  base_size: 0.1765
+  leg_height: 0.57
+  plate_thickness: 0.03
+
+incoming:
+  name: incoming
+  role: incoming
+  approach: [1.0, 0.0, 0.0]
+  face_distance: 0.792
+  width: 0.800
+  depth: 0.308
+  layer_heights: [0.82, 1.07, 1.32]
+  n_jigs: 4
+  plane_thickness: 0.020
+  cylinder_radius: 0.020
+  jig_gap: 0.016
+
+outgoing:
+  name: outgoing
+  role: outgoing
+  approach: [-1.0, 0.0, 0.0]
+  face_distance: 0.792
+  width: 1.160
+  depth: 0.308
+  layer_heights: [0.55, 0.80, 1.05, 1.30]
+  n_jigs: 6
+  plane_thickness: 0.020
+  cylinder_radius: 0.020
+  jig_gap: 0.016
+
+table:
+  face_distance: 0.85
+  height: 0.7
+  depth: 0.36
+  jig_x: 0.0
+  approach: [0.0, 1.0, 0.0]
+  plane_thickness: 0.020
+  confirmed: false
+
+# D20: rack distance stays at the measured 0.792 m. Moving the racks closer is
+# not a fix and is actively harmful -- at 0.700 m the sweep collapses to 21-23
+# serviceable slots regardless of mounting height.
+standoff_far: 0.35
+standoff_near: 0.2768

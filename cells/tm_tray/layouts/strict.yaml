@@ -1,0 +1,11 @@
+# D23: as_built with a 0.5285 m leg (origin 0.735 m), about 1 mm above the
+# lowest mount that sweeps 37/37 slots. The user's first choice; recommended is
+# the fallback. Differs from as_built in the leg height only.
+schema: rsf.layout/1
+extends: as_built.yaml
+name: strict
+description: >-
+  as_built with a 0.5285 m leg, putting the robot origin at 0.735 m, about 1 mm
+  above the lowest mount that sweeps 37/37 slots. Minimal margin.
+entities:
+  pedestal: {params: {leg_height: 0.5285}}

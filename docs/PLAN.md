@@ -269,6 +269,10 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 
 P0–P2 先做；P3 起每個階段開始前再細化 todo。
 
+**P1 完成（2026-11-12）**：通用 cell model（`rsf.model.world/layout/select/workflow/audit/registry`、`rsf.orchestrator.scheduler`、
+`rsf.compile.curobo`、CLI `python -m rsf`），TM tray 以 plugin 形式移植（`cells/tm_tray/plugin/tm_tray`、`layouts/`、`workflows/`）。
+與凍結的原 `cell_core`（`tests/reference/ai_robotics_v2`）比對到 1e-12；格式與擴充點見 `docs/cell_model.md`。
+
 **P0 進度（2026-11-12）**：`rsf.core.se3`、`rsf.model.urdf`（解析/FK/編輯/輸出）、TM tray 資產組合
 （`tools/assemble_tm_tray_assets.py`，見 `docs/assets.md`）與其測試；Kaggle CLI 認證已確認可用。
 

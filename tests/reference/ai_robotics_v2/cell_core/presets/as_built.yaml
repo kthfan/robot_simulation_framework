@@ -1,0 +1,63 @@
+# The real working cell, exactly as measured (D16, findings/03).
+#
+# DO NOT edit this preset to track design changes. It is the record of what the
+# physical cell is today, and it is needed to reproduce or re-check any earlier
+# result. Design changes belong in a new preset -- see recommended.yaml.
+#
+# Every length is metres. The robot rotation axis is world x=y=0, floor z=0.
+name: as_built
+description: >-
+  Measured real cell. Robot origin 0.6765 m. Reachability sweep (findings/04)
+  services 35 of 37 slots: outgoing/L3/C0 and outgoing/L3/C5 are out of
+  workspace at insert and lift.
+
+robot:
+  # 0.1765 + 0.47 + 0.03 = 0.6765
+  base_size: 0.1765
+  leg_height: 0.47
+  plate_thickness: 0.03
+
+incoming:
+  name: incoming
+  role: incoming
+  approach: [1.0, 0.0, 0.0]      # right of the robot, +X
+  face_distance: 0.792
+  width: 0.800
+  depth: 0.308
+  layer_heights: [0.82, 1.07, 1.32]
+  n_jigs: 4
+  plane_thickness: 0.020
+  cylinder_radius: 0.020
+  jig_gap: 0.016
+
+outgoing:
+  name: outgoing
+  role: outgoing
+  approach: [-1.0, 0.0, 0.0]     # left of the robot, -X
+  face_distance: 0.792
+  width: 1.160
+  depth: 0.308
+  layer_heights: [0.55, 0.80, 1.05, 1.30]
+  n_jigs: 6
+  plane_thickness: 0.020
+  cylinder_radius: 0.020
+  jig_gap: 0.016
+
+table:
+  # NOT measured. These are still env_config_generator defaults, kept unchanged
+  # on user instruction. confirmed=false records that they are unverified.
+  face_distance: 0.85
+  height: 0.7
+  depth: 0.36
+  jig_x: 0.0
+  approach: [0.0, 1.0, 0.0]
+  plane_thickness: 0.020
+  confirmed: false
+
+# D24 (supersedes D18): the near read is the distance at which the plate never
+# enters the shelf, PLATE_FZ_TIP - EIH CAM_FZ. D18's 0.2118 came from the
+# D455's position, not the EIH's. D28: 0.2768 with the user-measured plate
+# (was 0.2743 with the USD one). At 0.25 m layer gap a closer read would put
+# the plate 6.3 mm into the tray below.
+standoff_far: 0.35
+standoff_near: 0.2768

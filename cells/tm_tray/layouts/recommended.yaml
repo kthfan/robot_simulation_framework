@@ -1,0 +1,10 @@
+# D19: as_built with the mounting leg extended by 100 mm. Differs from as_built
+# in the leg height only (tests/test_tm_tray_layout.py).
+schema: rsf.layout/1
+extends: as_built.yaml
+name: recommended
+description: >-
+  as_built with a 0.57 m leg, putting the robot origin at 0.7765 m. Sweeps
+  222/222 poses and 37/37 slots with 18.1 mm of worst-case reach margin.
+entities:
+  pedestal: {params: {leg_height: 0.57}}
