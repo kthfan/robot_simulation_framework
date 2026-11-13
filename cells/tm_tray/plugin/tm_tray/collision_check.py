@@ -33,6 +33,7 @@ import numpy as np
 from rsf.collision import ContactPolicy, ContactRule
 from rsf.collision.coal_backend import CoalChecker
 from rsf.core import se3
+from rsf.planning.cartesian import walk
 from rsf.planning.chain import ContinuityRule, best_chain
 from rsf.model.urdf import UrdfModel
 
@@ -51,6 +52,8 @@ CARRIED_PHASES = ("lift", "withdraw", "carry")    # D28 grasp, kept for tools th
 JAWS = ("right_gripper_joint", "left_gripper_joint")
 JAW_LINKS = ("right_gripper", "left_gripper")
 CONTINUITY = ContinuityRule(sign_joints=(2, 4), max_step=1.0)
+#: Largest joint change between two samples of a checked motion (rad).
+PATH_MAX_STEP = 0.2
 
 
 def carried_tray_pose(centre_z: float) -> np.ndarray:
@@ -131,10 +134,44 @@ class CellChecker:
 
     def _run(self, key: str, phases: list) -> dict:
         out = {}
-        for ph in phases:
+        for i, ph in enumerate(phases):
             self._setup(key, ph)
-            out[ph.name] = [self.judge(key, ph, q) for q in self.arm.ik(ph.T, expand_turns=False)]
+            if ph.path and i > 0:
+                out[ph.name] = self._along(key, ph, out[phases[i - 1].name])
+            else:
+                out[ph.name] = [self.judge(key, ph, q) for q in self.arm.ik(ph.T, expand_turns=False)]
         self.checker.detach("tray")
+        return out
+
+    def _along(self, key: str, ph, previous: list) -> list:
+        """*ph* reached by following ``ph.path`` from every passing branch of the
+        previous phase: one continuous IK walk, every sample collision-checked."""
+        self.checker.policy = policy(key, contact=ph.contact)
+        self.checker._rule_cache.clear()
+        out = []
+        for i, b in enumerate(previous):
+            if not b["ok"]:
+                continue
+            qs = walk(self.arm, ph.path, b["q"], max_step=PATH_MAX_STEP, rule=CONTINUITY)
+            if qs is None:
+                out.append({"q": None, "ok": False, "score": -1.0, "from": i, "path": "no continuous IK",
+                            "worst": None, "violations": [], "self": [], "groups": {}})
+                continue
+            worst, bad = None, None
+            for k, q in enumerate(qs):
+                r = self.checker.check(self._q(q))
+                if r.worst is not None and (worst is None or r.worst.slack < worst.slack):
+                    worst = r.worst
+                if not r.ok and bad is None:
+                    bad = (k, r.violations[:1] + r.self_violations[:1])
+            rec = self.judge(key, ph, qs[-1])
+            rec.update({"from": i, "path_min_slack": None if worst is None else round(worst.slack, 5),
+                        "path_worst": None if worst is None else (worst.link, worst.obstacle, round(worst.distance, 5))})
+            if bad is not None:
+                v = bad[1][0]
+                rec.update({"ok": False, "path": f"sample {bad[0]}/{len(qs) - 1}: {v.link} vs {v.obstacle} "
+                                                 f"{v.distance * 1e3:.1f} mm (needs {v.margin * 1e3:.1f})"})
+            out.append(rec)
         return out
 
     def _chain(self, results: dict, names) -> tuple:

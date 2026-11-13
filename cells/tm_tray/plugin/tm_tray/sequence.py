@@ -254,6 +254,9 @@ class Phase:
     shift: float = 0.0
     carried_z: float = 0.0
     contact: bool = False
+    #: Poses from the previous phase to this one (both included) when the move
+    #: between them is not a free one and must be checked along the way.
+    path: tuple = ()
 
 
 def _push_params(process: dict, tool: Optional[dict]):
@@ -285,28 +288,40 @@ def _at_depth(slot: Slot, depth: float, lift: float = 0.0) -> np.ndarray:
     return _pose(slot, tip_dist - A.PLATE_FZ_TIP, insertion_flange_z(slot) + lift)
 
 
-#: Clearance between the carried tray's back end and the label plane before the
-#: plate tilts (2026-11-12): tilting while the tray still reaches into the shelf
-#: lifts its back end into the jig above (M2's contingent check, now triggered).
-TILT_CLEARANCE = 0.010
+@dataclass(frozen=True)
+class TiltMotion:
+    """The withdraw -> carry move as one motion (user 2026-11-12): the plate tilts
+    by the carry tilt about a pivot while the flange backs out ``retreat``.
+
+    The pivot is a point of the flange's y-z plane (flange frame at withdraw);
+    the nearer it is to the tray's back end, the less that end rises and the
+    more the flange drops. Rotation and retreat run together, linearly in the
+    motion parameter, so the tray goes down and back while it tilts.
+    """
+    pivot_y: float = 0.0
+    pivot_z: float = 0.0
+    retreat: float = 0.0
+    samples: int = 16
+
+    def pose(self, T_withdraw, tilt_rad: float, u: float) -> np.ndarray:
+        P = F.make_pose(np.eye(3), (0.0, self.pivot_y, self.pivot_z))
+        R = F.make_pose(F.rot_x(u * tilt_rad), (0.0, 0.0, 0.0))     # flange_rotation's tilt convention
+        back = F.make_pose(np.eye(3), (0.0, 0.0, -u * self.retreat))
+        return np.asarray(T_withdraw, dtype=float) @ back @ P @ R @ np.linalg.inv(P)
+
+    def path(self, T_withdraw, tilt_rad: float) -> tuple:
+        return tuple(self.pose(T_withdraw, tilt_rad, u) for u in np.linspace(0.0, 1.0, self.samples + 1))
+
+    def displacement(self, tilt_rad: float) -> float:
+        """How far the flange moves (m), withdraw -> carry."""
+        return float(np.linalg.norm(self.pose(np.eye(4), tilt_rad, 1.0)[:3, 3]))
 
 
-def tilt_retreat(carried_z: float) -> float:
-    """How far to back out from ``withdraw`` before tilting, so the carried tray's
-    back end is ``TILT_CLEARANCE`` in front of the label plane."""
-    back_ahead_of_tip = carried_z + A.TRAY_Y / 2.0 - A.PLATE_FZ_TIP
-    tip_depth_at_withdraw = -(A.LABEL_PROUD_OF_FACE + PRE_INSERT_GAP)
-    back_depth = tip_depth_at_withdraw + back_ahead_of_tip
-    return max(0.0, back_depth + A.LABEL_PROUD_OF_FACE + TILT_CLEARANCE)
-
-
-def tilted_carry_pose(slot: Slot, tilt_deg: float, carried_z: float) -> np.ndarray:
-    """:func:`carry_pose`, backed out first when there is a tilt (see TILT_CLEARANCE)."""
-    T = carry_pose(slot, tilt_deg)
-    if tilt_deg:
-        a = slot.approach_vec / np.linalg.norm(slot.approach_vec)
-        T[:3, 3] -= a * tilt_retreat(carried_z)
-    return T
+def tilt_motion(process: dict) -> TiltMotion:
+    """``process.tilt_motion``: ``{pivot: [y, z], retreat: r, samples: n}``."""
+    tm = process.get("tilt_motion") or {}
+    py, pz = tm.get("pivot", (0.0, 0.0))
+    return TiltMotion(float(py), float(pz), float(tm.get("retreat", 0.0)), int(tm.get("samples", 16)))
 
 
 def pick_phases(process: dict, slot: Slot, tool: Optional[dict] = None, near_rise: float = 0.0) -> list:
@@ -329,8 +344,10 @@ def pick_phases(process: dict, slot: Slot, tool: Optional[dict] = None, near_ris
                          -(d["push"] - (A.PLATE_FZ_TIP - pp["face"]) - A.TRAY_FRONT_DEPTH), contact=True))
         top = d["push"]
     out += [Phase("lift", _at_depth(slot, top, LIFT_HEIGHT), "carried", carried_z=carried_z),
-            Phase("withdraw", withdraw_pose(slot), "carried", carried_z=carried_z),
-            Phase("carry", tilted_carry_pose(slot, tilt, carried_z), "carried", carried_z=carried_z)]
+            Phase("withdraw", withdraw_pose(slot), "carried", carried_z=carried_z)]
+    path = tilt_motion(process).path(withdraw_pose(slot), math.radians(tilt)) if tilt else ()
+    out.append(Phase("carry", path[-1] if path else carry_pose(slot, tilt), "carried", carried_z=carried_z,
+                     path=path))
     return out
 
 
@@ -346,8 +363,9 @@ def place_phases(process: dict, slot: Slot, tool: Optional[dict] = None) -> list
     else:
         carried_z = A.PLATE_FZ_TIP + A.JIG_Y_OFFSET - d["place"]
         shift = 0.0
-    return [Phase("carry", tilted_carry_pose(slot, tilt, carried_z), "carried", carried_z=carried_z),
-            Phase("withdraw", withdraw_pose(slot), "carried", carried_z=carried_z),
+    path = tilt_motion(process).path(withdraw_pose(slot), math.radians(tilt)) if tilt else ()
+    return [Phase("carry", path[-1] if path else carry_pose(slot, tilt), "carried", carried_z=carried_z),
+            Phase("withdraw", withdraw_pose(slot), "carried", carried_z=carried_z, path=tuple(reversed(path))),
             Phase("place_lift", _at_depth(slot, d["place"], LIFT_HEIGHT), "carried", carried_z=carried_z),
             Phase("place_down", _at_depth(slot, d["place"]), "seated", shift, contact=bool(pp)),
             Phase("retreat", pre_insert_pose(slot), "seated", shift)]

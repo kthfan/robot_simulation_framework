@@ -14,7 +14,13 @@ process:
   standoff_far: 0.35      # far AprilGrid read, camera to label (m)
   standoff_near: 0.2768   # near read; plate-free standoff (D24, D28)
   carry_tilt_deg: 15.0    # plate tilt while carrying, degrees: insurance on top of the push
-                          # (user 2026-11-12); D14's design value. Tilts after backing out.
+                          # (user 2026-11-12); D14's design value.
+  # withdraw -> carry is one motion: tilt about `pivot` (flange y, z at withdraw)
+  # while backing out `retreat`, so the flange only goes down and back (user
+  # 2026-11-13). Least displacement passing every slot of all three layouts
+  # along the whole motion: cells/tm_tray/tools/tune_tilt.py (2026-11-13):
+  # flange 8.0 mm (7.1 down, 3.8 back), tightest 5.37 mm against a 5 mm margin.
+  tilt_motion: {pivot: [0.02, 0.03], retreat: 0.01, samples: 16}
   jaw_operating_range: {min: 0.0210, max: 0.06085}   # assets/asset_spec.yaml
   # The fixed push plate (user 2026-11-12). Pick: insert stops `margin` before
   # the plate meets a tray placed `place_offset` shallow, then the arm pushes the

@@ -271,7 +271,7 @@ P0–P2 先做；P3 起每個階段開始前再細化 todo。
 
 **P2（2026-11-12）**：EAIK＋RobustIK 運動學後端、可達性掃描、CPU 精確 mesh 碰撞（coal，含允許接觸規則、附著物、自碰撞）、
 M3 碰撞判定移植、World→MuJoCo 編譯器。D29 夾爪 strict／as_built 皆 37/37；裝上推板後 D28 insert 深度 0/37（推板插入 tray 9.5 mm），
-改為推板取放流程（insert 停在推板前 2 mm → jaw 張開推 tray 至座位後 2 mm → 貼推板攜帶；放料淺 2 mm；tilt 15° 先後退 50 mm 再傾斜），
+改為推板取放流程（insert 停在推板前 2 mm → jaw 張開推 tray 至座位後 2 mm → 貼推板攜帶；放料淺 2 mm；tilt 15° 以單一動作往下後方傾斜，flange 位移 8 mm），
 取料＋放料三個 layout 皆 37/37。推板實機位置待量測。結果與 cuRobo 交叉驗證見 `docs/p2_results.md`。
 
 **P1 完成（2026-11-12）**：通用 cell model（`rsf.model.world/layout/select/workflow/audit/registry`、`rsf.orchestrator.scheduler`、

@@ -115,21 +115,31 @@ def test_pick_and_place_pass_with_the_push_plate(with_air):
     assert s["place_chain_phases"] == ["place_lift", "place_down", "retreat"]
 
 
-def test_tilting_inside_the_shelf_would_hit_the_jig_above(with_air):
-    """Why the carry backs out before tilting: tilted at the withdraw pose, the
-    tray's back end (still 18 mm inside the shelf) rises into the jig above."""
+def test_tilting_in_place_would_hit_the_jig_above(with_air):
+    """Why the tilt moves down and back: tilted about the flange at the withdraw
+    pose, the carried tray's back end (still inside the shelf) rises into the jig
+    above. The check follows the whole motion, not only its end."""
+    from dataclasses import replace
+    from rsf_plugins.tm_tray.collision_check import check_cell
+    world = replace(with_air, process=dict(with_air.process, tilt_motion={"pivot": [0.0, 0.0], "retreat": 0.0}))
+    s = check_cell(world, select=["incoming/L0/C0"])["slots"][0]
+    assert "pick/carry" in s["missing"]
+    paths = [b.get("path") or "" for b in s["phases"]["pick"]["carry"]]
+    assert any("attached/tray vs jig/incoming/L1/" in p for p in paths)
+
+
+def test_tilt_motion_is_one_continuous_checked_move(with_air):
+    """carry is reached from withdraw by one IK walk, every sample checked; its
+    flange moves no more than the configured motion says."""
+    import math
     from rsf_plugins.tm_tray import sequence as SEQ
     from rsf_plugins.tm_tray.collision_check import check_cell
-    orig = SEQ.tilt_retreat
-    SEQ.tilt_retreat = lambda z: 0.0
-    try:
-        s = check_cell(with_air, select=["incoming/L0/C0"])["slots"][0]
-    finally:
-        SEQ.tilt_retreat = orig
-    assert "pick/carry" in s["missing"]
-    hits = {v[1].split("/")[1] + "/" + v[1].split("/")[2] for b in s["phases"]["pick"]["carry"]
-            for v in b["violations"] if v[0] == "attached/tray"}
-    assert "incoming/L1" in hits
+    s = check_cell(with_air, select=["outgoing/L1/C2"])["slots"][0]
+    carry = [b for b in s["phases"]["pick"]["carry"] if b["ok"]]
+    assert carry and all(b["path_min_slack"] >= 0.0 and b["from"] is not None for b in carry)
+    tm = SEQ.tilt_motion(with_air.process)
+    d = tm.displacement(math.radians(with_air.process["carry_tilt_deg"]))
+    assert d < 0.050          # less than backing out 50 mm and then tilting
 
 
 @pytest.mark.slow
