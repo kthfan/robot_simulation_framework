@@ -75,6 +75,13 @@ def policy(key: str, *, contact: bool = False) -> ContactPolicy:
     return ContactPolicy(MARGIN, rules)
 
 
+def path_policy(clearance: float) -> ContactPolicy:
+    """Along a motion with its own clearance (the tilt, user 2026-11-13): every
+    obstacle keeps *clearance*, the target jig too; only the base sits on its mount."""
+    return ContactPolicy(clearance, [ContactRule(allow=True, links=("link_0",), tags=("robot_seat",),
+                                                 label="base on its mount")])
+
+
 def group_of(name: str, key: str) -> str:
     """The original report's obstacle groups."""
     if name.startswith(f"jig/{key}/"):
@@ -146,12 +153,14 @@ class CellChecker:
     def _along(self, key: str, ph, previous: list) -> list:
         """*ph* reached by following ``ph.path`` from every passing branch of the
         previous phase: one continuous IK walk, every sample collision-checked."""
-        self.checker.policy = policy(key, contact=ph.contact)
-        self.checker._rule_cache.clear()
+        along = (policy(key, contact=ph.contact) if ph.path_clearance is None
+                 else path_policy(ph.path_clearance))
         out = []
         for i, b in enumerate(previous):
             if not b["ok"]:
                 continue
+            self.checker.policy = along          # judge() below switches it; set it per branch
+            self.checker._rule_cache.clear()
             qs = walk(self.arm, ph.path, b["q"], max_step=PATH_MAX_STEP, rule=CONTINUITY)
             if qs is None:
                 out.append({"q": None, "ok": False, "score": -1.0, "from": i, "path": "no continuous IK",

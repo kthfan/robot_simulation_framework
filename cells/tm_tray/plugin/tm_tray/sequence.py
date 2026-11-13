@@ -257,6 +257,8 @@ class Phase:
     #: Poses from the previous phase to this one (both included) when the move
     #: between them is not a free one and must be checked along the way.
     path: tuple = ()
+    #: Clearance every obstacle must keep along ``path`` (None: the phase's own rules).
+    path_clearance: Optional[float] = None
 
 
 def _push_params(process: dict, tool: Optional[dict]):
@@ -302,6 +304,8 @@ class TiltMotion:
     pivot_z: float = 0.0
     retreat: float = 0.0
     samples: int = 16
+    #: Clearance to every obstacle along the motion (user 2026-11-13: >= 10 mm).
+    clearance: Optional[float] = None
 
     def pose(self, T_withdraw, tilt_rad: float, u: float) -> np.ndarray:
         P = F.make_pose(np.eye(3), (0.0, self.pivot_y, self.pivot_z))
@@ -318,10 +322,12 @@ class TiltMotion:
 
 
 def tilt_motion(process: dict) -> TiltMotion:
-    """``process.tilt_motion``: ``{pivot: [y, z], retreat: r, samples: n}``."""
+    """``process.tilt_motion``: ``{pivot: [y, z], retreat: r, samples: n, clearance: c}``."""
     tm = process.get("tilt_motion") or {}
     py, pz = tm.get("pivot", (0.0, 0.0))
-    return TiltMotion(float(py), float(pz), float(tm.get("retreat", 0.0)), int(tm.get("samples", 16)))
+    c = tm.get("clearance")
+    return TiltMotion(float(py), float(pz), float(tm.get("retreat", 0.0)), int(tm.get("samples", 16)),
+                      None if c is None else float(c))
 
 
 def pick_phases(process: dict, slot: Slot, tool: Optional[dict] = None, near_rise: float = 0.0) -> list:
@@ -345,9 +351,10 @@ def pick_phases(process: dict, slot: Slot, tool: Optional[dict] = None, near_ris
         top = d["push"]
     out += [Phase("lift", _at_depth(slot, top, LIFT_HEIGHT), "carried", carried_z=carried_z),
             Phase("withdraw", withdraw_pose(slot), "carried", carried_z=carried_z)]
-    path = tilt_motion(process).path(withdraw_pose(slot), math.radians(tilt)) if tilt else ()
+    tm = tilt_motion(process)
+    path = tm.path(withdraw_pose(slot), math.radians(tilt)) if tilt else ()
     out.append(Phase("carry", path[-1] if path else carry_pose(slot, tilt), "carried", carried_z=carried_z,
-                     path=path))
+                     path=path, path_clearance=tm.clearance if path else None))
     return out
 
 
@@ -363,9 +370,11 @@ def place_phases(process: dict, slot: Slot, tool: Optional[dict] = None) -> list
     else:
         carried_z = A.PLATE_FZ_TIP + A.JIG_Y_OFFSET - d["place"]
         shift = 0.0
-    path = tilt_motion(process).path(withdraw_pose(slot), math.radians(tilt)) if tilt else ()
+    tm = tilt_motion(process)
+    path = tm.path(withdraw_pose(slot), math.radians(tilt)) if tilt else ()
     return [Phase("carry", path[-1] if path else carry_pose(slot, tilt), "carried", carried_z=carried_z),
-            Phase("withdraw", withdraw_pose(slot), "carried", carried_z=carried_z, path=tuple(reversed(path))),
+            Phase("withdraw", withdraw_pose(slot), "carried", carried_z=carried_z, path=tuple(reversed(path)),
+                  path_clearance=tm.clearance if path else None),
             Phase("place_lift", _at_depth(slot, d["place"], LIFT_HEIGHT), "carried", carried_z=carried_z),
             Phase("place_down", _at_depth(slot, d["place"]), "seated", shift, contact=bool(pp)),
             Phase("retreat", pre_insert_pose(slot), "seated", shift)]

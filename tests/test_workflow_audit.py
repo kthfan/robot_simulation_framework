@@ -46,7 +46,7 @@ def test_inspect_and_sort_follows_the_original_scheduler(world, wf):
     assert len(ex.tasks) == 3 * 12
     for c in range(ex.cycles):
         t = [x for x in ex.tasks if x.cycle == c]
-        assert [x.skill for x in t] == ["transfer", "wait", "transfer"]
+        assert [x.skill for x in t] == ["tm_tray.transfer", "wait", "tm_tray.transfer"]
         assert t[0].args == {"object": "tray", "from": sources[c], "to": "table/L0/C0"}
         assert t[2].args == {"object": "tray", "from": "table/L0/C0", "to": dests[c]}
     assert ex.end.name == "request_refill"

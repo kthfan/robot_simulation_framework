@@ -32,11 +32,15 @@ def main(argv=None) -> int:
     ap.add_argument("layout", nargs="+", help="every layout the answer must serve")
     ap.add_argument("--pivot-y", type=float, nargs="+", default=[-0.04, -0.02, 0.0, 0.02, 0.04, 0.06, 0.08])
     ap.add_argument("--pivot-z", type=float, nargs=3, default=[0.0, 0.38, 0.01], metavar=("FROM", "TO", "STEP"))
-    ap.add_argument("--retreat", type=float, nargs=3, default=[0.0, 0.05, 0.005], metavar=("FROM", "TO", "STEP"))
-    ap.add_argument("--max-candidates", type=int, default=60)
+    ap.add_argument("--retreat", type=float, nargs=3, default=[0.0, 0.08, 0.005], metavar=("FROM", "TO", "STEP"))
+    ap.add_argument("--max-candidates", type=int, default=400)
+    ap.add_argument("--clearance", type=float, default=None,
+                    help="clearance to every obstacle along the motion (default: the layout's tilt_motion.clearance)")
     ap.add_argument("--allow-forward", action="store_true",
                     help="allow the flange to move forward (deeper into the shelf) during the tilt; "
                          "by default it may only go down and back (user 2026-11-13)")
+    ap.add_argument("--min-displacement", type=float, default=0.0,
+                    help="skip candidates that move the flange less (m), e.g. to resume a search")
     ap.add_argument("--out")
     a = ap.parse_args(argv)
 
@@ -48,6 +52,8 @@ def main(argv=None) -> int:
     from rsf_plugins.tm_tray.tool import tool_geometry
 
     tilt = math.radians(worlds[0].process["carry_tilt_deg"])
+    if a.clearance is None:
+        a.clearance = (worlds[0].process.get("tilt_motion") or {}).get("clearance")
     zs = np.arange(a.pivot_z[0], a.pivot_z[1] + 1e-9, a.pivot_z[2])
     rs = np.arange(a.retreat[0], a.retreat[1] + 1e-9, a.retreat[2])
     def forward(m) -> float:
@@ -57,6 +63,7 @@ def main(argv=None) -> int:
     cands = [SEQ.TiltMotion(float(y), float(z), float(r)) for y, z, r in product(a.pivot_y, zs, rs)]
     if not a.allow_forward:
         cands = [m for m in cands if forward(m) <= 1e-9]
+    cands = [m for m in cands if m.displacement(tilt) >= a.min_displacement - 1e-9]
     cands.sort(key=lambda m: (round(m.displacement(tilt), 6), m.retreat))
     checkers = [(w, CellChecker(w, load_arm(w))) for w in worlds]
     tried = []
@@ -65,7 +72,7 @@ def main(argv=None) -> int:
         fails, worst = [], np.inf
         for w, cc in checkers:
             proc = dict(w.process, tilt_motion={"pivot": [m.pivot_y, m.pivot_z], "retreat": m.retreat,
-                                                "samples": m.samples})
+                                                "samples": m.samples, "clearance": a.clearance})
             # hardest first: everything below a shelf; tables and top layers last
             feats = sorted(w.features({"kind": "slot"}), key=lambda f: f.get("role") == "inspection")
             for f in feats:

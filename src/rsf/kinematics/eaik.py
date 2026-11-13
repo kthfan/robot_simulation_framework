@@ -54,3 +54,13 @@ class EaikKinematics:
     def ik_batch(self, Ts, *, num_threads: int = 4, **kw) -> list:
         res = self.solver.ik_batch([np.asarray(T, dtype=float) for T in Ts], num_threads=num_threads, **kw)
         return [[np.asarray(q, dtype=float) for q in r.Q] for r in res]
+
+    def refine(self, T, q0):
+        """Newton refinement from *q0* onto *T* (base frame): ``(q, dp, dr)``. Stays on q0's branch."""
+        q, dp, dr = self.solver.refine(np.asarray(T, dtype=float), np.asarray(q0, dtype=float))
+        return np.asarray(q, dtype=float), dp, dr
+
+    def jacobian(self, q) -> np.ndarray:
+        """Geometric Jacobian (6 x n: linear; angular) of the tip in the base frame."""
+        _, J = self.solver._fk_jac(np.asarray(q, dtype=float))
+        return np.asarray(J, dtype=float)

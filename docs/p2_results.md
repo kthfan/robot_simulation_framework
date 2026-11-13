@@ -44,7 +44,7 @@ the target tray where each phase has it (seated, shifted, or carried).
 |---|---|---|---|
 | D29 gripper (`tm5s_egu50_no_air_cylinder.urdf`), D28 grasp | **PASS 37/37** (as D29 with cuRobo) | PASS 37/37 | — |
 | Installed gripper (push plate), D28 insert depth | FAIL 0/37 (`insert`: plate 9.5 mm into the tray) | — | — |
-| **Installed gripper, push-plate pick/place, 15° tilt as one down-back motion (default)** | **PASS 37/37** | **PASS 37/37** | **PASS 37/37** |
+| **Installed gripper, push-plate pick/place, 15° tilt as one down-back motion 10 mm clear (default)** | **PASS 37/37** | **PASS 37/37** | **PASS 37/37** |
 | ... same, 0° tilt | PASS 37/37 | — | — |
 | ... same, 30° tilt | PASS 37/37 | — | — |
 | ... 15° tilt applied at the withdraw pose (no back-out) | FAIL 11/37 (`carry`) | — | — |
@@ -71,18 +71,20 @@ from the robot URDF. Audit checks: the insert tip stays past the tray middle
 derived 8.5 mm), the push stroke is positive (6.0 mm). Without the push plate
 the sequence is cell_core's grasp exactly (tested).
 
-#### Tilt: one motion, down and back (user 2026-11-12/13)
+#### Tilt: one motion, down and back, 10 mm clear (user 2026-11-12/13)
 The tilt is kept as insurance (15°, D14's design value) and done as **one**
 motion from `withdraw` to `carry`: the plate tilts about a pivot while the
 flange backs out, so the flange only goes down and back
-(`sequence.TiltMotion`). The check follows the whole motion: one continuous IK
-walk from every passing `withdraw` branch (`rsf.planning.cartesian.walk`), the
-exact meshes at each of 16 samples. The place runs the same motion backwards.
+(`sequence.TiltMotion`). Along the whole motion, its end included, **every
+obstacle stays at least 10 mm away** (`process.tilt_motion.clearance`), the
+target jig too. The check is one continuous IK walk from every passing
+`withdraw` branch (`rsf.planning.cartesian.walk`) with the exact meshes at each
+of 16 samples; the place runs the same motion backwards.
 
 Why it is needed: tilted in place about the flange, the carried tray's back end
 (it overhangs the plate tip by ~50 mm and is still inside the shelf at
-`withdraw`) rises into the label of the jig above (3.7 mm against the 5 mm
-margin). This was AI-Robotics-V2 M2's contingent check, now triggered.
+`withdraw`) rises into the label of the jig above. This was AI-Robotics-V2 M2's
+contingent check, now triggered.
 
 `cells/tm_tray/tools/tune_tilt.py` tries pivots and retreats in order of flange
 displacement, keeps only down-and-back motions, and takes the first that passes
@@ -91,13 +93,18 @@ every slot of as_built, strict and recommended:
 | Motion | Flange displacement | Result |
 |---|---|---|
 | tilt about the flange, no retreat | 0 | fails (jig above) |
-| back out 50 mm, then tilt (previous version) | 50 mm | passes |
-| **pivot (y +20, z +30) mm, retreat 10 mm (default)** | **8.0 mm: 7.1 down, 3.8 back** | **passes, tightest 5.37 mm vs 5 mm margin** |
-| pivot (y +40, z +40) mm, retreat 10 mm, forward allowed | 9.2 mm (moves 1.7 mm forward) | passes, tightest 8.6 mm |
+| back out 50 mm, then tilt (first version) | 50 mm | passes at 5 mm |
+| pivot (y 20, z 30) mm, retreat 10 mm | 8.0 mm | passes at 5 mm (5.37 mm tightest), **fails at 10 mm** |
+| **pivot (y 120, z 60) mm, retreat 35 mm (default)** | **11.6 mm: 11.4 down, 1.9 back** | **passes at 10 mm** |
 
-The default sits close to the margin (0.37 mm spare): if the cell changes,
-re-run the tuner. Path planning (P4) treats withdraw -> carry as this
-constrained Cartesian motion, not a free move.
+The binding point is the start: at `withdraw` the carried tray is exactly
+10.0 mm above its jig's front columns, which D28's lift height sets. A larger
+clearance needs a higher lift (taken from the room under the shelf above).
+Collision verdicts allow 1 µm of numerical tolerance
+(`CoalChecker.tolerance`), so a pair exactly at its margin passes.
+
+Path planning (P4) treats withdraw -> carry as this constrained motion, not a
+free move.
 
 **Pending measurement:** if the push plate shares tm5s.usd's stray gripper
 offset, the real plate is 1.76 mm closer to the tray and 3.41 mm lower than

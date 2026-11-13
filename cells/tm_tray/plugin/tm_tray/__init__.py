@@ -7,3 +7,4 @@ the frozen original is in ``tests/reference/ai_robotics_v2``.
 from . import generators  # noqa: F401
 from . import checks  # noqa: F401
 from . import targets  # noqa: F401
+from . import skills  # noqa: F401

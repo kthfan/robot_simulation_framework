@@ -23,6 +23,6 @@ scheduler:
       destination: {set: outgoing, order: [height, column],  state: empty,    on_none: request_removal}
 
 cycle:
-  - {skill: transfer, args: {object: tray, from: $source, to: $inspection}}
+  - {skill: tm_tray.transfer, effect: transfer, args: {object: tray, from: $source, to: $inspection}}
   - {skill: wait, args: {signal: inspection_done}}     # D1: trigger undecided; a signal stub
-  - {skill: transfer, args: {object: tray, from: $inspection, to: $destination}}
+  - {skill: tm_tray.transfer, effect: transfer, args: {object: tray, from: $inspection, to: $destination}}

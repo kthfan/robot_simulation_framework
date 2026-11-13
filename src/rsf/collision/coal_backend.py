@@ -128,12 +128,14 @@ class CoalChecker:
     """Exact distances between a robot (URDF) and a set of world solids."""
 
     def __init__(self, urdf, base, policy: ContactPolicy, *, self_pairs: Optional[Iterable] = None,
-                 self_margin: float = 0.0, cutoff: float = 0.05):
+                 self_margin: float = 0.0, cutoff: float = 0.05, tolerance: float = 1e-6):
         self.model = urdf if isinstance(urdf, UrdfModel) else UrdfModel.from_file(urdf)
         self.base = np.asarray(base, dtype=float)
         self.policy = policy
         self.cutoff = cutoff
         self.self_margin = self_margin
+        #: Numerical tolerance: a pair exactly at its margin (to 1 um) is not a violation.
+        self.tolerance = tolerance
         self.links: dict[str, list] = {}
         for s in solids_from_urdf(self.model):
             link = s.name.split("/", 1)[0] if "/" in s.name else self.model.root
@@ -227,9 +229,9 @@ class CoalChecker:
                         if np.linalg.norm(ca - cb) - ga.radius - gb.radius >= self.self_margin + 1e-3:
                             continue
                         d = signed_distance(ga.geom, Ta, gb.geom, Tb)
-                        if d < self.self_margin:
+                        if d < self.self_margin - self.tolerance:
                             self_v.append(PairResult(a, b, d, self.self_margin, "self"))
-        viol = [r for r in results if r.slack < 0.0]
+        viol = [r for r in results if r.slack < -self.tolerance]
         worst = min(results, key=lambda r: r.slack) if results else None
         near = {}
         if group is not None:

@@ -16,11 +16,13 @@ process:
   carry_tilt_deg: 15.0    # plate tilt while carrying, degrees: insurance on top of the push
                           # (user 2026-11-12); D14's design value.
   # withdraw -> carry is one motion: tilt about `pivot` (flange y, z at withdraw)
-  # while backing out `retreat`, so the flange only goes down and back (user
-  # 2026-11-13). Least displacement passing every slot of all three layouts
-  # along the whole motion: cells/tm_tray/tools/tune_tilt.py (2026-11-13):
-  # flange 8.0 mm (7.1 down, 3.8 back), tightest 5.37 mm against a 5 mm margin.
-  tilt_motion: {pivot: [0.02, 0.03], retreat: 0.01, samples: 16}
+  # while backing out `retreat`; the flange only goes down and back (user
+  # 2026-11-13), and every obstacle stays `clearance` away along the whole motion
+  # (user 2026-11-13: >= 10 mm). Least displacement passing every slot of all
+  # three layouts: cells/tm_tray/tools/tune_tilt.py (2026-11-13): flange 11.6 mm
+  # (11.4 down, 1.9 back). At its start (withdraw) the carried tray is exactly
+  # 10.0 mm above its jig's front columns, which the lift height (D28) sets.
+  tilt_motion: {pivot: [0.12, 0.06], retreat: 0.035, samples: 16, clearance: 0.010}
   jaw_operating_range: {min: 0.0210, max: 0.06085}   # assets/asset_spec.yaml
   # The fixed push plate (user 2026-11-12). Pick: insert stops `margin` before
   # the plate meets a tray placed `place_offset` shallow, then the arm pushes the

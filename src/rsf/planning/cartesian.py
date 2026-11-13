@@ -35,8 +35,20 @@ def walk(arm, poses: Sequence, q0, *, max_step: float = 0.2,
     ``poses[0]``), or None when the arm cannot follow them continuously."""
     qs = [np.asarray(q0, dtype=float)]
     for T in poses[1:]:
-        q = nearest_solution(arm, T, qs[-1])
+        q = arm.refine(T, qs[-1]) if hasattr(arm, "refine") else None   # fast: stay on the branch
+        if (q is None or float(np.abs(q - qs[-1]).max()) > max_step
+                or np.any(q < arm.lower - 1e-9) or np.any(q > arm.upper + 1e-9)):
+            q = nearest_solution(arm, T, qs[-1])
         if q is None or float(np.abs(q - qs[-1]).max()) > max_step or not rule.continuous(qs[-1], q):
             return None
         qs.append(q)
     return qs
+
+
+def line_poses(T0, T1, *, step: float = 0.005, ang_step: float = np.radians(1.0)) -> list:
+    """Poses on the straight line T0 -> T1 (position linear, rotation geodesic),
+    no farther apart than *step* metres and *ang_step* radians, both ends included."""
+    from rsf.core import se3
+    dp, dr = se3.pose_error(T0, T1)
+    n = max(1, int(np.ceil(max(dp / step, dr / ang_step))))
+    return [se3.interpolate(T0, T1, k / n) for k in range(n + 1)]

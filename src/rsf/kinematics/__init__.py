@@ -55,6 +55,24 @@ class ArmKinematics:
     def ik(self, T_world, **kw) -> list:
         return self.backend.ik(self._inv @ np.asarray(T_world, dtype=float), **kw)
 
+    def refine(self, T_world, q0, *, tol_pos: float = 1e-7, tol_rot: float = 1e-6):
+        """Local IK from *q0* (same branch), or None if the backend cannot or it misses."""
+        if not hasattr(self.backend, "refine"):
+            return None
+        q, dp, dr = self.backend.refine(self._inv @ np.asarray(T_world, dtype=float), q0)
+        return q if dp <= tol_pos and dr <= tol_rot else None
+
+    def jacobian(self, q) -> np.ndarray:
+        """Geometric Jacobian in the world frame (6 x n)."""
+        J = self.backend.jacobian(q)
+        R = self.base[:3, :3]
+        return np.vstack([R @ J[:3], R @ J[3:]])
+
+    def manipulability(self, q) -> float:
+        """Yoshikawa's measure sqrt(det(J J^T)); 0 at a singularity."""
+        J = self.jacobian(q)
+        return float(np.sqrt(max(0.0, np.linalg.det(J @ J.T))))
+
     def nearest(self, T_world, q_ref: Sequence[float]):
         """The solution nearest *q_ref* (largest joint difference), or None."""
         qs = self.ik(T_world)
