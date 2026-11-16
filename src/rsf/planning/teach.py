@@ -19,7 +19,15 @@ The engine:
    collision-checking every sample;
 3. keeps, per run, the chain with the largest worst-case slack (clearance beyond
    the required margin), then joint travel; the longest run anchors the others,
-   which take the chain nearest to it in joint space;
+   which take the chain nearest to it in joint space. With a *preference*
+   (``process.continuity.prefer``) chains in the preferred arm configuration
+   come first and every chain is turned (whole turns per joint) to lie nearest
+   a reference pose; across many sequences (a slot table, a workflow) the
+   preferred configuration is by default the one every sequence can use with
+   the largest worst-case slack (:func:`choose_branch`), so the free moves
+   between sequences never flip the elbow or the wrist; in a workflow each
+   sequence is then turned by whole turns so the run travels least between
+   sequences (:func:`align_turns`);
 4. reports a :class:`TeachPoint` per waypoint: joints, tool pose, clearance and
    the obstacle it is measured to, the worst slack along the arrival motion,
    manipulability, joint-limit margin and the arm configuration (branch signs).
@@ -110,13 +118,65 @@ class _Eval:
     worst: object
 
 
+@dataclass
+class Explored:
+    """Every feasible chain of every run of a sequence: ``options[run] = [(qs, worst, along)]``."""
+    seq: Sequence
+    runs: list
+    options: list
+    problems: list
+
+
+def choose_branch(engine, explored: list) -> Optional[dict]:
+    """The arm configuration for a set of sequences: usable by as many of them as
+    possible, then with the largest worst-case slack over them. ``{joint: +-1}``."""
+    score = {}
+    for ex in explored:
+        if ex.problems:
+            continue
+        per = {}
+        for opts in ex.options:                        # a sequence has a configuration if every run does
+            best = {}
+            for qs, w, _ in opts:
+                sig = engine.signature(qs)
+                if sig is not None:
+                    best[sig] = max(best.get(sig, -math.inf), w)
+            per = best if not per else {k: min(per[k], v) for k, v in per.items() if k in best}
+            if not per:
+                break
+        for sig, w in per.items():
+            n, lo = score.get(sig, (0, math.inf))
+            score[sig] = (n + 1, min(lo, w))
+    if not score:
+        return None
+    sig = max(score, key=lambda k: score[k])
+    return {engine.arm.joint_names[j]: g for j, g in zip(engine.rule.sign_joints, sig)}
+
+
+def resolve_prefer(world, engine, explored: list) -> Optional[dict]:
+    """``process.continuity.prefer`` made concrete: ``branch: auto`` (default) is
+    :func:`choose_branch`; ``q_ref`` defaults to ``process.motion.home``."""
+    c = (world.process.get("continuity") or {}).get("prefer", {"branch": "auto"})
+    if c in (None, False, "none"):
+        return None
+    out = dict(c)
+    if out.get("branch", "auto") == "auto":
+        out["branch"] = choose_branch(engine, explored)
+    if out.get("q_ref") is None:
+        home = (world.process.get("motion") or {}).get("home")
+        out["q_ref"] = None if home is None else [float(v) for v in home]
+    return out
+
+
 class TeachEngine:
     """Teach points for sequences, with one robot and one collision checker."""
 
     def __init__(self, arm, checker, *, rule: ContinuityRule = ContinuityRule(),
                  line_step: float = 0.005, line_ang_step: float = math.radians(1.0),
-                 max_step: float = 0.2, max_slack: float = 0.05):
+                 max_step: float = 0.2, max_slack: float = 0.05, prefer: Optional[dict] = None):
         self.arm, self.checker, self.rule = arm, checker, rule
+        #: ``{"branch": {joint: +-1}, "q_ref": [..]}`` or ``None``; see :meth:`select`
+        self.prefer = prefer
         self.line_step, self.line_ang_step, self.max_step = line_step, line_ang_step, max_step
         self.max_slack = max_slack       #: slack beyond this counts as "far" when ranking
         self._scene_id = None
@@ -204,7 +264,16 @@ class TeachEngine:
             Q[:, j] += 2 * math.pi * best
         return list(Q)
 
-    def teach(self, seq: Sequence) -> TeachResult:
+    def signature(self, qs) -> Optional[tuple]:
+        """The arm configuration of a chain (signs of the continuity joints), ``None`` if mixed."""
+        sig = {tuple(int(np.sign(q[j]) or 1) for j in self.rule.sign_joints) for q in qs}
+        return next(iter(sig)) if len(sig) == 1 else None
+
+    def teach(self, seq: Sequence, prefer: Optional[dict] = None) -> TeachResult:
+        return self.select(self.explore(seq), prefer if prefer is not None else self.prefer)
+
+    def explore(self, seq: Sequence) -> "Explored":
+        """Every feasible chain of every run of *seq* (the expensive part)."""
         wps = seq.waypoints
         runs, cur = [], []
         for wp in wps:
@@ -227,13 +296,32 @@ class TeachEngine:
             if not found:
                 problems.append(f"run {run[0].name}..{run[-1].name}: " + ("; ".join(sorted(set(why))[:3]) or "no IK"))
             options.append(found)
+        return Explored(seq, runs, options, problems)
+
+    def select(self, ex: "Explored", prefer: Optional[dict] = None) -> TeachResult:
+        """One chain per run of an explored sequence (see the module notes, step 3)."""
+        seq, runs, options, problems = ex.seq, ex.runs, ex.options, list(ex.problems)
+        wps = seq.waypoints
         if problems:
             return TeachResult(seq.name, False, [], problems, dict(seq.meta))
+        want = None
+        if prefer and prefer.get("branch"):
+            names = self.arm.joint_names
+            want = tuple(int(prefer["branch"].get(names[j], 0)) for j in self.rule.sign_joints)
+        q_ref = None if not prefer or prefer.get("q_ref") is None else np.asarray(prefer["q_ref"], float)
+
+        def mismatch(qs):
+            if want is None:
+                return 0
+            sig = self.signature(qs)
+            return 0 if sig is not None and all(w in (0, g) for w, g in zip(want, sig)) else 1
 
         travel = lambda qs: float(sum(np.abs(np.diff(np.array(qs), axis=0)).max(axis=1))) if len(qs) > 1 else 0.0  # noqa: E731
         anchor = max(range(len(runs)), key=lambda i: len(runs[i]))
         chosen = [None] * len(runs)
-        qs, worst, along = max(options[anchor], key=lambda o: (round(o[1], 4), -travel(o[0])))
+        qs, worst, along = max(options[anchor], key=lambda o: (-mismatch(o[0]), round(o[1], 4), -travel(o[0])))
+        if q_ref is not None:
+            qs = self._shift_to(qs, q_ref)
         chosen[anchor] = (qs, worst, along)
         for i in list(range(anchor + 1, len(runs))) + list(range(anchor - 1, -1, -1)):
             nb = chosen[i - 1] if i > anchor else chosen[i + 1]
@@ -242,7 +330,7 @@ class TeachEngine:
             for o_qs, o_w, o_al in options[i]:
                 cand = self._shift_to(o_qs, ref) if i > anchor else self._shift_to(o_qs[::-1], ref)[::-1]
                 d = float(np.abs((cand[0] if i > anchor else cand[-1]) - ref).max())
-                key = (d, -o_w)
+                key = (mismatch(cand), d, -o_w)
                 if best is None or key < best[0]:
                     best = (key, (cand, o_w, o_al))
             chosen[i] = best[1]
@@ -293,18 +381,92 @@ def make_engine(world, **kw) -> TeachEngine:
     return TeachEngine(arm, checker, rule=rule, **kw)
 
 
-def teach_targets(world, skills, select=None, engine: Optional[TeachEngine] = None, progress=None) -> list:
+def teach_targets(world, skills, select=None, engine: Optional[TeachEngine] = None, progress=None,
+                  info: Optional[dict] = None) -> list:
     """Every sequence of every *skills* (names) at every selected feature (``{"at": key}``)."""
     from rsf.model import registry
     engine = engine or make_engine(world)
-    out = []
+    explored = []
     for f in world.features(select or {"kind": "slot"}):
         for name in skills:
             for seq in registry.get("skill", name)(world, {"at": f.key}):
-                out.append(engine.teach(seq))
-                if progress:
-                    progress(out[-1])
+                explored.append(engine.explore(seq))
+    prefer = resolve_prefer(world, engine, explored)
+    if info is not None:
+        info["prefer"] = prefer
+    out = []
+    for ex in explored:
+        out.append(engine.select(ex, prefer))
+        if progress:
+            progress(out[-1])
     return out
+
+
+def align_turns(engine, seqs: dict, order: list, home=None, max_combos: int = 4096) -> float:
+    """Whole turns per joint and sequence so the run travels least between sequences.
+
+    *order* lists sequence names as the run executes them (a sequence may recur);
+    the run starts and ends at *home*. The cost, the sum over transitions of
+    ``|q_end(prev) - q_start(next)|`` per joint, separates by joint. Per joint:
+    every combination of turns of the recurring sequences (few: the shared
+    pick/place of a workflow), then a Viterbi pass over the run for the
+    sequences that occur once -- exact. A turn is admissible when every point of
+    the sequence stays inside the limits. Returns the travel in rad."""
+    import itertools
+    seq = [n for n in order if seqs[n].ok]
+    names = list(dict.fromkeys(seq))
+    if not names:
+        return 0.0
+    lo, hi = engine.arm.lower, engine.arm.upper
+    Q = {n: np.array([p.q for p in seqs[n].points], float) for n in names}
+    counts = {n: seq.count(n) for n in names}
+    total = 0.0
+    shift = {n: np.zeros(Q[n].shape[1]) for n in names}
+    for j in range(Q[names[0]].shape[1]):
+        tw = 2 * math.pi
+        opts = {n: [k for k in (-2, -1, 0, 1, 2)
+                    if np.all(Q[n][:, j] + tw * k >= lo[j] - 1e-9) and np.all(Q[n][:, j] + tw * k <= hi[j] + 1e-9)]
+                or [0] for n in names}
+        multi = [n for n in names if counts[n] > 1]
+        combos = list(itertools.product(*(opts[n] for n in multi)))
+        if len(combos) > max_combos:                       # too many: recurring ones stay nearest zero
+            combos = [tuple(min(opts[n], key=abs) for n in multi)]
+        best = (math.inf, None)
+        for combo in combos:
+            fixed = dict(zip(multi, combo))
+            # Viterbi over occurrences; state = turn of that occurrence's sequence
+            prev = {None: (0.0 if home is None else 0.0, {})}
+            last_end = None
+            for i, n in enumerate(seq):
+                states = [fixed[n]] if n in fixed else opts[n]
+                cur = {}
+                for k in states:
+                    s0 = Q[n][0, j] + tw * k
+                    cands = []
+                    for pk, (c, asg) in prev.items():
+                        if i == 0:
+                            e = None if home is None else home[j]
+                        else:
+                            e = Q[seq[i - 1]][-1, j] + tw * pk
+                        cands.append((c + (0.0 if e is None else abs(e - s0)), pk, asg))
+                    c, pk, asg = min(cands, key=lambda x: x[0])
+                    a2 = dict(asg)
+                    a2[n] = k
+                    cur[k] = (c, a2)
+                prev = cur
+            for k, (c, asg) in prev.items():
+                if home is not None:
+                    c += abs(Q[seq[-1]][-1, j] + tw * k - home[j])
+                if c < best[0] - 1e-12:
+                    best = (c, asg)
+        total += best[0]
+        for n in names:
+            shift[n][j] = tw * best[1].get(n, 0)
+    for n in names:
+        for p, q in zip(seqs[n].points, Q[n] + shift[n]):
+            p.q = [round(float(v), 6) for v in q]
+            p.limit_margin = round(float(min(np.min(q - lo), np.min(hi - q))), 6)
+    return total
 
 
 def teach_workflow(world, workflow, engine: Optional[TeachEngine] = None, progress=None) -> dict:
@@ -318,18 +480,25 @@ def teach_workflow(world, workflow, engine: Optional[TeachEngine] = None, progre
     from rsf.model.workflow import expand
     engine = engine or make_engine(world)
     ex = expand(workflow, world)
-    seqs, tasks = {}, []
+    explored, tasks = {}, []
     for t in ex.tasks:
         names = []
         if t.skill in registry.names("skill"):
             for seq in registry.get("skill", t.skill)(world, t.args):
-                if seq.name not in seqs:
-                    seqs[seq.name] = engine.teach(seq)
-                    if progress:
-                        progress(seqs[seq.name])
+                if seq.name not in explored:
+                    explored[seq.name] = engine.explore(seq)
                 names.append(seq.name)
         tasks.append({"index": t.index, "cycle": t.cycle, "skill": t.skill, "args": t.args, "sequences": names})
-    return {"tasks": tasks, "sequences": seqs, "end": {"name": ex.end.name, "detail": ex.end.detail}}
+    prefer = resolve_prefer(world, engine, list(explored.values()))
+    seqs = {name: engine.select(e, prefer) for name, e in explored.items()}
+    order = [n for t in tasks for n in t["sequences"]]
+    home = None if not prefer or prefer.get("q_ref") is None else np.asarray(prefer["q_ref"], float)
+    align_turns(engine, seqs, order, home)
+    for r in seqs.values():
+        if progress:
+            progress(r)
+    return {"tasks": tasks, "sequences": seqs, "end": {"name": ex.end.name, "detail": ex.end.detail},
+            "prefer": prefer}
 
 
 def write_table(results, path_json, path_csv=None, meta: Optional[dict] = None) -> None:

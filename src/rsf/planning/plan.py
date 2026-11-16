@@ -272,17 +272,22 @@ def time_segment(arm, s: Segment, motion: dict) -> None:
         if Q is None:
             raise RuntimeError(f"{s.name}: no free path")
         jv, ja = float(motion["joint"]["v"]), float(motion["joint"]["a"])
-        # a nominal unit-speed parameterisation, then one uniform scale
-        d = np.r_[0.0, np.cumsum(np.abs(np.diff(Q, axis=0)).max(axis=1))]
-        if d[-1] < 1e-9:
-            s.t, s.Q = np.array([0.0]), Q[:1]
-        else:
+        from .rrt import split_at_corners
+        # rest to rest between sharp corners; a smooth piece: a nominal unit-speed
+        # parameterisation, then one uniform scale
+        ts, qs = [np.array([0.0])], [Q[:1]]
+        for piece in split_at_corners(Q):
+            d = np.r_[0.0, np.cumsum(np.abs(np.diff(piece, axis=0)).max(axis=1))]
+            if d[-1] < 1e-9:
+                continue
             T0 = TM.trapezoid(d[-1], jv, ja)
             tt = np.linspace(0.0, T0, max(2, math.ceil(T0 / dt)) + 1)
             sd = TM.trapezoid_s(d[-1], jv, ja, tt)
-            Qt = np.column_stack([np.interp(sd, d, Q[:, j]) for j in range(Q.shape[1])])
-            scale = TM.joint_retime(tt, Qt, jv, ja)
-            s.t, s.Q = tt * scale, Qt
+            Qt = np.column_stack([np.interp(sd, d, piece[:, j]) for j in range(piece.shape[1])])
+            tt = tt * TM.joint_retime(tt, Qt, jv, ja)
+            ts.append(ts[-1][-1] + tt[1:])
+            qs.append(Qt[1:])
+        s.t, s.Q = np.concatenate(ts), np.vstack(qs)
     # a carried object keeps its own caps (D14)
     if s.carried is not None and "carry" in motion["caps"] and len(s.t) > 2:
         cc = TM.caps_from(motion["caps"]["carry"])
@@ -295,10 +300,8 @@ def time_segment(arm, s: Segment, motion: dict) -> None:
             s.t = s.t * f * 1.02
 
 
-def check_segment(arm, checker, s: Segment, step: float = 0.01) -> list:
-    """Problems of *s* on the CPU: every joint sample (densified to *step* rad) against its rules."""
-    if s.Q is None or s.kind == "hold" or s.scene is None:
-        return []
+def _load(checker, s: Segment) -> None:
+    """The checker set to segment *s*: its obstacles, attachments and rules."""
     checker.set_obstacles(s.scene.solids)
     for n in list(checker.attached):
         checker.detach(n)
@@ -306,6 +309,41 @@ def check_segment(arm, checker, s: Segment, step: float = 0.01) -> list:
         checker.attach(name, link, solids, T)
     checker.policy = s.policy
     checker._rule_cache.clear()
+
+
+def plan_free_cpu(arm, checker, s: Segment, *, step: float = 0.01, seed: int = 0,
+                  max_iter: int = 4000) -> dict:
+    """CPU fallback for a free segment: RRT-Connect + shortcut under the gate's rules.
+
+    Sets ``s.Q`` on success; returns ``{success, seconds, checks, iterations}``."""
+    import time as _t
+    from . import rrt
+    _load(checker, s)
+    n = {"checks": 0}
+
+    def valid(q):
+        n["checks"] += 1
+        if np.any(q < arm.lower) or np.any(q > arm.upper):
+            return False
+        d = dict(zip(arm.joint_names, q))
+        d.update(s.joints)
+        return checker.check(d).ok
+
+    t0, stats = _t.time(), {}
+    path = rrt.rrt_connect(valid, s.q_start, s.q_goal, arm.lower, arm.upper, step=step, seed=seed,
+                           max_iter=max_iter, stats=stats)
+    if path is not None:
+        path = rrt.smooth(valid, rrt.shortcut(valid, path, step=step, seed=seed), step=step)
+        s.Q = path
+    return {"success": path is not None, "seconds": round(_t.time() - t0, 2), "checks": n["checks"],
+            "via": 0 if path is None else len(path) - 2, **stats}
+
+
+def check_segment(arm, checker, s: Segment, step: float = 0.01) -> list:
+    """Problems of *s* on the CPU: every joint sample (densified to *step* rad) against its rules."""
+    if s.Q is None or s.kind == "hold" or s.scene is None:
+        return []
+    _load(checker, s)
     Q = s.Q
     dense = [Q[0]]
     for a, b in zip(Q[:-1], Q[1:]):

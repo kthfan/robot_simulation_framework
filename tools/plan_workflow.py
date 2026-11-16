@@ -2,15 +2,16 @@
 
     # 1. the free moves as a cuRobo job (commit it; Kaggle clones the repo)
     PYTHONPATH=src python tools/plan_workflow.py job cells/tm_tray/layouts/strict.yaml \
-        cells/tm_tray/workflows/inspect_and_sort.yaml --teach cells/tm_tray/teach/strict.json \
+        cells/tm_tray/workflows/inspect_and_sort.yaml --teach cells/tm_tray/teach/strict_inspect_and_sort.json \
         --cycles 1 --out tools/kaggle/jobs/strict_1cycle.json
     # 2. on a GPU: python tools/kaggle/curobo_free_plan.py --job ... --out results/....json
     # 3. time everything, check every sample on the CPU, write the trajectory
     PYTHONPATH=src python tools/plan_workflow.py assemble <layout> <workflow> --teach ... --cycles 1 \
         --paths results/....json --out cells/tm_tray/plans/strict_1cycle.json
 
-``--paths linear`` uses straight joint lines for the free moves (no GPU; for
-tests: the CPU check still decides).
+``--paths cpu`` plans the free moves on the CPU (RRT-Connect + shortcut, the
+fallback without a GPU); ``--paths linear`` uses straight joint lines (tests;
+the CPU check still decides).
 """
 from __future__ import annotations
 
@@ -47,7 +48,7 @@ def main(argv=None) -> int:
     ap.add_argument("workflow")
     ap.add_argument("--teach", required=True, help="teach table JSON covering the run's sequences")
     ap.add_argument("--cycles", type=int, default=0)
-    ap.add_argument("--paths", help="assemble: cuRobo results JSON, or 'linear'")
+    ap.add_argument("--paths", help="assemble: cuRobo results JSON, 'cpu' or 'linear'")
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
     from rsf.planning import plan as PL
@@ -59,16 +60,21 @@ def main(argv=None) -> int:
                                                            "cycles": a.cycles, "teach": a.teach})
         print(f"job -> {a.out}")
         return 0
+    from rsf.planning.teach import make_engine
+    eng = make_engine(world)
     if a.paths == "linear":
         for s in segs:
             if s.kind == "free":
                 s.Q = np.linspace(s.q_start, s.q_goal, 50)
+    elif a.paths == "cpu":                                    # no GPU: RRT-Connect on the CPU
+        for s in segs:
+            if s.kind == "free":
+                r = PL.plan_free_cpu(eng.arm, eng.checker, s)
+                print(f"  {'ok  ' if r['success'] else 'FAIL'} {s.name}: {r}", flush=True)
     else:
         bad = PL.attach_results(segs, json.loads(Path(a.paths).read_text()))
         if bad:
             print(f"no path for {len(bad)} free segments: {bad[:5]}")
-    from rsf.planning.teach import make_engine
-    eng = make_engine(world)
     t0 = time.time()
     traj, problems = PL.assemble(world, eng.arm, eng.checker, segs)
     traj.meta.update({"workflow": a.workflow, "cycles": a.cycles, "teach": a.teach, "paths": a.paths,

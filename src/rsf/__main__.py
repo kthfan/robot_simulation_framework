@@ -86,11 +86,13 @@ def main(argv=None) -> int:
         if a.workflow:
             from rsf.model.workflow import Workflow
             res = TE.teach_workflow(world, Workflow.from_file(a.workflow), progress=show)
-            meta.update({"workflow": a.workflow, "tasks": res["tasks"], "end": res["end"]})
+            meta.update({"workflow": a.workflow, "tasks": res["tasks"], "end": res["end"], "prefer": res["prefer"]})
             results = list(res["sequences"].values())
         else:
             sel = yaml.safe_load(a.select) if a.select else None
-            results = TE.teach_targets(world, a.skill or [], sel, progress=show)
+            info = {}
+            results = TE.teach_targets(world, a.skill or [], sel, progress=show, info=info)
+            meta["prefer"] = info["prefer"]
         meta["seconds"] = round(time.time() - t0, 1)
         TE.write_table(results, f"{a.out}.json", f"{a.out}.csv", meta)
         n_ok = sum(r.ok for r in results)

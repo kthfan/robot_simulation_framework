@@ -31,7 +31,7 @@ def run():
     world = load_world(CELL / "layouts" / "strict.yaml")
     wf = Workflow.from_file(CELL / "workflows" / "inspect_and_sort.yaml")
     wf.max_cycles = 1
-    doc = json.loads((CELL / "teach" / "strict.json").read_text())
+    doc = json.loads((CELL / "teach" / "strict_inspect_and_sort.json").read_text())
     teach = {s["sequence"]: s["points"] for s in doc["sequences"]}
     segs = PL.segments_for_workflow(world, wf, teach)
     for s in segs:

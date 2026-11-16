@@ -104,6 +104,29 @@ def test_workflow_teaches_each_motion_once(world, engine):
     assert len(res["sequences"]) == len(set(names))       # the table's pick/place taught once
     assert all(r.ok for r in res["sequences"].values())
     assert [t["skill"] for t in res["tasks"][:3]] == ["tm_tray.transfer", "wait", "tm_tray.transfer"]
+    # one arm configuration for the whole run, so free moves never flip the elbow or the wrist
+    assert res["prefer"]["branch"] == {"joint_3": -1, "joint_5": 1}
+    sigs = {tuple(p.branch.values()) for r in res["sequences"].values() for p in r.points}
+    assert sigs == {(-1, 1)}
+    # whole turns chosen for the run: no joint turns (nearly) a full turn between sequences
+    q = np.zeros(6)
+    for n in names:
+        pts = res["sequences"][n].points
+        assert np.abs(np.array(pts[0].q) - q).max() < math.radians(300), n
+        q = np.array(pts[-1].q)
+
+
+def test_align_turns_is_exact_for_recurring_sequences():
+    """J6 ends at +180 deg, the shared sequence starts at -173: turn the others, not spin 353 deg."""
+    import types
+    arm = types.SimpleNamespace(lower=np.full(1, -math.radians(355)), upper=np.full(1, math.radians(355)))
+    P = lambda *d: [types.SimpleNamespace(q=[math.radians(v)], limit_margin=0.0) for v in d]  # noqa: E731
+    seqs = {"hub": types.SimpleNamespace(ok=True, points=P(-173, -180)),
+            "a": types.SimpleNamespace(ok=True, points=P(175, 180)),
+            "b": types.SimpleNamespace(ok=True, points=P(180, 175))}
+    travel = TE.align_turns(types.SimpleNamespace(arm=arm), seqs, ["hub", "a", "b", "hub"], None)
+    assert math.degrees(travel) == pytest.approx(5 + 0 + 12, abs=1e-6)   # a, b turned by -360 (else 355 + 0 + 348)
+    assert math.degrees(seqs["a"].points[0].q[0]) == pytest.approx(-185)
 
 
 def test_write_table(taught, tmp_path):
