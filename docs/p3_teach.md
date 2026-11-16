@@ -95,6 +95,21 @@ strict, worst case per phase over all 37 slots:
 Arm configurations chosen (joint 3, joint 5 signs): (−,−) 28, (+,+) 28,
 (+,−) 10, (−,+) 8 sequences — each sequence takes its most clear chain.
 
+## Update 2026-11-16 (P4): one configuration per run, 5° joint margin
+
+* Joint limits: the URDF's (= the real robot's) moved in by
+  `robot.limit_margin_deg: 5.0` (J1, J2, J4–J6 ±355°, J3 ±153°).
+* Teaching is now *explore* (every feasible chain, as above) then *select*.
+  With `process.continuity.prefer` (default `{branch: auto}`) the selection
+  first keeps chains in one arm configuration for every sequence of the table
+  or the run — `auto`: the configuration every sequence can use with the
+  largest worst-case slack (strict: J3 −1, J5 +1 for all 74 and for the
+  workflow) — and turns each chain by whole turns to lie nearest
+  `q_ref` (default `process.motion.home`). In a workflow the turns are chosen
+  for the run (`align_turns`: least joint travel between consecutive
+  sequences, exact). Before, picking at the incoming rack and placing on the
+  table used different elbows: the carry between them flipped elbow and wrist.
+
 ## Not yet
 
 - **Free moves** between runs and between tasks (sight_near → pre_insert,

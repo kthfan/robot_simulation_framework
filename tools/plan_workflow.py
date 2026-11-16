@@ -81,6 +81,9 @@ def main(argv=None) -> int:
                       "problems": problems, "ok": not problems, "seconds": round(time.time() - t0, 1)})
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(traj.to_dict()))
+    summary = {"schema": "rsf.trajectory_summary/1", "duration": round(float(traj.t[-1]), 3),
+               "samples": len(traj.t), "segments": traj.segments, "meta": traj.meta}
+    Path(a.out).with_suffix(".summary.json").write_text(json.dumps(summary, indent=1))
     print(f"trajectory {traj.t[-1]:.1f} s, {len(traj.t)} samples, {len(problems)} problems -> {a.out}")
     for p in problems[:15]:
         print("  PROBLEM", p)

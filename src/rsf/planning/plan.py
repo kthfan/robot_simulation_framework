@@ -312,13 +312,21 @@ def _load(checker, s: Segment) -> None:
 
 
 def plan_free_cpu(arm, checker, s: Segment, *, step: float = 0.01, seed: int = 0,
-                  max_iter: int = 4000) -> dict:
-    """CPU fallback for a free segment: RRT-Connect + shortcut under the gate's rules.
+                  max_iter: int = 4000, pad: float = 0.001) -> dict:
+    """CPU fallback for a free segment: RRT-Connect + shortcut + smoothing under the
+    gate's rules, every margin *pad* larger (the gate samples the timed path at
+    other points than the planner's edge checks; a corner may dip between them).
 
     Sets ``s.Q`` on success; returns ``{success, seconds, checks, iterations}``."""
     import time as _t
+    from dataclasses import replace
     from . import rrt
     _load(checker, s)
+    if pad:
+        pol = s.policy
+        checker.policy = ContactPolicy(pol.default_margin + pad,
+                                       [r if r.allow else replace(r, margin=r.margin + pad) for r in pol.rules])
+        checker._rule_cache.clear()
     n = {"checks": 0}
 
     def valid(q):
@@ -327,7 +335,13 @@ def plan_free_cpu(arm, checker, s: Segment, *, step: float = 0.01, seed: int = 0
             return False
         d = dict(zip(arm.joint_names, q))
         d.update(s.joints)
-        return checker.check(d).ok
+        r = checker.check(d)
+        if r.ok:
+            return True
+        # near the ends (taught points) the gate's own margin is enough
+        near = min(float(np.abs(q - s.q_start).max()), float(np.abs(q - s.q_goal).max())) < 0.05
+        return bool(near and pad and not r.self_violations
+                    and all(v.distance >= v.margin - pad - 1e-9 for v in r.violations))
 
     t0, stats = _t.time(), {}
     path = rrt.rrt_connect(valid, s.q_start, s.q_goal, arm.lower, arm.upper, step=step, seed=seed,

@@ -189,10 +189,10 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 ```
 
 - **佈局評估工具**（reach sweep / reach volume / 基座高度掃描，D19/D23）：輸入 layout 變體，回傳 slot 覆蓋率與最差 margin；這也是 agent 架點的主要工具。
-- **CPU / GPU 分工（依使用者決定）**：離線的自動點位與路徑生成**全部在 CPU**：EAIK（RobustIK）負責可達性與分支列舉、
-  CPU 碰撞（MuJoCo / coal，exact mesh）、CPU free-space planner（RRT-Connect + shortcut + 時間參數化）。
-  cuRobo 用在 GPU 端（real-time），並在 Kaggle 上對離線結果做交叉驗證（同一 world、同一 margin 的 mesh 判定應一致）。
-  若日後 cuRobo 能在 CPU 執行（見 §6.1 #4），離線也可改用 cuRobo。
+- **CPU / GPU 分工（使用者 2026-11-16 更新）**：點位（P3）與受限動作（shelf 內直線、tilt）在 CPU（EAIK + coal，逐點檢查）；
+  **free move（點位之間、含攜帶 tray）由 cuRobo 在 GPU 離線規劃（目前用 Kaggle），上線時匯入路徑**。
+  匯入的路徑一律再經 CPU gate（coal exact mesh、0.01 rad 取樣、與點位相同的規則）才成為軌跡。
+  沒有 GPU 時（開發、CI）以 CPU RRT-Connect + shortcut + 平滑 作為 fallback（`--paths cpu`）。
 - **重新生成**：layout 或 world 改變（新增靜態障礙、定位修正後的 slot pose）→ 只重算受影響的 task/segment（依賴圖快取）。
 
 ## 4. Real-time 路徑規劃（線上）
@@ -260,7 +260,7 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 | **P1** | Cell model schema + loaders + audit；TM tray 移植成 `cells/tm_tray`（rack generator plugin、3 presets） | 由 YAML 產生的 box world 與原 `cell_core.scene.cell_boxes` 一致到 1e-12；所有 slot frames 一致 | CPU |
 | **P2** | Kinematics（RobustIK）＋ collision backends（CPU exact mesh 為主、cuRobo 交叉驗證）；scene compilers（MJCF、cuRobo） | reach sweep strict 37/37（EAIK）；M3 collision 37/37（CPU）；Kaggle 上 cuRobo 結論一致 | CPU + Kaggle |
 | **P3** | 自動點位：skill expand、候選、IK 分支、篩選、分支鏈選擇；layout 評估工具 | 37 slots 全部產生 teach points，`chain_q` 與原 M3 相同或更好 | CPU (+Kaggle) |
-| **P4** | 路徑生成（CPU）：free（RRT-Connect）/ line / sweep / carry / jaw、時間參數化、validate；移植 M6 transfer；障礙變更時自動重新生成 | scenario `all` dry run 全部通過 validate + caps（D30 準則） | CPU |
+| **P4** | 路徑生成：free（cuRobo GPU 離線；CPU RRT-Connect fallback）/ line / tilt / jaw、時間參數化（D14/D30 caps）、CPU gate；整個 workflow 輸出一條時間化關節軌跡 | workflow 全程通過 CPU gate + caps | CPU + Kaggle |
 | **P5** | Sim：Kinematic、MuJoCo（物理/相機）、Isaac adapter；judge；viz（viser + RViz adapter） | MuJoCo 中 transfer 通過 5 項 judge；Isaac adapter 能載入同一 world | CPU (+Isaac 主機) |
 | **P6** | 定位：AprilGrid locator；執行前修正 → 重新生成、執行中局部修正（CPU） | 擾動 slot pose 後仍通過 judge | CPU |
 | — | ~~Codegen~~ 暫緩，實機程式格式交給使用者設計；框架只輸出中立的點位表與時間化軌跡（JSON） | | |
@@ -268,6 +268,11 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 | **P8** | Agent：tool API（MCP）、agent 協助架點（提案 → 驗證 → 渲染 → 人確認） | agent 能為新 slot 產生並驗證點位 | — |
 
 P0–P2 先做；P3 起每個階段開始前再細化 todo。
+
+**P4（2026-11-16）**：關節運轉餘裕 5°（URDF 極限內縮，`robot.limit_margin_deg`）；workflow → segments（free/line/path/hold）→ 計時 → CPU gate →
+`rsf.trajectory/1`（`tools/plan_workflow.py`）。點位改為整個 run 同一手臂組態（J3 −1、J5 +1，自動選擇）並以整圈調整讓 sequence 間移動最少
+（原本取料/放料分支不同，攜帶 tray 時 elbow/wrist 翻轉）。free move：cuRobo job（`tools/kaggle/curobo_free_plan.py`）或 CPU fallback。
+strict 全流程（12 cycles）CPU 結果見 `docs/p4_paths.md`。
 
 **P3（2026-11-13）**：通用自動點位引擎 `rsf.planning.teach`（skill → waypoint 序列；IK 全分支、直線／路徑逐點連續 IK 與碰撞、
 最大最差裕量的分支鏈、點位表 JSON/CSV、`python -m rsf teach`），TM 取放 skill。三個 layout 皆 74/74 序列（37 取＋37 放），
@@ -298,6 +303,8 @@ M3 碰撞判定移植、World→MuJoCo 編譯器。D29 夾爪 strict／as_built 
 - 3D 輸入：URDF、mesh、USD。
 - 實機程式格式：暫緩，由使用者設計。
 - 離線（自動點位、路徑生成）無 GPU；real-time 有 GPU，延後實作（含移動物進入工作區）。
+  → 2026-11-16 更新：free move 路徑由 cuRobo 在 GPU 離線計算（先用 Kaggle），上線時匯入。
+- 實機關節極限與 URDF 相同；需要餘裕，暫定 5°（2026-11-16）。
 - 新的靜態障礙：離線隨時自動重新生成，不需 real-time。
 - 定位：補償架點與實機誤差，執行前與執行中兩種模式都要。
 - CPU fallback：依提議（功能正確等級的 CPU 碰撞 + RRT-Connect，cuRobo 交叉驗證）。
