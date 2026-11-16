@@ -38,6 +38,11 @@ PLACE_ARRIVE = {"carry": "free", "withdraw": "path", "place_lift": "line", "plac
                 "retreat": "line"}
 PICK_JAW = {"withdraw": A.JAW_Q_FIT, "carry": A.JAW_Q_FIT}                 # else open
 PLACE_JAW = {"carry": A.JAW_Q_FIT, "withdraw": A.JAW_Q_FIT, "place_lift": A.JAW_Q_FIT}
+#: Cartesian caps of each constrained arrival (keys of process.motion.caps): inside
+#: a shelf slow (D30 IN_JIG), so the flange tracks within 1 mm; the tilt too.
+PICK_CAPS = {"sight_near": "empty", "insert": "in_jig", "push": "in_jig", "lift": "in_jig",
+             "withdraw": "in_jig", "carry": "in_jig"}
+PLACE_CAPS = {"withdraw": "in_jig", "place_lift": "in_jig", "place_down": "in_jig", "retreat": "in_jig"}
 PICK_ACTION = {"sight_far": "read the AprilGrid (far)", "sight_near": "read the AprilGrid (near)",
                "push": "tray pushed against the push plate", "lift": f"close the jaws to {A.JAW_Q_FIT:.4f}",
                "carry": "tilted for transport"}
@@ -65,7 +70,7 @@ def phase_scene(world, key: str, ph) -> Scene:
     return Scene(others + tuple(moved.world_solids()))
 
 
-def _waypoints(world, key, phases, arrive, jaw, action) -> list:
+def _waypoints(world, key, phases, arrive, jaw, action, caps) -> list:
     out, scenes = [], {}
     for i, ph in enumerate(phases):
         scene = phase_scene(world, key, ph)
@@ -80,7 +85,7 @@ def _waypoints(world, key, phases, arrive, jaw, action) -> list:
         out.append(Waypoint(ph.name, ph.T, scene, policy(key, contact=ph.contact),
                             {n: j for n in JAWS}, arrive[ph.name] if i else "free", ph.path,
                             along_policy, along_scene, action.get(ph.name, ""),
-                            {"tray": ph.tray, "tray_shift": ph.shift}))
+                            {"tray": ph.tray, "tray_shift": ph.shift, "caps": caps.get(ph.name, "empty")}))
     return out
 
 
@@ -88,7 +93,7 @@ def _waypoints(world, key, phases, arrive, jaw, action) -> list:
 def pick(world, args: dict) -> list:
     key = args["at"] if "at" in args else args["from"]
     phases = SEQ.pick_phases(world.process, slot_of(world.feature(key)), tool_geometry(world))
-    return [Sequence(f"pick:{key}", _waypoints(world, key, phases, PICK_ARRIVE, PICK_JAW, PICK_ACTION),
+    return [Sequence(f"pick:{key}", _waypoints(world, key, phases, PICK_ARRIVE, PICK_JAW, PICK_ACTION, PICK_CAPS),
                      {"skill": "tm_tray.pick", "slot": key})]
 
 
@@ -96,7 +101,7 @@ def pick(world, args: dict) -> list:
 def place(world, args: dict) -> list:
     key = args["at"] if "at" in args else args["to"]
     phases = SEQ.place_phases(world.process, slot_of(world.feature(key)), tool_geometry(world))
-    return [Sequence(f"place:{key}", _waypoints(world, key, phases, PLACE_ARRIVE, PLACE_JAW, PLACE_ACTION),
+    return [Sequence(f"place:{key}", _waypoints(world, key, phases, PLACE_ARRIVE, PLACE_JAW, PLACE_ACTION, PLACE_CAPS),
                      {"skill": "tm_tray.place", "slot": key})]
 
 

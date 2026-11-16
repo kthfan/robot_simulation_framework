@@ -20,7 +20,7 @@ from rsf.model.urdf import UrdfModel
 
 
 class EaikKinematics:
-    def __init__(self, urdf, tip_link: str, base_link: Optional[str] = None,
+    def __init__(self, urdf, tip_link: str, base_link: Optional[str] = None, limit_margin: float = 0.0,
                  tol_pos: float = 1e-9, tol_rot: float = 1e-9,
                  parallel_tol: float = 2e-3, intersect_tol: float = 1e-3):
         from eaik.IK_URDF import UrdfRobot
@@ -37,6 +37,9 @@ class EaikKinematics:
         finally:
             os.unlink(path)
         lo, hi = chain.limits(movable)
+        self.hardware_lower, self.hardware_upper = lo.copy(), hi.copy()
+        # operating limits: a margin inside the hardware limits on both sides (rad)
+        lo, hi = lo + limit_margin, hi - limit_margin
         self.joint_names = movable
         self.lower, self.upper = lo, hi
         self.tip_link = tip_link

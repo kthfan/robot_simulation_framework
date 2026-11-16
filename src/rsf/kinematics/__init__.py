@@ -83,9 +83,15 @@ class ArmKinematics:
 
 
 def load_arm(world, backend: str = "eaik", **kw) -> ArmKinematics:
-    """The world's robot as an :class:`ArmKinematics`, chain root -> tool frame."""
+    """The world's robot as an :class:`ArmKinematics`, chain root -> tool frame.
+
+    ``robot.limit_margin_deg`` in the layout keeps every joint that far inside its
+    URDF limits (operating limits; the URDF stays the hardware).
+    """
     if world.robot is None:
         raise ValueError("the world has no robot")
+    import math
+    kw.setdefault("limit_margin", math.radians(float(world.robot.meta.get("limit_margin_deg", 0.0))))
     if backend == "eaik":
         from rsf.kinematics.eaik import EaikKinematics
         be = EaikKinematics(world.robot.urdf, world.robot.tool_frame, **kw)

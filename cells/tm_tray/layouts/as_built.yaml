@@ -31,6 +31,17 @@ process:
   # margin 2 mm until the real plate is measured (docs/p2_results.md);
   # overtravel and place_offset are AI-Robotics-V2 D30's 2 mm.
   push_plate: {geometry: air_cylinder_plate, margin: 0.002, overtravel: 0.002, place_offset: 0.002}
+  # Motion timing (AI-Robotics-V2 D14, D30). Caps are of the moving frame
+  # (tool flange); a carried tray also keeps `carry`.
+  motion:
+    dt: 0.01
+    caps:
+      in_jig: {v: 0.05, a: 0.25, w: 0.25, alpha: 1.0}
+      carry:  {v: 0.25, a: 1.5, w: 0.5, alpha: 3.0, a_down: 4.0}
+      empty:  {v: 0.25, a: 1.5, w: 0.5, alpha: 3.0}
+    joint: {v: 1.0, a: 2.0}
+    jaw: {speed: 0.05, settle: 0.5}
+    home: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 entities:
   floor:
@@ -100,3 +111,6 @@ robot:
   urdf: ../assets/tm5s_egu50.urdf
   base: {feature: pedestal/arm_base}
   tool_frame: flange
+  # Operating limits: 5 deg inside the URDF limits, which are the real arm's
+  # (user 2026-11-16). Planning, IK and teach points stay within them.
+  limit_margin_deg: 5.0
