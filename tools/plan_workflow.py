@@ -77,6 +77,13 @@ def main(argv=None) -> int:
         bad = PL.attach_results(segs, json.loads(Path(a.paths).read_text()))
         if bad:
             print(f"no GPU path for {len(bad)} free segments: {bad[:5]}")
+        if a.fallback == "cpu":                               # GPU paths the gate rejects: replan
+            for s in segs:
+                if s.kind == "free" and s.name not in bad and s.Q is not None:
+                    p = PL.check_segment(eng.arm, eng.checker, s)
+                    if p:
+                        print(f"  gate rejects the GPU path: {p[0]}", flush=True)
+                        bad.append(s.name)
         if bad and a.fallback == "cpu":                       # plan what the GPU could not
             for s in segs:
                 if s.name in bad:

@@ -58,7 +58,7 @@ def variant_urdf(job: dict, lock: dict, carried, workdir: Path) -> Path:
 
 
 #: exact-mesh options (set from the command line in ``main``)
-MESH = {"self": True, "only_success": True, "self_margin": 0.0}
+MESH = {"self": True, "only_success": True, "self_margin": 0.0, "pad": 0.001}
 
 
 def make_planner(robot: dict, scene: dict, job: dict):
@@ -68,7 +68,7 @@ def make_planner(robot: dict, scene: dict, job: dict):
     from curobo.motion_planner import MotionPlanner, MotionPlannerCfg
     return MotionPlanner(MotionPlannerCfg.create(
         robot=robot, scene_model=scene, collision_cache={"cuboid": 1000},
-        mesh_collision_check=True, mesh_collision_margin=float(job["mesh_collision_margin"]),
+        mesh_collision_check=True, mesh_collision_margin=float(job["mesh_collision_margin"]) + MESH["pad"],
         mesh_self_collision_check=MESH["self"], mesh_self_collision_margin=MESH["self_margin"],
         mesh_only_success=MESH["only_success"], use_cuda_graph=False))
 
@@ -142,10 +142,12 @@ def main(argv=None) -> int:
     ap.add_argument("--sphere-success", action="store_true",
                     help="spheres decide success (cuRobo default), not the exact meshes")
     ap.add_argument("--mesh-self-margin", type=float, default=0.0)
+    ap.add_argument("--pad", type=float, default=0.001,
+                    help="extra scene margin (m): the CPU gate checks between cuRobo's samples too")
     a = ap.parse_args(argv)
     MESH.update({"self": not a.no_mesh_self, "only_success": not a.sphere_success,
-                 "self_margin": a.mesh_self_margin})
-    print(f"mesh checks: scene margin {job_margin(a.job)} m, self {MESH['self']} "
+                 "self_margin": a.mesh_self_margin, "pad": a.pad})
+    print(f"mesh checks: scene margin {job_margin(a.job)} + {MESH['pad']} m, self {MESH['self']} "
           f"(margin {MESH['self_margin']} m), mesh decides success {MESH['only_success']}", flush=True)
     import torch
     from curobo.motion_planner import MotionPlanner, MotionPlannerCfg
