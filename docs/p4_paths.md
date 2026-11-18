@@ -139,13 +139,25 @@ The summary (segments, timing, problems) is kept in
 
 ## cuRobo on Kaggle
 
-`tools/kaggle/jobs/strict_full.json` (73 free moves, 37 distinct scenes stored
-once, two robot variants: jaws open, and jaws on the tray with the tray as a
-link) is committed and runs with the `curobo-warm` environment. On
-2026-11-16 the account's two Kaggle GPU sessions were taken by other runs the
-whole afternoon ("Maximum batch GPU session count of 2 reached"), so the GPU
-result is still pending; the CPU result above stands in for it. When it runs:
-`--paths results/strict_full_paths.json` and the same gate.
+`tools/kaggle/jobs/strict_full.json`: 73 free moves, 37 distinct scenes stored
+once, two robot variants (jaws open; jaws on the tray with the tray as a link).
+Environment `curobo-warm` (T4, torch 2.9.1, Warp 1.19), kthfan/curobo dev/main.
+
+| run | result |
+|---|---|
+| 1 (2026-11-16) | 0/73: the script read the trajectory as 6 columns (it carries the 2 locked jaws too); carry moves refused, "start or end state in collision" (tray vs the jaws holding it) |
+| 2 (2026-11-18) | **51/73**: without the tray 47/49, with the tray 4/24. Failures: the trajectory optimiser's result is not collision-free. The 24 carry moves planned again *without* the tray: 21/24 — the tray's sphere model (fitted to the box, it bulges past it; the carry ends are ~10 mm from the jig) is the main cause |
+
+All 51 GPU paths pass the CPU gate. The full run with them and the CPU
+fallback for the other 22 (`--paths cells/tm_tray/plans/gpu/strict_full_paths.json --fallback cpu`):
+**0 problems, 1039.1 s** (CPU only: 1095.9 s). The 47 empty moves from cuRobo
+take 77.5 s against 135.0 s from the CPU planner (smooth, no corners); the 4
+carry moves are equal (the tray's caps decide). Summary:
+`cells/tm_tray/plans/strict_inspect_and_sort_gpu.summary.json`.
+
+Next for the carry moves: model the tray for cuRobo as cuboid spheres that stay
+inside the box (or attach it as a cuboid obstacle via cuRobo's attach API), and
+give the optimiser the carry ends' real clearance.
 
 ## Not yet
 
