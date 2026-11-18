@@ -8,7 +8,8 @@ frame, stored once in ``scenes``) and the carried object (boxes in a link frame)
 For every distinct (locked joints, carried object) the script writes a URDF
 variant -- joint limits moved inside by the margin, the carried object as a
 fixed link of boxes -- builds a cuRobo model of it with ``RobotBuilder`` and a
-``MotionPlanner`` with the exact mesh check on; then ``plan_cspace`` per
+``MotionPlanner`` with the exact mesh checks on (scene, link self-collision, meshes
+decide success: ``make_planner``); then ``plan_cspace`` per
 segment. Output ``{name: {success, q, dt, seconds, attempts}}``. The CPU checks
 every returned path again before it is used (``rsf.planning.plan.assemble``).
 
@@ -56,6 +57,22 @@ def variant_urdf(job: dict, lock: dict, carried, workdir: Path) -> Path:
     return out
 
 
+#: exact-mesh options (set from the command line in ``main``)
+MESH = {"self": True, "only_success": True, "self_margin": 0.0}
+
+
+def make_planner(robot: dict, scene: dict, job: dict):
+    """A MotionPlanner with cuRobo's exact mesh checks: robot meshes vs the scene, link
+    meshes vs each other, and (``mesh_only_success``) the meshes, not the spheres, decide
+    whether a solution succeeds; the spheres still steer the optimisers."""
+    from curobo.motion_planner import MotionPlanner, MotionPlannerCfg
+    return MotionPlanner(MotionPlannerCfg.create(
+        robot=robot, scene_model=scene, collision_cache={"cuboid": 1000},
+        mesh_collision_check=True, mesh_collision_margin=float(job["mesh_collision_margin"]),
+        mesh_self_collision_check=MESH["self"], mesh_self_collision_margin=MESH["self_margin"],
+        mesh_only_success=MESH["only_success"], use_cuda_graph=False))
+
+
 #: links the carried object touches by design (held by the jaws, against the push plate)
 HOLDING_LINKS = ["link_6", "gripper_body", "left_gripper", "right_gripper"]
 
@@ -66,8 +83,11 @@ def build_robot(urdf: Path, tool_frame: str, lock: dict, carried: bool = False) 
     t = time.time()
     b = RobotBuilder(str(urdf), str(urdf.parent), tool_frames=[tool_frame])
     b.fit_collision_spheres(sphere_density=0.5, use_collision_mesh=True, iterations=50)
-    b.compute_collision_matrix(num_samples=200,
-                               custom_ignore={"carried_object": list(HOLDING_LINKS)} if carried else None)
+    hold = {"carried_object": list(HOLDING_LINKS)} if carried else None
+    b.compute_collision_matrix(num_samples=200, custom_ignore=hold)
+    if MESH["self"]:                                         # exact link-mesh self-collision pairs
+        ign = b.compute_mesh_collision_matrix(num_samples=1000, custom_ignore=hold)
+        print(f"  mesh self-collision ignore: {ign}", flush=True)
     cfg = b.build()
     out = Path("/tmp") / (urdf.stem + ".yml")
     b.save(cfg, str(out))
@@ -80,6 +100,10 @@ def build_robot(urdf: Path, tool_frame: str, lock: dict, carried: bool = False) 
     return robot
 
 
+def job_margin(path) -> float:
+    return float(json.loads(Path(path).read_text())["mesh_collision_margin"])
+
+
 def main_diag(job: dict, segs: list, work: Path, attempts: int) -> dict:
     """``{name: success}`` for *segs* planned with the jaws locked as given but no carried object."""
     import torch
@@ -88,10 +112,7 @@ def main_diag(job: dict, segs: list, work: Path, attempts: int) -> dict:
     from curobo.types import JointState
     lock = segs[0]["lock_joints"]
     robot = build_robot(variant_urdf(job, lock, None, work), job["tool_frame"], lock)
-    mp = MotionPlanner(MotionPlannerCfg.create(
-        robot=robot, scene_model=segs[0]["scene"], collision_cache={"cuboid": 1000},
-        mesh_collision_check=True, mesh_collision_margin=float(job["mesh_collision_margin"]),
-        use_cuda_graph=False))
+    mp = make_planner(robot, segs[0]["scene"], job)
     names = list(mp.joint_names)
     dev = dict(device=torch.device("cuda", 0), dtype=torch.float32)
     out = {}
@@ -117,7 +138,15 @@ def main(argv=None) -> int:
     ap.add_argument("--out", default="results/paths.json")
     ap.add_argument("--attempts", type=int, default=20)
     ap.add_argument("--no-diagnose", action="store_true")
+    ap.add_argument("--no-mesh-self", action="store_true", help="no exact link-mesh self-collision check")
+    ap.add_argument("--sphere-success", action="store_true",
+                    help="spheres decide success (cuRobo default), not the exact meshes")
+    ap.add_argument("--mesh-self-margin", type=float, default=0.0)
     a = ap.parse_args(argv)
+    MESH.update({"self": not a.no_mesh_self, "only_success": not a.sphere_success,
+                 "self_margin": a.mesh_self_margin})
+    print(f"mesh checks: scene margin {job_margin(a.job)} m, self {MESH['self']} "
+          f"(margin {MESH['self_margin']} m), mesh decides success {MESH['only_success']}", flush=True)
     import torch
     from curobo.motion_planner import MotionPlanner, MotionPlannerCfg
     from curobo.scene import Scene
@@ -139,10 +168,7 @@ def main(argv=None) -> int:
         lock, carried = json.loads(key)
         print(f"variant: lock {lock}, carried {'yes' if carried else 'no'}: {len(segs)} segments", flush=True)
         robot = build_robot(variant_urdf(job, lock, carried, work), job["tool_frame"], lock, bool(carried))
-        mp = MotionPlanner(MotionPlannerCfg.create(
-            robot=robot, scene_model=segs[0]["scene"], collision_cache={"cuboid": 1000},
-            mesh_collision_check=True, mesh_collision_margin=float(job["mesh_collision_margin"]),
-            use_cuda_graph=False))
+        mp = make_planner(robot, segs[0]["scene"], job)
         names = list(mp.joint_names)
         dev = dict(device=torch.device("cuda", 0), dtype=torch.float32)
         for s in segs:
