@@ -155,9 +155,29 @@ take 77.5 s against 135.0 s from the CPU planner (smooth, no corners); the 4
 carry moves are equal (the tray's caps decide). Summary:
 `cells/tm_tray/plans/strict_inspect_and_sort_gpu.summary.json`.
 
-Next for the carry moves: model the tray for cuRobo as cuboid spheres that stay
-inside the box (or attach it as a cuboid obstacle via cuRobo's attach API), and
-give the optimiser the carry ends' real clearance.
+### With cuRobo's exact mesh checks deciding (2026-11-18)
+
+`make_planner`: `mesh_collision_check` (robot meshes vs the scene, 5 mm),
+`mesh_self_collision_check` (link meshes vs each other; pairs from
+`RobotBuilder.compute_mesh_collision_matrix` — it added none — plus the tray
+against the links holding it) and `mesh_only_success` (the meshes, not the
+spheres, decide success; the spheres still steer the optimisers; the graph
+planner's start/end check stays sphere-based).
+
+| run | planned | without / with tray | pass the CPU gate | full run |
+|---|---|---|---|---|
+| spheres decide | 51/73 | 47/49, 4/24 | 51/51 | 51 GPU + 22 CPU: 0 problems, 1039.1 s |
+| **meshes decide + mesh self-collision** | **68/73** | 47/49, 21/24 | 64/68 | **64 GPU + 9 CPU: 0 problems, 983.2 s** |
+| same, scene margin +1 mm (`--pad`) | 66/73 | 47/49, 19/24 | 65/66 | — |
+
+The gate rejects: the tray 4.2–4.7 mm from a rack leg (between cuRobo's
+25 ms samples), and with the pad one empty move with `gripper_body` 3.4 mm
+from a jig part — more than sampling explains; possibly the per-link triangle
+budget (20 000) simplifying the gripper mesh (unverified). Paths the gate
+rejects are replanned on the CPU before timing (`--fallback cpu`), so the
+trajectory never contains them. Still failing in cuRobo: two moves to a far
+AprilGrid read and three carries onto the table (one of them fails without
+the tray too: tight ends, not the tray model).
 
 ## Not yet
 
