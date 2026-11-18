@@ -56,13 +56,18 @@ def variant_urdf(job: dict, lock: dict, carried, workdir: Path) -> Path:
     return out
 
 
-def build_robot(urdf: Path, tool_frame: str, lock: dict) -> dict:
+#: links the carried object touches by design (held by the jaws, against the push plate)
+HOLDING_LINKS = ["link_6", "gripper_body", "left_gripper", "right_gripper"]
+
+
+def build_robot(urdf: Path, tool_frame: str, lock: dict, carried: bool = False) -> dict:
     import yaml
     from curobo.robot_builder import RobotBuilder
     t = time.time()
     b = RobotBuilder(str(urdf), str(urdf.parent), tool_frames=[tool_frame])
     b.fit_collision_spheres(sphere_density=0.5, use_collision_mesh=True, iterations=50)
-    b.compute_collision_matrix(num_samples=200)
+    b.compute_collision_matrix(num_samples=200,
+                               custom_ignore={"carried_object": list(HOLDING_LINKS)} if carried else None)
     cfg = b.build()
     out = Path("/tmp") / (urdf.stem + ".yml")
     b.save(cfg, str(out))
@@ -75,11 +80,43 @@ def build_robot(urdf: Path, tool_frame: str, lock: dict) -> dict:
     return robot
 
 
+def main_diag(job: dict, segs: list, work: Path, attempts: int) -> dict:
+    """``{name: success}`` for *segs* planned with the jaws locked as given but no carried object."""
+    import torch
+    from curobo.motion_planner import MotionPlanner, MotionPlannerCfg
+    from curobo.scene import Scene
+    from curobo.types import JointState
+    lock = segs[0]["lock_joints"]
+    robot = build_robot(variant_urdf(job, lock, None, work), job["tool_frame"], lock)
+    mp = MotionPlanner(MotionPlannerCfg.create(
+        robot=robot, scene_model=segs[0]["scene"], collision_cache={"cuboid": 1000},
+        mesh_collision_check=True, mesh_collision_margin=float(job["mesh_collision_margin"]),
+        use_cuda_graph=False))
+    names = list(mp.joint_names)
+    dev = dict(device=torch.device("cuda", 0), dtype=torch.float32)
+    out = {}
+    for s in segs:
+        try:
+            mp.update_world(Scene.create(s["scene"]))
+            q0 = torch.tensor([s["q_start"]], **dev)
+            q1 = torch.tensor([s["q_goal"]], **dev)
+            res = mp.plan_cspace(JointState.from_position(q1, joint_names=names),
+                                 JointState.from_position(q0, joint_names=names), max_attempts=attempts)
+            out[s["name"]] = {"success": bool(res is not None and res.success.reshape(-1)[0]),
+                              "info": str(getattr(res, "debug_info", "") or "")}
+        except Exception as e:  # noqa: BLE001
+            out[s["name"]] = {"success": False, "info": f"{type(e).__name__}: {e}"}
+        print(f"  without tray {'ok  ' if out[s['name']]['success'] else 'FAIL'} {s['name']} "
+              f"{out[s['name']]['info']}", flush=True)
+    return out
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--job", required=True)
     ap.add_argument("--out", default="results/paths.json")
     ap.add_argument("--attempts", type=int, default=20)
+    ap.add_argument("--no-diagnose", action="store_true")
     a = ap.parse_args(argv)
     import torch
     from curobo.motion_planner import MotionPlanner, MotionPlannerCfg
@@ -101,7 +138,7 @@ def main(argv=None) -> int:
     for key, segs in groups.items():
         lock, carried = json.loads(key)
         print(f"variant: lock {lock}, carried {'yes' if carried else 'no'}: {len(segs)} segments", flush=True)
-        robot = build_robot(variant_urdf(job, lock, carried, work), job["tool_frame"], lock)
+        robot = build_robot(variant_urdf(job, lock, carried, work), job["tool_frame"], lock, bool(carried))
         mp = MotionPlanner(MotionPlannerCfg.create(
             robot=robot, scene_model=segs[0]["scene"], collision_cache={"cuboid": 1000},
             mesh_collision_check=True, mesh_collision_margin=float(job["mesh_collision_margin"]),
@@ -125,9 +162,17 @@ def main(argv=None) -> int:
                     if ok:
                         ip = res.interpolated_trajectory
                         last = int(res.interpolated_last_tstep.reshape(-1)[0])
-                        Q = ip.position.reshape(-1, len(names))[: last + 1].detach().cpu().numpy().astype(float)
+                        # the trajectory may carry the locked joints too: pick the arm by name
+                        jn = list(getattr(ip, "joint_names", None) or [])
+                        P = ip.position.detach().cpu().numpy().astype(float)
+                        P = P.reshape(-1, P.shape[-1])[: last + 1]
+                        cols = [jn.index(n) for n in names] if jn and all(n in jn for n in names) \
+                            else list(range(len(names)))
+                        Q = P[:, cols]
                         dt = ip.dt.reshape(-1)[0] if hasattr(ip.dt, "reshape") else ip.dt
                         rec = {"success": True, "q": Q.tolist(), "dt": float(dt)}
+                    else:
+                        rec["error"] = str(getattr(res, "debug_info", "") or "not solved")
                 rec["attempts"] = int(getattr(mp, "_last_planning_attempts", 0) or 0)
             except Exception as e:  # noqa: BLE001
                 rec = {"success": False, "error": f"{type(e).__name__}: {e}"}
@@ -136,6 +181,12 @@ def main(argv=None) -> int:
             results[s["name"]] = rec
             print(f"  {'ok  ' if rec['success'] else 'FAIL'} {s['name']} ({rec['seconds']} s)"
                   f"{'' if rec['success'] else ' ' + rec.get('error', '')}", flush=True)
+    bad = [s for s in job["segments"] if s["carried"] and not results[s["name"]]["success"]]
+    if bad and not a.no_diagnose:                     # is it the tray? the same moves without it
+        print(f"diagnose: {len(bad)} carried moves failed; again without the tray", flush=True)
+        diag = main_diag(job, bad, work, a.attempts)
+        for n, r in diag.items():
+            results[n]["without_tray"] = r
     n_ok = sum(r["success"] for r in results.values())
     print(f"SUMMARY {n_ok}/{len(results)} free segments planned", flush=True)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
