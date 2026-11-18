@@ -49,6 +49,8 @@ def main(argv=None) -> int:
     ap.add_argument("--teach", required=True, help="teach table JSON covering the run's sequences")
     ap.add_argument("--cycles", type=int, default=0)
     ap.add_argument("--paths", help="assemble: cuRobo results JSON, 'cpu' or 'linear'")
+    ap.add_argument("--fallback", choices=["none", "cpu"], default="none",
+                    help="assemble: plan free moves the GPU result lacks on the CPU")
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
     from rsf.planning import plan as PL
@@ -74,9 +76,17 @@ def main(argv=None) -> int:
     else:
         bad = PL.attach_results(segs, json.loads(Path(a.paths).read_text()))
         if bad:
-            print(f"no path for {len(bad)} free segments: {bad[:5]}")
+            print(f"no GPU path for {len(bad)} free segments: {bad[:5]}")
+        if bad and a.fallback == "cpu":                       # plan what the GPU could not
+            for s in segs:
+                if s.name in bad:
+                    r = PL.plan_free_cpu(eng.arm, eng.checker, s)
+                    print(f"  cpu {'ok  ' if r['success'] else 'FAIL'} {s.name}: {r}", flush=True)
+        source = {s.name: ("cpu" if s.name in bad else "gpu") for s in segs if s.kind == "free"}
     t0 = time.time()
     traj, problems = PL.assemble(world, eng.arm, eng.checker, segs)
+    if a.paths not in ("cpu", "linear"):
+        traj.meta["free_source"] = source
     traj.meta.update({"workflow": a.workflow, "cycles": a.cycles, "teach": a.teach, "paths": a.paths,
                       "problems": problems, "ok": not problems, "seconds": round(time.time() - t0, 1)})
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)

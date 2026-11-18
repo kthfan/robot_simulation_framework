@@ -10,3 +10,4 @@ reports/
 # P4 trajectories (10 ms samples, regenerable with tools/plan_workflow.py); summaries are kept
 cells/*/plans/*.json
 !cells/*/plans/*.summary.json
+!cells/*/plans/gpu/*.json
