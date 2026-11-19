@@ -105,7 +105,7 @@ arm's own links, and angular speed/acceleration in the carry timing.
 |---|---|---|---|---|---|---|---|
 | strict | 1086.8 s | 58 cuRobo + 15 CPU | 0 problems | **24/24 pass** | 0.50 mm / 0.02° | 0.46 mm | 0.42 mm |
 | as_built | 1101.6 s | 73 CPU | 0 problems | **24/24 pass** | 0.50 mm / 0.01° | 0.33 mm | 0.46 mm |
-| recommended | RECPLAN | 73 CPU | 0 problems | RECSIM |
+| recommended | 1173.1 s | 73 CPU (one needed a second seed) | 0 problems | **24/24 pass** | 0.51 mm / 0.04° | 0.46 mm | 0.44 mm |
 
 Carry caps are judged on the trajectory's own 10 ms samples, as the planner
 caps them (worst over the three layouts: a 1.08 m/s², ω 0.49 rad/s, α 2.2
