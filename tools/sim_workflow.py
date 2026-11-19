@@ -58,7 +58,7 @@ def main(argv=None) -> int:
     cell = MujocoCell(world, occ, params(a.set))
     t0 = time.time()
     rep = cell.run(traj, t_end=t_end, progress=lambda t, w: print(f"  sim t={t:7.1f} s  wall {w:6.1f} s", flush=True))
-    res = J.judge(world, wf, rep, occ)
+    res = J.judge(world, wf, rep, occ, traj=traj)
     res["meta"] = {"layout": a.layout, "workflow": a.workflow, "plan": a.plan, "sim_seconds": round(float(rep.t[-1]), 2),
                    "wall_seconds": round(time.time() - t0, 1), "params": {k: v for k, v in vars(cell.p).items()}}
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)

@@ -125,8 +125,24 @@ def _window(rep, t0, t1):
     return np.flatnonzero((rep.t >= t0 - 1e-9) & (rep.t <= t1 + 1e-9))
 
 
-def judge(world, workflow, rep, occupancy: dict, *, carry_caps=None, **kw) -> dict:
-    """Every transfer's verdict and the run's: ``{ok, transfers: [...], other_contacts}``."""
+def _planned_flange(world, traj):
+    """``(t, flange poses)`` of a trajectory at its own samples (for the caps)."""
+    from rsf.kinematics import load_arm
+    arm = load_arm(world)
+    T = np.asarray(traj["t"], float)
+    Q = np.asarray(traj["q"], float)
+    idx = [traj["joint_names"].index(n) for n in arm.joint_names]
+    return T, Q[:, idx], arm
+
+
+def judge(world, workflow, rep, occupancy: dict, *, carry_caps=None, traj: Optional[dict] = None, **kw) -> dict:
+    """Every transfer's verdict and the run's: ``{ok, transfers: [...], other_contacts}``.
+
+    With *traj* (the executed ``rsf.trajectory/1``), the carry caps are judged
+    on the plan's own samples, as the planner caps them; otherwise on the
+    report's planned flange samples (coarser: a corner between them reads
+    differently with every alignment)."""
+    planned = _planned_flange(world, traj) if traj is not None else None
     seat_solids = {s.name for s in world.solids(objects=False) if "robot_seat" in s.tags}
     if carry_caps is None:
         mo = (world.process.get("motion") or {}).get("caps", {})
@@ -168,9 +184,16 @@ def judge(world, workflow, rep, occupancy: dict, *, carry_caps=None, **kw) -> di
         # 5. the carried object's planned motion within the carry caps
         r["caps_ok"], r["carry_kin"] = True, None
         if carry_caps is not None and rel_ref is not None and len(w) > 3:
-            P = np.array([rep.flange_planned[i] @ rel_ref for i in w])
-            k = TM.point_kinematics(rep.t[w], P[:, :3, 3])
-            k.update(TM.angular_kinematics(rep.t[w], P[:, :3, :3]))
+            if planned is not None:
+                Tp, Qp, arm = planned
+                wp = np.flatnonzero((Tp >= tr.carry[0] - 1e-9) & (Tp <= tr.carry[1] + 1e-9))
+                tk = Tp[wp]
+                P = np.array([arm.fk(q) @ rel_ref for q in Qp[wp]])
+            else:
+                tk = rep.t[w]
+                P = np.array([rep.flange_planned[i] @ rel_ref for i in w])
+            k = TM.point_kinematics(tk, P[:, :3, 3])
+            k.update(TM.angular_kinematics(tk, P[:, :3, :3]))
             r["carry_kin"] = {a: round(b, 4) for a, b in k.items()}
             r["caps_ok"] = (k["v"] <= carry_caps.v * 1.05 and k["a"] <= carry_caps.a * 1.05
                             and k["w"] <= carry_caps.w * 1.05 and k["alpha"] <= carry_caps.alpha * 1.05

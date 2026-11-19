@@ -396,6 +396,27 @@ def plan_free_cpu(arm, checker, s: Segment, *, step: float = 0.01, seed: int = 0
             "via": 0 if path is None else len(path) - 2, **stats}
 
 
+def plan_free_gated(arm, checker, s: Segment, motion: dict, *, tries: int = 5, **kw) -> dict:
+    """:func:`plan_free_cpu`, then timed and gated as :func:`assemble` will; on a gate
+    problem (e.g. a corner dipping below the margin between samples) planned again
+    with the next seed. Leaves the untimed path in ``s.Q``."""
+    tilt = float(motion.get("carry_max_tilt_deg", 30.0))
+    r, why = {"success": False}, []
+    for k in range(tries):
+        r = plan_free_cpu(arm, checker, s, seed=k, max_tilt_deg=tilt, **kw)
+        if not r["success"]:
+            continue
+        path = s.Q.copy()
+        time_segment(arm, s, motion)
+        why = check_segment(arm, checker, s, max_tilt_deg=tilt)
+        s.Q, s.t = path, None
+        if not why:
+            r["seed"] = k
+            return r
+    r.update(success=False, gate=why[:1])
+    return r
+
+
 def check_segment(arm, checker, s: Segment, step: float = 0.01, max_tilt_deg: float = 30.0) -> list:
     """Problems of *s* on the CPU: every joint sample (densified to *step* rad) against its rules."""
     if s.Q is None or s.kind == "hold" or s.scene is None:
