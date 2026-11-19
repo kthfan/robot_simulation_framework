@@ -60,7 +60,9 @@ Transfers are found from the trajectory's segment names (`pick:<from>/…`,
 `place:<to>/…`); the tray each one moves is tracked from the workflow's initial
 occupancy.
 
-## Results (strict, plan: 64 cuRobo + 9 CPU free moves, 983.2 s)
+## Results
+
+### strict, first simulation (plan: 64 cuRobo + 9 CPU free moves, 983.2 s)
 
 First cycle (2 transfers):
 
@@ -81,7 +83,29 @@ The carry does not rely on friction: tilted back 15°, the tray rests against
 the push plate (the original project's 8 mm creep at Teflon friction predates
 the push plate and the tilt-back).
 
-Whole run: FULLRUN
+Whole run (24 transfers), same plan: **20/24**. The simulation found two gaps
+in P4, invisible to a geometric check:
+
+* **Carry orientation.** Transfer 17's free carry (`free051`, cuRobo) rolled
+  the gripper until gravity pointed 126° off the plate normal: the tray left
+  the plate and fell (the next transfer then had nothing to pick). 8 of 24
+  free carries tilted the tray more than 30° from how it was picked up; some
+  stood it almost upright on the push plate. Neither planner constrained the
+  tool's orientation while carrying.
+* **Angular caps.** Two carries turned the tray at 0.54 / 0.61 rad/s (cap
+  0.5): the carry timing capped its linear motion only.
+
+Fixed in P4 (`docs/p4_paths.md` F6, F7): `process.motion.carry_max_tilt_deg`
+(30°) in the CPU planner and the gate, the carried object checked against the
+arm's own links, and angular speed/acceleration in the carry timing.
+
+### After the fixes: the whole run, every layout
+
+| layout | plan | free moves | gate | simulated | worst placement | worst slip | worst tracking |
+|---|---|---|---|---|---|---|---|
+| strict | 1086.8 s | 58 cuRobo + 15 CPU | 0 problems | **24/24 pass** | 0.50 mm / 0.02° | 0.46 mm | 0.42 mm |
+| as_built | 1101.6 s | 73 CPU | 0 problems | ASBUILT |
+| recommended | RECPLAN | 73 CPU | 0 problems | RECSIM |
 
 Pictures of the first transfer: `docs/images/p5_transfer1_close.png` (close-up
 at the end of every phase), `p5_transfer1_wide.png` (overview),
