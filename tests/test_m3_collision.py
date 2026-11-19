@@ -140,8 +140,8 @@ def test_tilt_motion_is_one_continuous_checked_move(with_air):
     tm = SEQ.tilt_motion(with_air.process)
     d = tm.displacement(math.radians(with_air.process["carry_tilt_deg"]))
     # the 130 mm tray's far end must clear the jig above while it rises
-    # (tune_tilt, 2026-11-19): 51 mm, down and back only
-    assert d == pytest.approx(0.0511, abs=0.0005)
+    # (tune_tilt, 2026-11-19): 52.4 mm, down and back only
+    assert d == pytest.approx(0.0524, abs=0.0005)
 
 
 @pytest.mark.slow

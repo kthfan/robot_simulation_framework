@@ -269,6 +269,9 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 
 P0–P2 先做；P3 起每個階段開始前再細化 todo。
 
+**P6 準備（2026-11-19）**：模擬中的 AprilGrid 讀取：每個 slot 的 label（36h11 4×1）印在 jig 上、EIH 相機（手眼標定＋焦距組態）、
+使用者的 AprilgridDetector；strict 74/74 讀取找到正確 board，理想影像下位姿誤差 0.04 mm / 0.07°。見 `docs/p6_locating.md`。
+
 **P5（2026-11-19）**：MuJoCo 重播規劃軌跡（tray 為自由物體，摩擦、重力、接觸；手臂 PID 追蹤；夾爪剛性伺服）＋ D30 五項 judge
 （`rsf.sim`、`tools/sim_workflow.py`、`tools/render_sim.py`）。strict 第一個 cycle 2/2 通過（放置 0.25 mm、滑移 0.45 mm）；
 推板摩擦降到 0.1 仍通過（tray 靠在推板上，不靠摩擦）。全流程模擬找到 P4 的漏洞：free 攜帶動作未限制工具姿態，8/24 段 tray 傾斜超過 30°，
@@ -311,6 +314,9 @@ M3 碰撞判定移植、World→MuJoCo 編譯器。D29 夾爪 strict／as_built 
 - 離線（自動點位、路徑生成）無 GPU；real-time 有 GPU，延後實作（含移動物進入工作區）。
   → 2026-11-16 更新：free move 路徑由 cuRobo 在 GPU 離線計算（先用 Kaggle），上線時匯入。
 - 實機關節極限與 URDF 相同；需要餘裕，暫定 5°（2026-11-16）。
+- Tray 高度更正為 130 mm（2026-11-19）；tray 需小心對待、必須確保：攜帶時姿態維持在取料傾角 15° 內（`carry_max_tilt_deg`），
+  CPU 規劃器、cuRobo（ToolPoseBound）與碰撞檢查都強制。
+- 後續優先順序（2026-11-19）：1. ToolPoseBound　2. AprilGrid 讀取　3. Isaac Sim adapter　4. 物理參數。
 - 新的靜態障礙：離線隨時自動重新生成，不需 real-time。
 - 定位：補償架點與實機誤差，執行前與執行中兩種模式都要。
 - CPU fallback：依提議（功能正確等級的 CPU 碰撞 + RRT-Connect，cuRobo 交叉驗證）。
