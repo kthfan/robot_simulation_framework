@@ -169,14 +169,14 @@ def test_air_cylinder_clears_d455():
         assert not _overlap(extent_in(model, part, "flange"), d455)
 
 
-# ── tray (original cell_core values, user 2026-11-12) ────────────────────────
+# ── tray (cell_core values, user 2026-11-12; height 130 mm, user 2026-11-19) ──
 def test_tray_is_the_measured_tray():
-    """cell_core.assets: 0.1329 wide, 0.2470 long, 0.0851 high, rails 6.5 mm,
-    underside recessed 2.5 mm between them."""
+    """cell_core.assets: 0.1329 wide, 0.2470 long, rails 6.5 mm, underside
+    recessed 2.5 mm between them; 0.130 high (corrected from cell_core's 0.0851)."""
     tray = UrdfModel.from_file(ASSETS / "tray" / "tray.urdf")
     parts = {g.name: obj_vertices(g.path) for g in tray.links["tray"].collisions}
     V = np.vstack(list(parts.values()))
-    assert np.allclose(V.max(0) - V.min(0), [0.1329, 0.2470, 0.0851], atol=1e-6)
+    assert np.allclose(V.max(0) - V.min(0), [0.1329, 0.2470, 0.130], atol=1e-6)
     assert parts["body"][:, 2].min() == pytest.approx(0.0025, abs=1e-6)
     for rail in ("rail_left", "rail_right"):
         r = parts[rail]

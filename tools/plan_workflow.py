@@ -65,7 +65,7 @@ def main(argv=None) -> int:
     from rsf.planning.teach import make_engine
     eng = make_engine(world)
     mo = PL._motion(world.process)
-    tilt = float(mo.get("carry_max_tilt_deg", 30.0))
+    tilt = float(mo.get("carry_max_tilt_deg", 15.0))
     if a.paths == "linear":
         for s in segs:
             if s.kind == "free":

@@ -22,7 +22,9 @@ process:
   # three layouts: cells/tm_tray/tools/tune_tilt.py (2026-11-13): flange 11.6 mm
   # (11.4 down, 1.9 back). At its start (withdraw) the carried tray is exactly
   # 10.0 mm above its jig's front columns, which the lift height (D28) sets.
-  tilt_motion: {pivot: [0.12, 0.06], retreat: 0.035, samples: 16, clearance: 0.010}
+  # 130 mm tray (2026-11-19): the far end must clear the jig above while it rises;
+  # tune_tilt over all three layouts: flange 51 mm (40 down, 32 back), >= 10 mm clear
+  tilt_motion: {pivot: [0.20, 0.18], retreat: 0.09, samples: 16, clearance: 0.010}
   jaw_operating_range: {min: 0.0210, max: 0.06085}   # assets/asset_spec.yaml
   # The fixed push plate (user 2026-11-12). Pick: insert stops `margin` before
   # the plate meets a tray placed `place_offset` shallow, then the arm pushes the
@@ -40,9 +42,11 @@ process:
       carry:  {v: 0.25, a: 1.5, w: 0.5, alpha: 3.0, a_down: 4.0}
       empty:  {v: 0.25, a: 1.5, w: 0.5, alpha: 3.0}
     joint: {v: 1.0, a: 2.0}
-    # a free move carrying a tray keeps it on the plate: gravity within this angle of
-    # how it was picked up (the tilt-back pose), never pulling it out of the open side
-    carry_max_tilt_deg: 30.0
+    # a free move carrying a tray keeps it as it was picked up: gravity within this
+    # angle of the tilt-back pose (user 2026-11-19: handle with care). 15 deg keeps
+    # the plate between level and 30 deg back, rolled at most 15 deg: gravity never
+    # pulls the tray toward the open side
+    carry_max_tilt_deg: 15.0
     jaw: {speed: 0.05, settle: 0.5}
     home: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 

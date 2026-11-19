@@ -33,7 +33,7 @@ import json
 import math
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 import numpy as np
 
@@ -309,7 +309,7 @@ def time_segment(arm, s: Segment, motion: dict) -> None:
 _DOWN = np.array([0.0, 0.0, -1.0])
 
 
-def carry_frame(arm, s: Segment, max_tilt_deg: float = 30.0) -> Optional[tuple]:
+def carry_frame(arm, s: Segment, max_tilt_deg: float = 15.0) -> Optional[tuple]:
     """For a free segment carrying an object: ``(g_nom, c_dir, cos_max)`` in the holding
     link's frame: gravity at the start of the carry, the direction to the object's
     centre, and the cosine of the largest tilt allowed. None otherwise.
@@ -325,6 +325,35 @@ def carry_frame(arm, s: Segment, max_tilt_deg: float = 30.0) -> Optional[tuple]:
     c = np.mean([(np.asarray(T) @ x.T)[:3, 3] for x in solids], axis=0)
     g_nom = arm.fk(s.q_start)[:3, :3].T @ _DOWN
     return g_nom, c / np.linalg.norm(c), math.cos(math.radians(max_tilt_deg))
+
+
+def carry_sampler(arm, s: Segment, frame, sign_joints=(2, 4), margin: float = 0.3) -> Callable:
+    """Configurations that keep a carried object as it was picked up: a random tool
+    position around the start and goal, the start orientation turned about the
+    vertical (gravity in the tool frame unchanged) and tilted within half the
+    allowed cone, on the start's arm branch (IK solution nearest a random blend of
+    start and goal)."""
+    from rsf.core import se3 as _se3
+    T0, T1 = arm.fk(s.q_start), arm.fk(s.q_goal)
+    lo = np.minimum(T0[:3, 3], T1[:3, 3]) - margin
+    hi = np.maximum(T0[:3, 3], T1[:3, 3]) + margin
+    branch = tuple(int(np.sign(s.q_start[j]) or 1) for j in sign_joints)
+    cos_max = frame[2]
+    half = 0.5 * math.acos(max(-1.0, min(1.0, cos_max)))
+
+    def sample(rng):
+        R = _se3.rot_z(rng.uniform(-math.pi, math.pi)) @ T0[:3, :3]
+        ax = rng.normal(size=2)
+        ax = np.array([ax[0], ax[1], 0.0]) / max(np.linalg.norm(ax), 1e-12)
+        R = _se3.axis_angle(ax, rng.uniform(0.0, half)) @ R
+        T = _se3.make_T(R, rng.uniform(lo, hi))
+        sols = [q for q in arm.ik(T) if tuple(int(np.sign(q[j]) or 1) for j in sign_joints) == branch]
+        if not sols:
+            return None
+        ref = s.q_start + (s.q_goal - s.q_start) * rng.random()
+        return min(sols, key=lambda q: float(np.abs(np.asarray(q) - ref).max()))
+
+    return sample
 
 
 def carry_violation(arm, q, frame) -> Optional[str]:
@@ -351,7 +380,7 @@ def _load(checker, s: Segment) -> None:
 
 
 def plan_free_cpu(arm, checker, s: Segment, *, step: float = 0.01, seed: int = 0,
-                  max_iter: int = 4000, pad: float = 0.001, max_tilt_deg: float = 30.0) -> dict:
+                  max_iter: int = 4000, pad: float = 0.001, max_tilt_deg: float = 15.0) -> dict:
     """CPU fallback for a free segment: RRT-Connect + shortcut + smoothing under the
     gate's rules, every margin *pad* larger (the gate samples the timed path at
     other points than the planner's edge checks; a corner may dip between them).
@@ -388,7 +417,9 @@ def plan_free_cpu(arm, checker, s: Segment, *, step: float = 0.01, seed: int = 0
 
     t0, stats = _t.time(), {}
     path = rrt.rrt_connect(valid, s.q_start, s.q_goal, arm.lower, arm.upper, step=step, seed=seed,
-                           max_iter=max_iter, stats=stats)
+                           max_iter=max_iter, stats=stats,
+                           extend=0.15 if frame is not None else 0.3,
+                           sampler=carry_sampler(arm, s, frame) if frame is not None else None)
     if path is not None:
         path = rrt.smooth(valid, rrt.shortcut(valid, path, step=step, seed=seed), step=step)
         s.Q = path
@@ -400,7 +431,7 @@ def plan_free_gated(arm, checker, s: Segment, motion: dict, *, tries: int = 5, *
     """:func:`plan_free_cpu`, then timed and gated as :func:`assemble` will; on a gate
     problem (e.g. a corner dipping below the margin between samples) planned again
     with the next seed. Leaves the untimed path in ``s.Q``."""
-    tilt = float(motion.get("carry_max_tilt_deg", 30.0))
+    tilt = float(motion.get("carry_max_tilt_deg", 15.0))
     r, why = {"success": False}, []
     for k in range(tries):
         r = plan_free_cpu(arm, checker, s, seed=k, max_tilt_deg=tilt, **kw)
@@ -417,7 +448,7 @@ def plan_free_gated(arm, checker, s: Segment, motion: dict, *, tries: int = 5, *
     return r
 
 
-def check_segment(arm, checker, s: Segment, step: float = 0.01, max_tilt_deg: float = 30.0) -> list:
+def check_segment(arm, checker, s: Segment, step: float = 0.01, max_tilt_deg: float = 15.0) -> list:
     """Problems of *s* on the CPU: every joint sample (densified to *step* rad) against its rules."""
     if s.Q is None or s.kind == "hold" or s.scene is None:
         return []
@@ -474,7 +505,7 @@ def assemble(world, arm, checker, segs: list) -> tuple:
         except RuntimeError as e:
             problems.append(str(e))
             continue
-        problems += check_segment(arm, checker, s, max_tilt_deg=float(mo.get("carry_max_tilt_deg", 30.0)))
+        problems += check_segment(arm, checker, s, max_tilt_deg=float(mo.get("carry_max_tilt_deg", 15.0)))
     jaw_names = sorted({k for s in segs for k in (s.joints or {})} | {k for s in segs for k in (s.joints_end or {})})
     names = list(arm.joint_names) + jaw_names
     T, Qs, out_segs, t0 = [], [], [], 0.0

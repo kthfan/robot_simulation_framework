@@ -53,6 +53,6 @@ objects:
   tray:
     generator: recessed_tray            # rsf.model.primitives
     # AI-Robotics-V2 cell_core.assets, measured from tray.usd (user 2026-11-12:
-    # keep the original setting).
-    params: {width: 0.1329, length: 0.2470, height: 0.0851, recess: 0.0025, rail: 0.0065}
+    # keep the original setting); height corrected to 130 mm (user 2026-11-19).
+    params: {width: 0.1329, length: 0.2470, height: 0.130, recess: 0.0025, rail: 0.0065}
     mass: 1.2

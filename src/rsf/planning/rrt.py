@@ -59,8 +59,12 @@ class _Tree:
 
 def rrt_connect(valid: Callable, q_start, q_goal, lower, upper, *, step: float = 0.01,
                 extend: float = 0.3, max_iter: int = 4000, seed: int = 0,
-                stats: Optional[dict] = None) -> Optional[np.ndarray]:
-    """A collision-free joint path ``q_start -> q_goal`` (rows), or ``None``."""
+                stats: Optional[dict] = None, sampler: Optional[Callable] = None) -> Optional[np.ndarray]:
+    """A collision-free joint path ``q_start -> q_goal`` (rows), or ``None``.
+
+    *sampler(rng)* proposes configurations (``None`` when it has none); by
+    default they are uniform in the joint box. A constrained problem (a held
+    object kept level) passes a sampler that only proposes valid ones."""
     rng = np.random.default_rng(seed)
     lower, upper = np.asarray(lower, float), np.asarray(upper, float)
     qs, qg = np.asarray(q_start, float), np.asarray(q_goal, float)
@@ -78,7 +82,13 @@ def rrt_connect(valid: Callable, q_start, q_goal, lower, upper, *, step: float =
         return i, b
 
     for it in range(max_iter):
-        target = qg if (not swapped and rng.random() < 0.1) else rng.uniform(lower, upper)
+        target = None
+        if not swapped and rng.random() < 0.1:
+            target = qg
+        elif sampler is not None:
+            target = sampler(rng)
+        if target is None:
+            target = rng.uniform(lower, upper)
         i, b = steer(ta, target)
         if not edge_ok(valid, ta.Q[i], b, step):
             ta, tb, swapped = tb, ta, not swapped

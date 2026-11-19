@@ -139,7 +139,9 @@ def test_tilt_motion_is_one_continuous_checked_move(with_air):
     assert carry and all(b["path_min_slack"] >= 0.0 and b["from"] is not None for b in carry)
     tm = SEQ.tilt_motion(with_air.process)
     d = tm.displacement(math.radians(with_air.process["carry_tilt_deg"]))
-    assert d < 0.050          # less than backing out 50 mm and then tilting
+    # the 130 mm tray's far end must clear the jig above while it rises
+    # (tune_tilt, 2026-11-19): 51 mm, down and back only
+    assert d == pytest.approx(0.0511, abs=0.0005)
 
 
 @pytest.mark.slow

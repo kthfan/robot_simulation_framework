@@ -101,7 +101,7 @@ JIG_X_HALF = 0.078        #: half-width of one jig along the rack width
 
 TRAY_X = 0.1329           #: tray width
 TRAY_Y = 0.2470           #: tray length (depth direction)
-TRAY_Z = 0.0851           #: tray height
+TRAY_Z = 0.130            #: tray height (user 2026-11-19; cell_core: 0.0851)
 TRAY_RECESS = 0.00250     #: underside recess over the plate corridor (measured)
 TRAY_RAIL_W = 0.0065      #: load-bearing rail width at each long edge
 TRAY_MASS = 1.2           #: kg, user-supplied
