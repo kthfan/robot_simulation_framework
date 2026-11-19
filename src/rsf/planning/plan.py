@@ -368,6 +368,89 @@ def carry_sampler(arm, s: Segment, frame, sign_joints=(2, 4), margin: float = 0.
     return sample
 
 
+def plan_carry_taskspace(arm, valid: Callable, s: Segment, *, seed: int = 0, max_iter: int = 1500,
+                         margin: float = 0.35, pos_step: float = 0.05, yaw_step: float = 0.25,
+                         yaw_weight: float = 0.3, stats: Optional[dict] = None) -> Optional[np.ndarray]:
+    """A carry that keeps the tool's tilt exactly as it was picked up: RRT-Connect over
+    the tool position and its turn about the vertical (x, y, z, yaw); every edge is
+    followed by continuous IK (5 mm / 1 deg steps) and each configuration checked by
+    *valid*. Joint configurations of the path, or None."""
+    from rsf.core import se3 as _se3
+    from .cartesian import line_poses, walk
+    T0, T1 = arm.fk(s.q_start), arm.fk(s.q_goal)
+    R0 = T0[:3, :3]
+    M = T1[:3, :3] @ R0.T
+    yaw1 = math.atan2(M[1, 0], M[0, 0])
+    if _se3.pose_error(_se3.make_T(_se3.rot_z(yaw1) @ R0, T1[:3, 3]), T1)[1] > math.radians(1.0):
+        return None                                 # the goal is not the start turned about the vertical
+    # the arm turns J1 (and the wrist) the long way when the taught joints say so
+    yaw1 += 2 * math.pi * round(((s.q_goal[0] - s.q_start[0]) - yaw1) / (2 * math.pi))
+
+    def pose(x):
+        return _se3.make_T(_se3.rot_z(x[3]) @ R0, x[:3])
+
+    def dist(a, b):
+        return float(np.linalg.norm(a[:3] - b[:3]) + yaw_weight * abs(a[3] - b[3]))
+
+    x0 = np.r_[T0[:3, 3], 0.0]
+    x1 = np.r_[T1[:3, 3], yaw1]
+    lo = np.r_[np.minimum(x0[:3], x1[:3]) - margin, min(0.0, yaw1) - math.pi / 2]
+    hi = np.r_[np.maximum(x0[:3], x1[:3]) + margin, max(0.0, yaw1) + math.pi / 2]
+    rng = np.random.default_rng(seed)
+
+    def follow(xa, qa, xb):
+        qs = walk(arm, line_poses(pose(xa), pose(xb)), qa, max_step=0.05)
+        if qs is None or not all(valid(q) for q in qs[1:]):
+            return None
+        return qs
+
+    trees = [{"x": [x0], "q": [np.asarray(s.q_start, float)], "parent": [-1], "qs": [None]},
+             {"x": [x1], "q": [np.asarray(s.q_goal, float)], "parent": [-1], "qs": [None]}]
+
+    def extend(t, target):
+        i = min(range(len(t["x"])), key=lambda k: dist(t["x"][k], target))
+        xa = t["x"][i]
+        d = target - xa
+        n = max(np.linalg.norm(d[:3]) / pos_step, abs(d[3]) / yaw_step, 1.0)
+        xb = xa + d / n
+        qs = follow(xa, t["q"][i], xb)
+        if qs is None:
+            return None
+        t["x"].append(xb), t["q"].append(qs[-1]), t["parent"].append(i), t["qs"].append(qs)
+        return len(t["x"]) - 1
+
+    def branch(t, i):
+        out = []
+        while t["parent"][i] >= 0:
+            out = t["qs"][i][1:] + out
+            i = t["parent"][i]
+        return [t["q"][0]] + out
+
+    a, b = 0, 1
+    for it in range(max_iter):
+        target = x1 if (a == 0 and rng.random() < 0.15) else rng.uniform(lo, hi)
+        ia = extend(trees[a], target)
+        if ia is not None:
+            xa = trees[a]["x"][ia]
+            while True:                              # connect the other tree toward it
+                ib = extend(trees[b], xa)
+                if ib is None:
+                    break
+                xb, qb, qa = trees[b]["x"][ib], trees[b]["q"][ib], trees[a]["q"][ia]
+                if dist(xb, xa) < 1e-9 and float(np.abs(qb - qa).max()) < 0.05:
+                    pa, pb = branch(trees[a], ia), branch(trees[b], ib)
+                    path = pa + pb[::-1][1:] if a == 0 else pb + pa[::-1][1:]
+                    if stats is not None:
+                        stats.update(iterations=it + 1, nodes=len(trees[0]["x"]) + len(trees[1]["x"]))
+                    return np.array(path)
+                if dist(xb, xa) < 1e-9:
+                    break                            # same pose, another IK branch: not joined
+        a, b = b, a
+    if stats is not None:
+        stats.update(iterations=max_iter, nodes=len(trees[0]["x"]) + len(trees[1]["x"]))
+    return None
+
+
 def carry_violation(arm, q, frame) -> Optional[str]:
     """Why *q* breaks the carry orientation (None if it does not)."""
     g_nom, c_dir, cos_max = frame
@@ -432,6 +515,12 @@ def plan_free_cpu(arm, checker, s: Segment, *, step: float = 0.01, seed: int = 0
                            max_iter=max_iter, stats=stats,
                            extend=0.15 if frame is not None else 0.3,
                            sampler=carry_sampler(arm, s, frame) if frame is not None else None)
+    if path is None and frame is not None:           # a hard carry: the tilt held exactly, only the yaw turns
+        path = plan_carry_taskspace(arm, valid, s, seed=seed, stats=stats)
+        if path is not None:
+            s.Q = path                               # dense, already continuous: no shortcutting
+            return {"success": True, "seconds": round(_t.time() - t0, 2), "checks": n["checks"],
+                    "via": len(path) - 2, "planner": "taskspace", **stats}
     if path is not None:
         path = rrt.smooth(valid, rrt.shortcut(valid, path, step=step, seed=seed), step=step)
         s.Q = path
