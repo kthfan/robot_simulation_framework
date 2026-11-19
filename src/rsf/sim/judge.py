@@ -11,7 +11,10 @@ fields) and the plan it executed:
    (during that transfer) and, with its base links, the mount it stands on;
 4. **tracking**: the flange within ``TRACK_MM`` of the plan where the plan is
    slow and close (segments with the ``in_jig`` caps);
-5. **caps**: the carried object's planned motion within the carry caps (D14).
+5. **caps**: the carried object's planned motion within the carry caps (D14);
+6. **carry tilt**: during free carries the object's simulated orientation keeps
+   gravity within ``carry_max_tilt_deg`` (+1 deg) of how it was held when the
+   carry began (user 2026-11-19: handle the tray with care).
 
 A *transfer* is a pick sequence followed by a place sequence in the trajectory
 (``pick:<from>/...``, ``place:<to>/...``). Where the carry begins and ends is
@@ -144,6 +147,7 @@ def judge(world, workflow, rep, occupancy: dict, *, carry_caps=None, traj: Optio
     report's planned flange samples (coarser: a corner between them reads
     differently with every alignment)."""
     planned = _planned_flange(world, traj) if traj is not None else None
+    max_tilt = float(((world.process.get("motion") or {}).get("carry_max_tilt_deg", 15.0)))
     seat_solids = {s.name for s in world.solids(objects=False) if "robot_seat" in s.tags}
     if carry_caps is None:
         mo = (world.process.get("motion") or {}).get("caps", {})
@@ -199,7 +203,21 @@ def judge(world, workflow, rep, occupancy: dict, *, carry_caps=None, traj: Optio
             r["caps_ok"] = (k["v"] <= carry_caps.v * 1.05 and k["a"] <= carry_caps.a * 1.05
                             and k["w"] <= carry_caps.w * 1.05 and k["alpha"] <= carry_caps.alpha * 1.05
                             and k["a_down"] <= carry_caps.a_down * 1.05)
+        # 6. the tray as it was picked up: during free carries, its simulated orientation keeps
+        #    gravity within carry_max_tilt_deg (+1 deg of simulation compliance) of the carry's start
+        tilt = 0.0
+        if tr.obj in rep.objects:
+            for sg in rep.segments:
+                if sg["kind"] == "free" and tr.carry[0] - 1e-9 <= sg["t0"] and sg["t1"] <= tr.carry[1] + 1e-9:
+                    wf = _window(rep, sg["t0"], sg["t1"])
+                    if len(wf):
+                        R = rep.objects[tr.obj][wf][:, :3, :3]
+                        g = np.einsum("nji,j->ni", R, np.array([0.0, 0.0, -1.0]))
+                        c = np.clip(g @ g[0], -1.0, 1.0)
+                        tilt = max(tilt, float(np.degrees(np.arccos(c.min()))))
+        r["carry_tilt_deg"] = tilt
         r["checks"] = {"placement": r["seat_mm"] <= SEAT_MM and r["seat_deg"] <= SEAT_DEG,
+                       "carry_tilt": tilt <= max_tilt + 1.0,
                        "slip": r["slip_mm"] <= SLIP_MM, "contacts": not bad,
                        "tracking": r["track_mm"] <= TRACK_MM, "caps": bool(r["caps_ok"])}
         r["ok"] = all(r["checks"].values())

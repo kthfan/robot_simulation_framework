@@ -66,7 +66,7 @@ def main(argv=None) -> int:
     for t in res["transfers"]:
         ch = " ".join(f"{k}:{'ok' if v else 'FAIL'}" for k, v in t["checks"].items())
         print(f"{'PASS' if t['ok'] else 'FAIL'} {t['src']} -> {t['dst']}: seat {t['seat_mm']:.2f} mm / {t['seat_deg']:.2f} deg, "
-              f"slip {t['slip_mm']:.2f} mm, track {t['track_mm']:.2f} mm  [{ch}]")
+              f"slip {t['slip_mm']:.2f} mm, track {t['track_mm']:.2f} mm, carry tilt {t['carry_tilt_deg']:.1f} deg  [{ch}]")
         for c in t["contacts"][:5]:
             print(f"     contact {c['link']} vs {c['other']}: {c['n']}x, {c['depth_mm']} mm, t {c['t_first']}..{c['t_last']}")
     for c in res["other_contacts"][:5]:

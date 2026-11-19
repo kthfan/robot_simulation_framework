@@ -79,7 +79,7 @@ def main(argv=None) -> int:
     close, wide = mj.MjvCamera(), mj.MjvCamera()
     wide.lookat[:] = world.robot.base[:3, 3] + np.array([0.0, 0.0, 0.3])
     wide.distance, wide.azimuth, wide.elevation = 2.6, 135.0, -28.0
-    close.distance, close.elevation = 0.8, -25.0
+    close.distance, close.elevation = 0.9, -8.0
     stills = {"close": [], "wide": []}
     gif, next_gif = [], [tr.t0]
 
@@ -94,9 +94,11 @@ def main(argv=None) -> int:
         if t < tr.t0 - 1e-6 or t > tr.t1 + 0.3:
             return
         f = d.xpos[cell.flange_id]
-        close.lookat[:] = f
-        # from the side of the arm's reach: radial direction + 70 deg, so the arm hides nothing
-        close.azimuth = float(np.degrees(np.arctan2(f[1] - base[1], f[0] - base[0]))) + 70.0
+        z = d.xmat[cell.flange_id].reshape(3, 3)[:, 2]          # the plate's long axis (approach)
+        close.lookat[:] = f + 0.12 * z
+        # from the tray's side, nearly level: a level tray looks level and its tilt reads true
+        # (a view along the tray foreshortens it and can make it look upright)
+        close.azimuth = float(np.degrees(np.arctan2(z[1], z[0]))) + 90.0
         for ts, label in shots.items():
             if ts not in taken and t >= ts - 1e-9:
                 taken.add(ts)
