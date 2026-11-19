@@ -81,8 +81,11 @@ def robot_spec(urdf, jaw_equal: bool = False):
     return mujoco.MjSpec.from_string(ET.tostring(root, encoding="unicode"))
 
 
-def world_spec(world, *, robot: bool = True, objects: bool = True, kp: float = 2000.0, timestep: float = 0.002):
-    """The world as an ``MjSpec`` (call ``.compile()`` for an ``MjModel``)."""
+def world_spec(world, *, robot: bool = True, objects: bool = True, kp: float = 2000.0, timestep: float = 0.002,
+               actuators: bool = True):
+    """The world as an ``MjSpec`` (call ``.compile()`` for an ``MjModel``).
+
+    ``actuators=False``: no actuators (a simulator adds its own, see ``rsf.sim``)."""
     import mujoco
     spec = mujoco.MjSpec()
     spec.modelname = world.name or "rsf_world"
@@ -106,7 +109,7 @@ def world_spec(world, *, robot: bool = True, objects: bool = True, kp: float = 2
         pos, quat = _pose(world.robot.base)
         frame = wb.add_frame(pos=pos, quat=quat)
         spec.attach(rs, frame=frame, prefix=ROBOT_PREFIX)
-        for j in spec.joints:
+        for j in (spec.joints if actuators else ()):
             if j.name.startswith(ROBOT_PREFIX) and j.type in (mujoco.mjtJoint.mjJNT_HINGE, mujoco.mjtJoint.mjJNT_SLIDE):
                 a = spec.add_actuator(name=f"{j.name}/pos", target=j.name)
                 a.trntype = mujoco.mjtTrn.mjTRN_JOINT
