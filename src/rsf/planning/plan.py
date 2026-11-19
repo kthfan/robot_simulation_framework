@@ -169,7 +169,7 @@ def segments_for_workflow(world, workflow, teach: dict, *, margin: float = 0.005
 # Jobs for the GPU (cuRobo) and their results
 # ─────────────────────────────────────────────────────────────────────────────
 def write_job(world, segs: list, path, *, margin: float = 0.005, meta: Optional[dict] = None,
-              root=None) -> dict:
+              root=None, arm=None) -> dict:
     """The free segments as a self-contained cuRobo planning job (JSON).
 
     Scenes (cuRobo dicts in the robot base frame) are stored once in
@@ -193,8 +193,16 @@ def write_job(world, segs: list, path, *, margin: float = 0.005, meta: Optional[
             name, link, solids, T = s.carried
             carried = {"link": link, "boxes": [{"name": b.name, "dims": [float(v) for v in b.shape.size],
                                                 "pose_in_link": (T @ b.T).tolist()} for b in solids]}
+        bound = None
+        if carried is not None and arm is not None:
+            # the carry cone (carry_frame) as a cuRobo ToolPoseBound: the tool-frame axis
+            # opposite gravity at the pick tilt stays within the cone of the base's vertical
+            frame = carry_frame(arm, s, float(_motion(world.process).get("carry_max_tilt_deg", 15.0)))
+            bound = {"tool_axis": [float(v) for v in -frame[0]], "reference_axis": [0.0, 0.0, 1.0],
+                     "max_angle": math.acos(max(-1.0, min(1.0, frame[2])))}
         items.append({"name": s.name, "q_start": [float(v) for v in s.q_start], "q_goal": [float(v) for v in s.q_goal],
-                      "lock_joints": {k: float(v) for k, v in s.joints.items()}, "scene": scene, "carried": carried})
+                      "lock_joints": {k: float(v) for k, v in s.joints.items()}, "scene": scene, "carried": carried,
+                      "tool_bound": bound})
     import os
     urdf = Path(world.robot.urdf).resolve()
     rel = os.path.relpath(urdf, Path(root).resolve()) if root else str(urdf)
@@ -256,11 +264,15 @@ def time_segment(arm, s: Segment, motion: dict) -> None:
             seg_d = [se3.pose_error(a, b) for a, b in zip(P, P[1:])]
             dp, dr = sum(d for d, _ in seg_d), sum(r for _, r in seg_d)
             n = len(P) - 1
+            # progress by length, each piece weighted by the cap it uses up, so the
+            # timing's speed holds everywhere (the samples need not be evenly spaced)
+            w = np.array([max(d / caps.v, r / caps.w) if caps else d + r for d, r in seg_d]) + 1e-12
+            cum = np.r_[0.0, np.cumsum(w)] / w.sum()
 
             def pose_at(u):
-                x = min(max(u, 0.0), 1.0) * n
-                i = min(int(x), n - 1)
-                return se3.interpolate(P[i], P[i + 1], x - i)
+                u = min(max(u, 0.0), 1.0)
+                i = min(int(np.searchsorted(cum, u, side="right")) - 1, n - 1)
+                return se3.interpolate(P[i], P[i + 1], (u - cum[i]) / (cum[i + 1] - cum[i]))
         t, u = TM.unit_timing(max(dp, 1e-9), dr, caps, dt)
         Q = walk(arm, [pose_at(x) for x in u], s.q_start, max_step=0.2)
         if Q is None:

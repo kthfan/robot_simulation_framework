@@ -3,7 +3,8 @@
 Input: a job written by ``rsf.planning.plan.write_job`` (``rsf.curobo_job/1``):
 the robot URDF, its base, the operating-limit margin, and per segment the start
 and goal joints, the locked joints (jaws), the scene (cuRobo cuboids, robot base
-frame, stored once in ``scenes``) and the carried object (boxes in a link frame) if any.
+frame, stored once in ``scenes``) and the carried object (boxes in a link frame) if any, and for a carry the tool
+pose bound that keeps the object as it was picked up (``tool_bound``).
 
 For every distinct (locked joints, carried object) the script writes a URDF
 variant -- joint limits moved inside by the margin, the carried object as a
@@ -100,6 +101,17 @@ def build_robot(urdf: Path, tool_frame: str, lock: dict, carried: bool = False) 
     return robot
 
 
+def set_bound(mp, tool_frame: str, bound) -> None:
+    """The segment's carry cone as a ToolPoseBound (cleared when it has none): the
+    tool axis opposite gravity at the pick tilt within ``max_angle`` of the base's
+    vertical, over the whole trajectory (trajopt; the graph planner ignores it)."""
+    from curobo.types import ToolPoseBound
+    b = None if not bound else ToolPoseBound.axis_tilt(
+        tool_axis=bound["tool_axis"], reference_axis=bound["reference_axis"],
+        max_angle=float(bound["max_angle"]), anchor="base", reference_axes="base")
+    mp.update_tool_pose_bounds({tool_frame: b})
+
+
 def job_margin(path) -> float:
     return float(json.loads(Path(path).read_text())["mesh_collision_margin"])
 
@@ -119,6 +131,7 @@ def main_diag(job: dict, segs: list, work: Path, attempts: int) -> dict:
     for s in segs:
         try:
             mp.update_world(Scene.create(s["scene"]))
+            set_bound(mp, job["tool_frame"], s.get("tool_bound"))
             q0 = torch.tensor([s["q_start"]], **dev)
             q1 = torch.tensor([s["q_goal"]], **dev)
             res = mp.plan_cspace(JointState.from_position(q1, joint_names=names),
@@ -178,6 +191,7 @@ def main(argv=None) -> int:
             rec = {"success": False}
             try:
                 mp.update_world(Scene.create(s["scene"]))
+                set_bound(mp, job["tool_frame"], s.get("tool_bound"))
                 order = list(range(len(names)))         # job joints are the arm joints in chain order
                 q0 = torch.tensor([[s["q_start"][i] for i in order]], **dev)
                 q1 = torch.tensor([[s["q_goal"][i] for i in order]], **dev)

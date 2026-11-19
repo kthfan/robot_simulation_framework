@@ -39,6 +39,10 @@ def main(argv=None) -> int:
     ap.add_argument("--allow-forward", action="store_true",
                     help="allow the flange to move forward (deeper into the shelf) during the tilt; "
                          "by default it may only go down and back (user 2026-11-13)")
+    ap.add_argument("--allowance", type=float, default=0.0,
+                    help="extra slack (m) every sample after the start must keep, so the continuous motion "
+                         "between samples keeps the clearance too (the start is fixed by the lift)")
+    ap.add_argument("--samples", type=int, default=None, help="tilt samples (default: the layout's)")
     ap.add_argument("--min-displacement", type=float, default=0.0,
                     help="skip candidates that move the flange less (m), e.g. to resume a search")
     ap.add_argument("--out")
@@ -60,7 +64,8 @@ def main(argv=None) -> int:
         """Largest forward (approach-axis) flange travel along the motion."""
         return max(m.pose(np.eye(4), tilt, u)[2, 3] for u in np.linspace(0.0, 1.0, m.samples + 1))
 
-    cands = [SEQ.TiltMotion(float(y), float(z), float(r)) for y, z, r in product(a.pivot_y, zs, rs)]
+    n_samples = a.samples or int((worlds[0].process.get("tilt_motion") or {}).get("samples", 16))
+    cands = [SEQ.TiltMotion(float(y), float(z), float(r), samples=n_samples) for y, z, r in product(a.pivot_y, zs, rs)]
     if not a.allow_forward:
         cands = [m for m in cands if forward(m) <= 1e-9]
     cands = [m for m in cands if m.displacement(tilt) >= a.min_displacement - 1e-9]
@@ -78,9 +83,13 @@ def main(argv=None) -> int:
             for f in feats:
                 phases = SEQ.pick_phases(proc, slot_of(f), tool_geometry(w))
                 res = cc._run(f.key, phases[-2:])                  # withdraw, carry (the motion)
-                ok = [x for x in res["carry"] if x["ok"]]
+                ok = [x for x in res["carry"] if x["ok"]
+                      and (x.get("path_min_slack_after_start") or 0.0) >= a.allowance - 1e-9]
                 if not ok:
-                    why = next((x.get("path") for x in res["carry"] if x.get("path")), "no passing withdraw branch")
+                    short = [x["path_min_slack_after_start"] for x in res["carry"] if x["ok"]]
+                    why = next((x.get("path") for x in res["carry"] if x.get("path")),
+                               f"slack after the start {max(short) * 1e3:.2f} mm < allowance" if short
+                               else "no passing withdraw branch")
                     fails.append((w.name, f.key, why))
                     break
                 worst = min(worst, max(x["path_min_slack"] for x in ok))

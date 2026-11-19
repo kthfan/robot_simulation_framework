@@ -58,8 +58,9 @@ def main(argv=None) -> int:
     kinds = {k: sum(s.kind == k for s in segs) for k in ("line", "path", "free", "hold")}
     print(f"{len(segs)} segments {kinds}")
     if a.cmd == "job":
-        PL.write_job(world, segs, a.out, root=ROOT, meta={"layout": a.layout, "workflow": a.workflow,
-                                                           "cycles": a.cycles, "teach": a.teach})
+        from rsf.kinematics import load_arm
+        PL.write_job(world, segs, a.out, root=ROOT, arm=load_arm(world),
+                     meta={"layout": a.layout, "workflow": a.workflow, "cycles": a.cycles, "teach": a.teach})
         print(f"job -> {a.out}")
         return 0
     from rsf.planning.teach import make_engine

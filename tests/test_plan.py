@@ -96,11 +96,18 @@ def test_jaws_close_after_lift_and_open_before_setting_down(run):
 
 def test_job_round_trip(run, tmp_path):
     world, segs, traj, problems, eng = run
-    job = PL.write_job(world, segs, tmp_path / "job.json", root=CELL.parents[1])
+    job = PL.write_job(world, segs, tmp_path / "job.json", root=CELL.parents[1], arm=eng.arm)
     assert job["robot_urdf"] == "cells/tm_tray/assets/tm5s_egu50.urdf"
     assert len(job["segments"]) == 7 and job["limit_margin_deg"] == 5.0
     carried = [s for s in job["segments"] if s["carried"]]
     assert len(carried) == 2 and len(carried[0]["carried"]["boxes"]) == 3
+    # the carry cone for cuRobo: up axis (opposite gravity at the pick tilt) within 15 deg of vertical
+    b = carried[0]["tool_bound"]
+    assert b["max_angle"] == pytest.approx(math.radians(15.0)) and b["reference_axis"] == [0.0, 0.0, 1.0]
+    s0 = next(x for x in segs if x.name == carried[0]["name"])
+    up = eng.arm.fk(s0.q_start)[:3, :3] @ np.array(b["tool_axis"])
+    assert up == pytest.approx([0.0, 0.0, 1.0], abs=1e-9)
+    assert all(s["tool_bound"] is None for s in job["segments"] if not s["carried"])
     assert len(job["scenes"]) < len(job["segments"])
     assert all("pedestal/plate" not in job["scenes"][s["scene"]]["cuboid"] for s in job["segments"])  # base mount
     fake = {s["name"]: {"success": True, "q": [s["q_start"], s["q_goal"]], "dt": 0.1} for s in job["segments"]}

@@ -7,8 +7,15 @@ imports it, so the comparisons check the port and not the outdated value.
 """
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
+
+# offscreen rendering (tests/test_vision.py): headless, the software renderer;
+# MuJoCo reads this when first imported, so it is set before any test imports it
+if "MUJOCO_GL" not in os.environ and not os.environ.get("DISPLAY"):
+    os.environ["MUJOCO_GL"] = "osmesa"
+    os.environ.setdefault("PYOPENGL_PLATFORM", "osmesa")
 
 _REF = Path(__file__).resolve().parent / "reference" / "ai_robotics_v2"
 if str(_REF) not in sys.path:

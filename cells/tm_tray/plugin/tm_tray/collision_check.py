@@ -166,15 +166,18 @@ class CellChecker:
                 out.append({"q": None, "ok": False, "score": -1.0, "from": i, "path": "no continuous IK",
                             "worst": None, "violations": [], "self": [], "groups": {}})
                 continue
-            worst, bad = None, None
+            worst, bad, after = None, None, None
             for k, q in enumerate(qs):
                 r = self.checker.check(self._q(q))
                 if r.worst is not None and (worst is None or r.worst.slack < worst.slack):
                     worst = r.worst
+                if k and r.worst is not None and (after is None or r.worst.slack < after):
+                    after = r.worst.slack                # the motion itself, past its fixed start
                 if not r.ok and bad is None:
                     bad = (k, r.violations[:1] + r.self_violations[:1])
             rec = self.judge(key, ph, qs[-1])
             rec.update({"from": i, "path_min_slack": None if worst is None else round(worst.slack, 5),
+                        "path_min_slack_after_start": None if after is None else round(after, 6),
                         "path_worst": None if worst is None else (worst.link, worst.obstacle, round(worst.distance, 5))})
             if bad is not None:
                 v = bad[1][0]
