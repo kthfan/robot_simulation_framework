@@ -64,6 +64,7 @@ def main(argv=None) -> int:
         return 0
     from rsf.planning.teach import make_engine
     eng = make_engine(world)
+    tilt = float(PL._motion(world.process).get("carry_max_tilt_deg", 30.0))
     if a.paths == "linear":
         for s in segs:
             if s.kind == "free":
@@ -71,7 +72,7 @@ def main(argv=None) -> int:
     elif a.paths == "cpu":                                    # no GPU: RRT-Connect on the CPU
         for s in segs:
             if s.kind == "free":
-                r = PL.plan_free_cpu(eng.arm, eng.checker, s)
+                r = PL.plan_free_cpu(eng.arm, eng.checker, s, max_tilt_deg=tilt)
                 print(f"  {'ok  ' if r['success'] else 'FAIL'} {s.name}: {r}", flush=True)
     else:
         bad = PL.attach_results(segs, json.loads(Path(a.paths).read_text()))
@@ -80,14 +81,14 @@ def main(argv=None) -> int:
         if a.fallback == "cpu":                               # GPU paths the gate rejects: replan
             for s in segs:
                 if s.kind == "free" and s.name not in bad and s.Q is not None:
-                    p = PL.check_segment(eng.arm, eng.checker, s)
+                    p = PL.check_segment(eng.arm, eng.checker, s, max_tilt_deg=tilt)
                     if p:
                         print(f"  gate rejects the GPU path: {p[0]}", flush=True)
                         bad.append(s.name)
         if bad and a.fallback == "cpu":                       # plan what the GPU could not
             for s in segs:
                 if s.name in bad:
-                    r = PL.plan_free_cpu(eng.arm, eng.checker, s)
+                    r = PL.plan_free_cpu(eng.arm, eng.checker, s, max_tilt_deg=tilt)
                     print(f"  cpu {'ok  ' if r['success'] else 'FAIL'} {s.name}: {r}", flush=True)
         source = {s.name: ("cpu" if s.name in bad else "gpu") for s in segs if s.kind == "free"}
     t0 = time.time()

@@ -40,6 +40,9 @@ process:
       carry:  {v: 0.25, a: 1.5, w: 0.5, alpha: 3.0, a_down: 4.0}
       empty:  {v: 0.25, a: 1.5, w: 0.5, alpha: 3.0}
     joint: {v: 1.0, a: 2.0}
+    # a free move carrying a tray keeps it on the plate: gravity within this angle of
+    # how it was picked up (the tilt-back pose), never pulling it out of the open side
+    carry_max_tilt_deg: 30.0
     jaw: {speed: 0.05, settle: 0.5}
     home: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 

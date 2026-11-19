@@ -106,3 +106,40 @@ def test_job_round_trip(run, tmp_path):
     fake = {s["name"]: {"success": True, "q": [s["q_start"], s["q_goal"]], "dt": 0.1} for s in job["segments"]}
     fake[job["segments"][0]["name"]]["success"] = False
     assert PL.attach_results(segs, fake) == [job["segments"][0]["name"]]
+
+
+def test_carry_orientation(run):
+    """A free carry may not roll the tray off the plate: J6 +60 deg rolls it."""
+    world, segs, traj, problems, eng = run
+    s = next(x for x in segs if x.kind == "free" and x.carried is not None)
+    frame = PL.carry_frame(eng.arm, s, 30.0)
+    assert PL.carry_violation(eng.arm, s.q_start, frame) is None
+    assert PL.carry_violation(eng.arm, s.q_goal, frame) is None          # set down the way it was picked
+    q = s.q_start.copy()
+    q[5] += math.radians(60.0)
+    assert "tilted" in PL.carry_violation(eng.arm, q, frame)
+    q[5] -= math.radians(45.0)                                            # 15 deg: fine
+    assert PL.carry_violation(eng.arm, q, frame) is None
+
+
+def test_carried_object_against_the_arm(run):
+    """The gate checks a carried object against the arm's own links (not those holding it)."""
+    from rsf.model.world import Shape, Solid
+    from rsf.core import se3
+    world, segs, traj, problems, eng = run
+    c = eng.checker
+    c.set_obstacles([])
+    for n in list(c.attached):
+        c.detach(n)
+    q = dict(zip(eng.arm.joint_names, [0.0, 0.0, 1.5, 0.0, 1.5, 0.0]))
+    box = Solid("blob", np.eye(4), Shape.box((0.2, 0.2, 0.2)), "", frozenset())   # crosses a link's surface
+    c.attach("held", "flange", [box], se3.make_T(None, (0.0, 0.0, 0.45)))     # in front of the gripper: clear
+    assert c.check(q).ok
+    c.detach("held")
+    poses = c.link_poses(q)
+    at_link4 = np.linalg.inv(poses["flange"]) @ poses["link_4"]
+    c.attach("held", "flange", [box], at_link4)                                # inside the forearm's wrist
+    r = c.check(q)
+    assert not r.ok and r.self_violations[0].rule == "carried vs robot"
+    assert r.self_violations[0].obstacle.startswith("link_")
+    c.detach("held")

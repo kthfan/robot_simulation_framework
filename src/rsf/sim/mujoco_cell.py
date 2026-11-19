@@ -159,8 +159,10 @@ class MujocoCell:
                         "depth": float(-c.dist)})
 
     # ── the run ────────────────────────────────────────────────────────────
-    def run(self, traj: dict, t_end: Optional[float] = None, progress=None) -> ExecReport:
-        """Replay a ``rsf.trajectory/1`` dict (``t``, ``q``, ``qd``, ``joint_names``)."""
+    def run(self, traj: dict, t_end: Optional[float] = None, progress=None, on_sample=None) -> ExecReport:
+        """Replay a ``rsf.trajectory/1`` dict (``t``, ``q``, ``qd``, ``joint_names``).
+
+        *on_sample(t, model, data)* is called at every sample (e.g. to render)."""
         mj, m, d, p = self.mj, self.m, self.d, self.p
         names = traj["joint_names"]
         T = np.asarray(traj["t"], float)
@@ -213,6 +215,8 @@ class MujocoCell:
                 mj.mj_kinematics(m, dp)
                 fp.append(_T(dp.xpos[self.flange_id], dp.xmat[self.flange_id]))
                 qs.append(d.qpos[adr].copy())
+                if on_sample is not None:
+                    on_sample(t, m, d)
                 if progress and len(ts) % 500 == 0:
                     progress(t, time.time() - wall)
             mj.mj_step(m, d)

@@ -128,7 +128,8 @@ class CoalChecker:
     """Exact distances between a robot (URDF) and a set of world solids."""
 
     def __init__(self, urdf, base, policy: ContactPolicy, *, self_pairs: Optional[Iterable] = None,
-                 self_margin: float = 0.0, cutoff: float = 0.05, tolerance: float = 1e-6):
+                 self_margin: float = 0.0, cutoff: float = 0.05, tolerance: float = 1e-6,
+                 attached_margin: Optional[float] = None):
         self.model = urdf if isinstance(urdf, UrdfModel) else UrdfModel.from_file(urdf)
         self.base = np.asarray(base, dtype=float)
         self.policy = policy
@@ -149,8 +150,12 @@ class CoalChecker:
             for link, items in self.links.items()}
         self.self_pairs = list(candidate_self_pairs(self.model) if self_pairs is None else self_pairs)
         self.attached: dict[str, tuple] = {}
+        #: clearance an attached object keeps from the robot's own links (None: the policy's default)
+        self.attached_margin = attached_margin
+        self._body = rigid_bodies(self.model)
         self.obstacles: list[_Geom] = []
         self._rule_cache: dict = {}
+        self._attached_links: dict[str, list] = {}
 
     # ── world ──────────────────────────────────────────────────────────────
     def set_obstacles(self, solids: Iterable[Solid]) -> None:
@@ -176,10 +181,16 @@ class CoalChecker:
             g, c, r = make_geometry(s.shape)
             geoms.append(_Geom(s.name, g, T @ s.T, c, r, s))
         self.attached[name] = (link, geoms)
+        # the links that hold it by design: its own rigid body and what slides on it (jaws)
+        b = self._body[link]
+        hold = {b} | {self._body[j.child] for j in self.model.joints.values()
+                      if j.type == "prismatic" and self._body[j.parent] == b}
+        self._attached_links[name] = [n for n in self._link_geoms if self._body[n] not in hold]
         self._rule_cache.clear()
 
     def detach(self, name: str) -> None:
         self.attached.pop(name, None)
+        self._attached_links.pop(name, None)
         self._rule_cache.clear()
 
     # ── queries ────────────────────────────────────────────────────────────
@@ -231,6 +242,21 @@ class CoalChecker:
                         d = signed_distance(ga.geom, Ta, gb.geom, Tb)
                         if d < self.self_margin - self.tolerance:
                             self_v.append(PairResult(a, b, d, self.self_margin, "self"))
+            # carried objects against the robot's own links (not those holding them)
+            am = self.policy.default_margin if self.attached_margin is None else self.attached_margin
+            for name, (alink, ageoms) in self.attached.items():
+                for ga in ageoms:
+                    Ta = poses[alink] @ ga.T_local
+                    ca = Ta[:3, :3] @ ga.centre + Ta[:3, 3]
+                    for b in self._attached_links.get(name, []):
+                        for gb in self._link_geoms[b]:
+                            Tb = poses[b] @ gb.T_local
+                            cb = Tb[:3, :3] @ gb.centre + Tb[:3, 3]
+                            if np.linalg.norm(ca - cb) - ga.radius - gb.radius >= am + 1e-3:
+                                continue
+                            d = signed_distance(ga.geom, Ta, gb.geom, Tb)
+                            if d < am - self.tolerance:
+                                self_v.append(PairResult(f"attached/{name}", b, d, am, "carried vs robot"))
         viol = [r for r in results if r.slack < -self.tolerance]
         worst = min(results, key=lambda r: r.slack) if results else None
         near = {}
