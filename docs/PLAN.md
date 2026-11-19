@@ -269,6 +269,11 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 
 P0–P2 先做；P3 起每個階段開始前再細化 todo。
 
+**P5（2026-11-19）**：MuJoCo 重播規劃軌跡（tray 為自由物體，摩擦、重力、接觸；手臂 PID 追蹤；夾爪剛性伺服）＋ D30 五項 judge
+（`rsf.sim`、`tools/sim_workflow.py`、`tools/render_sim.py`）。strict 第一個 cycle 2/2 通過（放置 0.25 mm、滑移 0.45 mm）；
+推板摩擦降到 0.1 仍通過（tray 靠在推板上，不靠摩擦）。全流程模擬找到 P4 的漏洞：free 攜帶動作未限制工具姿態，8/24 段 tray 傾斜超過 30°，
+其中一段 tray 掉落；攜帶速度上限缺角速度。已加入攜帶姿態限制（`carry_max_tilt_deg`）、攜帶物對手臂本身的碰撞檢查、角速度上限。見 `docs/p5_sim.md`。
+
 **P4（2026-11-16）**：關節運轉餘裕 5°（URDF 極限內縮，`robot.limit_margin_deg`）；workflow → segments（free/line/path/hold）→ 計時 → CPU gate →
 `rsf.trajectory/1`（`tools/plan_workflow.py`）。點位改為整個 run 同一手臂組態（J3 −1、J5 +1，自動選擇）並以整圈調整讓 sequence 間移動最少
 （原本取料/放料分支不同，攜帶 tray 時 elbow/wrist 翻轉）。free move：cuRobo job（`tools/kaggle/curobo_free_plan.py`）或 CPU fallback。
