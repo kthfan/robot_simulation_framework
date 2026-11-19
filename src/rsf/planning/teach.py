@@ -491,6 +491,31 @@ def teach_workflow(world, workflow, engine: Optional[TeachEngine] = None, progre
         tasks.append({"index": t.index, "cycle": t.cycle, "skill": t.skill, "args": t.args, "sequences": names})
     prefer = resolve_prefer(world, engine, list(explored.values()))
     seqs = {name: engine.select(e, prefer) for name, e in explored.items()}
+    # A sequence that ends holding an object must hand over to the next one in the same
+    # arm configuration: the configuration may change only with the gripper empty. If the
+    # next one needs another configuration (a slot the preferred one cannot serve), the
+    # earlier sequence is taught again in that configuration, for that task only.
+    for t in tasks:
+        names = t["sequences"]
+        for i in range(len(names) - 1):
+            a, b = names[i], names[i + 1]
+            ra, rb = seqs.get(a), seqs.get(b)
+            if not (ra and rb and ra.ok and rb.ok) or not explored[a].seq.waypoints[-1].scene.attached:
+                continue
+            want = rb.points[0].branch
+            if ra.points[-1].branch == want:
+                continue
+            var = f"{a}#" + ",".join(f"{k}{v:+d}" for k, v in sorted(want.items()))
+            if var not in seqs:
+                r = engine.select(explored[a], dict(prefer or {}, branch=dict(want)))
+                if r.ok and r.points[-1].branch == want:
+                    r.sequence = var
+                    for p in r.points:
+                        p.sequence = var
+                    r.meta = dict(r.meta, variant_of=a, branch=dict(want))
+                    seqs[var] = r
+            if var in seqs:
+                names[i] = var
     order = [n for t in tasks for n in t["sequences"]]
     home = None if not prefer or prefer.get("q_ref") is None else np.asarray(prefer["q_ref"], float)
     align_turns(engine, seqs, order, home)

@@ -38,7 +38,9 @@ def load(a):
         wf.max_cycles = a.cycles
     doc = json.loads(Path(a.teach).read_text())
     teach = {s["sequence"]: s["points"] for s in doc["sequences"]}
-    return world, wf, PL.segments_for_workflow(world, wf, teach)
+    tasks = (doc.get("meta") or {}).get("tasks")
+    used = [t["sequences"] for t in tasks] if tasks and not a.cycles else None
+    return world, wf, PL.segments_for_workflow(world, wf, teach, task_sequences=used)
 
 
 def main(argv=None) -> int:

@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import json
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -93,7 +93,8 @@ def free_policy(margin: float) -> ContactPolicy:
                                               label="base on its mount")])
 
 
-def segments_for_workflow(world, workflow, teach: dict, *, margin: float = 0.005) -> list:
+def segments_for_workflow(world, workflow, teach: dict, *, margin: float = 0.005,
+                          task_sequences: Optional[list] = None) -> list:
     """The run's segments, from the workflow and its teach table (``teach_workflow`` JSON).
 
     *teach* maps sequence name -> point list. Free segments get their start
@@ -124,12 +125,15 @@ def segments_for_workflow(world, workflow, teach: dict, *, margin: float = 0.005
                             carried=None if held is None else held[:4]))
         q = np.array(q_goal, float)
 
-    for task in ex.tasks:
+    for k_task, task in enumerate(ex.tasks):
+        used = None if task_sequences is None or k_task >= len(task_sequences) else task_sequences[k_task]
         if task.skill not in registry.names("skill"):
             segs.append(Segment(f"hold:{task.skill}", "hold", dict(jaws or {}), duration=0.0,
                                 event=f"{task.skill} {task.args}"))
             continue
-        for seq in registry.get("skill", task.skill)(world, task.args):
+        for k_seq, seq in enumerate(registry.get("skill", task.skill)(world, task.args)):
+            if used and k_seq < len(used) and used[k_seq] != seq.name:   # a taught variant (teach_workflow)
+                seq = replace(seq, name=used[k_seq])
             pts = {p["name"]: p for p in teach[seq.name]}
             wps = seq.waypoints
             for i, wp in enumerate(wps):
@@ -226,6 +230,9 @@ def attach_results(segs: list, results: dict) -> list:
             bad.append(s.name)
             continue
         Q = np.array(r["q"], float)
+        if float(np.abs(Q[0] - s.q_start).max()) > 1e-3 or float(np.abs(Q[-1] - s.q_goal).max()) > 1e-3:
+            bad.append(s.name)                       # planned for other ends (a stale result)
+            continue
         Q[0], Q[-1] = s.q_start, s.q_goal
         s.Q = Q
     return bad
@@ -349,7 +356,8 @@ def carry_sampler(arm, s: Segment, frame, sign_joints=(2, 4), margin: float = 0.
     T0, T1 = arm.fk(s.q_start), arm.fk(s.q_goal)
     lo = np.minimum(T0[:3, 3], T1[:3, 3]) - margin
     hi = np.maximum(T0[:3, 3], T1[:3, 3]) + margin
-    branch = tuple(int(np.sign(s.q_start[j]) or 1) for j in sign_joints)
+    sig = lambda q: tuple(int(np.sign(q[j]) or 1) for j in sign_joints)   # noqa: E731
+    branches = [sig(s.q_start), sig(s.q_goal)]       # a carry may have to flip the wrist on the way
     cos_max = frame[2]
     half = 0.5 * math.acos(max(-1.0, min(1.0, cos_max)))
 
@@ -359,7 +367,8 @@ def carry_sampler(arm, s: Segment, frame, sign_joints=(2, 4), margin: float = 0.
         ax = np.array([ax[0], ax[1], 0.0]) / max(np.linalg.norm(ax), 1e-12)
         R = _se3.axis_angle(ax, rng.uniform(0.0, half)) @ R
         T = _se3.make_T(R, rng.uniform(lo, hi))
-        sols = [q for q in arm.ik(T) if tuple(int(np.sign(q[j]) or 1) for j in sign_joints) == branch]
+        branch = branches[int(rng.integers(len(branches)))]
+        sols = [q for q in arm.ik(T) if sig(q) == branch]
         if not sols:
             return None
         ref = s.q_start + (s.q_goal - s.q_start) * rng.random()

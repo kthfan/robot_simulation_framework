@@ -105,7 +105,8 @@ def transfers(world, workflow, segments: list, occupancy: dict, *,
         k = j
         while k < len(rows) and rows[k][0] == rows[j][0]:
             k += 1
-        src, dst = name[len("pick:"):], rows[j][0][len("place:"):]
+        # a taught variant ("pick:<slot>#<configuration>") is the same slot
+        src, dst = name[len("pick:"):].split("#")[0], rows[j][0][len("place:"):].split("#")[0]
         pick, place = rows[i:j], rows[j:k]
         c0 = next((s["t1"] for _, ph, s in pick if s["name"].endswith(carry_from)), pick[-1][2]["t1"])
         c1 = next((s["t0"] for _, ph, s in place if ph == carry_to and not s["name"].endswith(":act")),
@@ -114,7 +115,7 @@ def transfers(world, workflow, segments: list, occupancy: dict, *,
         if obj is not None:
             occ[dst] = obj
         tmpl = world.object_at(dst)
-        seat = planned_object_pose(world, seqs[rows[j][0]], tmpl) if tmpl is not None else None
+        seat = planned_object_pose(world, seqs[rows[j][0].split("#")[0]], tmpl) if tmpl is not None else None
         out.append(Transfer(src, dst, obj, pick[0][2]["t0"], place[-1][2]["t1"], (c0, c1),
                             tmpl.T if seat is None else seat))
         i = k

@@ -71,7 +71,7 @@ def test_pick_jaws_and_motions(taught):
     assert len(pts["insert"].joints) == 2
     assert pts["push"].clearance == pytest.approx(0.0, abs=1e-6)                # touching the tray
     assert pts["insert"].clearance == pytest.approx(0.002, abs=1e-5)             # 2 mm short (push plate)
-    assert pts["carry"].along_samples == 16
+    assert pts["carry"].along_samples == 64                  # process.tilt_motion.samples (130 mm tray)
 
 
 def test_tilt_motion_keeps_its_clearance(taught, world):
@@ -105,9 +105,16 @@ def test_workflow_teaches_each_motion_once(world, engine):
     assert all(r.ok for r in res["sequences"].values())
     assert [t["skill"] for t in res["tasks"][:3]] == ["tm_tray.transfer", "wait", "tm_tray.transfer"]
     # one arm configuration for the whole run, so free moves never flip the elbow or the wrist
-    assert res["prefer"]["branch"] == {"joint_3": -1, "joint_5": 1}
-    sigs = {tuple(p.branch.values()) for r in res["sequences"].values() for p in r.points}
-    assert sigs == {(-1, 1)}
+    # the configuration every sequence can use (chosen automatically for this run)
+    pref = tuple(res["prefer"]["branch"].values())
+    sigs = {tuple(p.branch.values()) for n, r in res["sequences"].items() if "#" not in n for p in r.points}
+    assert sigs == {pref}
+    # the configuration changes only with the gripper empty: a sequence that ends holding the
+    # tray hands over to the next in the same configuration (a taught "#" variant if need be)
+    for t in res["tasks"]:
+        for a, b in zip(t["sequences"], t["sequences"][1:]):
+            if a.startswith("pick:"):
+                assert res["sequences"][a].points[-1].branch == res["sequences"][b].points[0].branch, (a, b)
     # whole turns chosen for the run: no joint turns (nearly) a full turn between sequences
     q = np.zeros(6)
     for n in names:
