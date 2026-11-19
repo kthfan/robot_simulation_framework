@@ -1,7 +1,7 @@
 {
  "schema": "rsf.trajectory_summary/1",
- "duration": 1075.684,
- "samples": 79730,
+ "duration": 1101.57,
+ "samples": 79723,
  "segments": [
   {
    "name": "free001:pick:incoming/L2/C0/sight_far",
@@ -111,3839 +111,3839 @@
    "name": "free003:place:table/L0/C0/carry",
    "kind": "free",
    "t0": 19.0183,
-   "t1": 28.0511,
+   "t1": 29.5058,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/withdraw",
    "kind": "path",
-   "t0": 28.0511,
-   "t1": 29.3483,
+   "t0": 29.5058,
+   "t1": 30.803,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift",
    "kind": "line",
-   "t0": 29.3483,
-   "t1": 34.3176,
+   "t0": 30.803,
+   "t1": 35.7723,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift:act",
    "kind": "hold",
-   "t0": 34.3176,
-   "t1": 35.1451,
+   "t0": 35.7723,
+   "t1": 36.5998,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:table/L0/C0/place_down",
    "kind": "line",
-   "t0": 35.1451,
-   "t1": 35.7701,
+   "t0": 36.5998,
+   "t1": 37.2248,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_down:act",
    "kind": "hold",
-   "t0": 35.7701,
-   "t1": 35.7701,
+   "t0": 37.2248,
+   "t1": 37.2248,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:table/L0/C0/retreat",
    "kind": "line",
-   "t0": 35.7701,
-   "t1": 40.7395,
+   "t0": 37.2248,
+   "t1": 42.1942,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "hold:wait",
    "kind": "hold",
-   "t0": 40.7395,
-   "t1": 40.7395,
+   "t0": 42.1942,
+   "t1": 42.1942,
    "caps": null,
    "event": "wait {'signal': 'inspection_done'}"
   },
   {
    "name": "free004:pick:table/L0/C0/sight_far",
    "kind": "free",
-   "t0": 40.7395,
-   "t1": 41.876,
+   "t0": 42.1942,
+   "t1": 43.3307,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_far:act",
    "kind": "hold",
-   "t0": 41.876,
-   "t1": 41.876,
+   "t0": 43.3307,
+   "t1": 43.3307,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:table/L0/C0/sight_near",
    "kind": "line",
-   "t0": 41.876,
-   "t1": 42.3355,
+   "t0": 43.3307,
+   "t1": 43.7902,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_near:act",
    "kind": "hold",
-   "t0": 42.3355,
-   "t1": 42.3355,
+   "t0": 43.7902,
+   "t1": 43.7902,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free005:pick:table/L0/C0/pre_insert",
    "kind": "free",
-   "t0": 42.3355,
-   "t1": 44.3184,
+   "t0": 43.7902,
+   "t1": 45.7731,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/insert",
    "kind": "line",
-   "t0": 44.3184,
-   "t1": 49.2478,
+   "t0": 45.7731,
+   "t1": 50.7025,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push",
    "kind": "line",
-   "t0": 49.2478,
-   "t1": 49.5576,
+   "t0": 50.7025,
+   "t1": 51.0123,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push:act",
    "kind": "hold",
-   "t0": 49.5576,
-   "t1": 49.5576,
+   "t0": 51.0123,
+   "t1": 51.0123,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:table/L0/C0/lift",
    "kind": "line",
-   "t0": 49.5576,
-   "t1": 50.1826,
+   "t0": 51.0123,
+   "t1": 51.6373,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/lift:act",
    "kind": "hold",
-   "t0": 50.1826,
-   "t1": 51.0101,
+   "t0": 51.6373,
+   "t1": 52.4648,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:table/L0/C0/withdraw",
    "kind": "line",
-   "t0": 51.0101,
-   "t1": 56.0595,
+   "t0": 52.4648,
+   "t1": 57.5142,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry",
    "kind": "path",
-   "t0": 56.0595,
-   "t1": 57.3567,
+   "t0": 57.5142,
+   "t1": 58.8114,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry:act",
    "kind": "hold",
-   "t0": 57.3567,
-   "t1": 57.3567,
+   "t0": 58.8114,
+   "t1": 58.8114,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free006:place:outgoing/L0/C0/carry",
    "kind": "free",
-   "t0": 57.3567,
-   "t1": 63.764,
+   "t0": 58.8114,
+   "t1": 65.2187,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C0/withdraw",
    "kind": "path",
-   "t0": 63.764,
-   "t1": 65.0612,
+   "t0": 65.2187,
+   "t1": 66.5159,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C0/place_lift",
    "kind": "line",
-   "t0": 65.0612,
-   "t1": 70.0306,
+   "t0": 66.5159,
+   "t1": 71.4853,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C0/place_lift:act",
    "kind": "hold",
-   "t0": 70.0306,
-   "t1": 70.8581,
+   "t0": 71.4853,
+   "t1": 72.3128,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:outgoing/L0/C0/place_down",
    "kind": "line",
-   "t0": 70.8581,
-   "t1": 71.4831,
+   "t0": 72.3128,
+   "t1": 72.9378,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C0/place_down:act",
    "kind": "hold",
-   "t0": 71.4831,
-   "t1": 71.4831,
+   "t0": 72.9378,
+   "t1": 72.9378,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:outgoing/L0/C0/retreat",
    "kind": "line",
-   "t0": 71.4831,
-   "t1": 76.4525,
+   "t0": 72.9378,
+   "t1": 77.9072,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "free007:pick:incoming/L2/C1/sight_far",
    "kind": "free",
-   "t0": 76.4525,
-   "t1": 84.2608,
+   "t0": 77.9072,
+   "t1": 85.7155,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C1/sight_far:act",
    "kind": "hold",
-   "t0": 84.2608,
-   "t1": 84.2608,
+   "t0": 85.7155,
+   "t1": 85.7155,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:incoming/L2/C1/sight_near",
    "kind": "line",
-   "t0": 84.2608,
-   "t1": 84.7203,
+   "t0": 85.7155,
+   "t1": 86.175,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C1/sight_near:act",
    "kind": "hold",
-   "t0": 84.7203,
-   "t1": 84.7203,
+   "t0": 86.175,
+   "t1": 86.175,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free008:pick:incoming/L2/C1/pre_insert",
    "kind": "free",
-   "t0": 84.7203,
-   "t1": 86.9687,
+   "t0": 86.175,
+   "t1": 88.4234,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C1/insert",
    "kind": "line",
-   "t0": 86.9687,
-   "t1": 91.8981,
+   "t0": 88.4234,
+   "t1": 93.3528,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C1/push",
    "kind": "line",
-   "t0": 91.8981,
-   "t1": 92.2079,
+   "t0": 93.3528,
+   "t1": 93.6626,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C1/push:act",
    "kind": "hold",
-   "t0": 92.2079,
-   "t1": 92.2079,
+   "t0": 93.6626,
+   "t1": 93.6626,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:incoming/L2/C1/lift",
    "kind": "line",
-   "t0": 92.2079,
-   "t1": 92.8329,
+   "t0": 93.6626,
+   "t1": 94.2876,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C1/lift:act",
    "kind": "hold",
-   "t0": 92.8329,
-   "t1": 93.6604,
+   "t0": 94.2876,
+   "t1": 95.1151,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:incoming/L2/C1/withdraw",
    "kind": "line",
-   "t0": 93.6604,
-   "t1": 98.7098,
+   "t0": 95.1151,
+   "t1": 100.1645,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C1/carry",
    "kind": "path",
-   "t0": 98.7098,
-   "t1": 100.007,
+   "t0": 100.1645,
+   "t1": 101.4617,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C1/carry:act",
    "kind": "hold",
-   "t0": 100.007,
-   "t1": 100.007,
+   "t0": 101.4617,
+   "t1": 101.4617,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free009:place:table/L0/C0/carry",
    "kind": "free",
-   "t0": 100.007,
-   "t1": 108.3587,
+   "t0": 101.4617,
+   "t1": 113.1232,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/withdraw",
    "kind": "path",
-   "t0": 108.3587,
-   "t1": 109.6559,
+   "t0": 113.1232,
+   "t1": 114.4204,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift",
    "kind": "line",
-   "t0": 109.6559,
-   "t1": 114.6253,
+   "t0": 114.4204,
+   "t1": 119.3898,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift:act",
    "kind": "hold",
-   "t0": 114.6253,
-   "t1": 115.4528,
+   "t0": 119.3898,
+   "t1": 120.2173,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:table/L0/C0/place_down",
    "kind": "line",
-   "t0": 115.4528,
-   "t1": 116.0778,
+   "t0": 120.2173,
+   "t1": 120.8423,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_down:act",
    "kind": "hold",
-   "t0": 116.0778,
-   "t1": 116.0778,
+   "t0": 120.8423,
+   "t1": 120.8423,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:table/L0/C0/retreat",
    "kind": "line",
-   "t0": 116.0778,
-   "t1": 121.0472,
+   "t0": 120.8423,
+   "t1": 125.8117,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "hold:wait",
    "kind": "hold",
-   "t0": 121.0472,
-   "t1": 121.0472,
+   "t0": 125.8117,
+   "t1": 125.8117,
    "caps": null,
    "event": "wait {'signal': 'inspection_done'}"
   },
   {
    "name": "free010:pick:table/L0/C0/sight_far",
    "kind": "free",
-   "t0": 121.0472,
-   "t1": 122.1837,
+   "t0": 125.8117,
+   "t1": 126.9481,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_far:act",
    "kind": "hold",
-   "t0": 122.1837,
-   "t1": 122.1837,
+   "t0": 126.9481,
+   "t1": 126.9481,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:table/L0/C0/sight_near",
    "kind": "line",
-   "t0": 122.1837,
-   "t1": 122.6431,
+   "t0": 126.9481,
+   "t1": 127.4076,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_near:act",
    "kind": "hold",
-   "t0": 122.6431,
-   "t1": 122.6431,
+   "t0": 127.4076,
+   "t1": 127.4076,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free011:pick:table/L0/C0/pre_insert",
    "kind": "free",
-   "t0": 122.6431,
-   "t1": 124.6261,
+   "t0": 127.4076,
+   "t1": 129.3905,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/insert",
    "kind": "line",
-   "t0": 124.6261,
-   "t1": 129.5554,
+   "t0": 129.3905,
+   "t1": 134.3199,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push",
    "kind": "line",
-   "t0": 129.5554,
-   "t1": 129.8653,
+   "t0": 134.3199,
+   "t1": 134.6298,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push:act",
    "kind": "hold",
-   "t0": 129.8653,
-   "t1": 129.8653,
+   "t0": 134.6298,
+   "t1": 134.6298,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:table/L0/C0/lift",
    "kind": "line",
-   "t0": 129.8653,
-   "t1": 130.4903,
+   "t0": 134.6298,
+   "t1": 135.2548,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/lift:act",
    "kind": "hold",
-   "t0": 130.4903,
-   "t1": 131.3178,
+   "t0": 135.2548,
+   "t1": 136.0823,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:table/L0/C0/withdraw",
    "kind": "line",
-   "t0": 131.3178,
-   "t1": 136.3671,
+   "t0": 136.0823,
+   "t1": 141.1316,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry",
    "kind": "path",
-   "t0": 136.3671,
-   "t1": 137.6643,
+   "t0": 141.1316,
+   "t1": 142.4288,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry:act",
    "kind": "hold",
-   "t0": 137.6643,
-   "t1": 137.6643,
+   "t0": 142.4288,
+   "t1": 142.4288,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free012:place:outgoing/L0/C1/carry",
    "kind": "free",
-   "t0": 137.6643,
-   "t1": 144.4173,
+   "t0": 142.4288,
+   "t1": 149.1818,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C1/withdraw",
    "kind": "path",
-   "t0": 144.4173,
-   "t1": 145.7145,
+   "t0": 149.1818,
+   "t1": 150.479,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C1/place_lift",
    "kind": "line",
-   "t0": 145.7145,
-   "t1": 150.6838,
+   "t0": 150.479,
+   "t1": 155.4483,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C1/place_lift:act",
    "kind": "hold",
-   "t0": 150.6838,
-   "t1": 151.5113,
+   "t0": 155.4483,
+   "t1": 156.2758,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:outgoing/L0/C1/place_down",
    "kind": "line",
-   "t0": 151.5113,
-   "t1": 152.1363,
+   "t0": 156.2758,
+   "t1": 156.9008,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C1/place_down:act",
    "kind": "hold",
-   "t0": 152.1363,
-   "t1": 152.1363,
+   "t0": 156.9008,
+   "t1": 156.9008,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:outgoing/L0/C1/retreat",
    "kind": "line",
-   "t0": 152.1363,
-   "t1": 157.1057,
+   "t0": 156.9008,
+   "t1": 161.8702,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "free013:pick:incoming/L2/C2/sight_far",
    "kind": "free",
-   "t0": 157.1057,
-   "t1": 164.553,
+   "t0": 161.8702,
+   "t1": 169.3175,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C2/sight_far:act",
    "kind": "hold",
-   "t0": 164.553,
-   "t1": 164.553,
+   "t0": 169.3175,
+   "t1": 169.3175,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:incoming/L2/C2/sight_near",
    "kind": "line",
-   "t0": 164.553,
-   "t1": 165.0125,
+   "t0": 169.3175,
+   "t1": 169.777,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C2/sight_near:act",
    "kind": "hold",
-   "t0": 165.0125,
-   "t1": 165.0125,
+   "t0": 169.777,
+   "t1": 169.777,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free014:pick:incoming/L2/C2/pre_insert",
    "kind": "free",
-   "t0": 165.0125,
-   "t1": 167.2711,
+   "t0": 169.777,
+   "t1": 172.0355,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C2/insert",
    "kind": "line",
-   "t0": 167.2711,
-   "t1": 172.2004,
+   "t0": 172.0355,
+   "t1": 176.9649,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C2/push",
    "kind": "line",
-   "t0": 172.2004,
-   "t1": 172.5103,
+   "t0": 176.9649,
+   "t1": 177.2748,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C2/push:act",
    "kind": "hold",
-   "t0": 172.5103,
-   "t1": 172.5103,
+   "t0": 177.2748,
+   "t1": 177.2748,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:incoming/L2/C2/lift",
    "kind": "line",
-   "t0": 172.5103,
-   "t1": 173.1353,
+   "t0": 177.2748,
+   "t1": 177.8998,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C2/lift:act",
    "kind": "hold",
-   "t0": 173.1353,
-   "t1": 173.9628,
+   "t0": 177.8998,
+   "t1": 178.7273,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:incoming/L2/C2/withdraw",
    "kind": "line",
-   "t0": 173.9628,
-   "t1": 179.0121,
+   "t0": 178.7273,
+   "t1": 183.7766,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C2/carry",
    "kind": "path",
-   "t0": 179.0121,
-   "t1": 180.3093,
+   "t0": 183.7766,
+   "t1": 185.0738,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C2/carry:act",
    "kind": "hold",
-   "t0": 180.3093,
-   "t1": 180.3093,
+   "t0": 185.0738,
+   "t1": 185.0738,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free015:place:table/L0/C0/carry",
    "kind": "free",
-   "t0": 180.3093,
-   "t1": 189.4711,
+   "t0": 185.0738,
+   "t1": 196.3921,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/withdraw",
    "kind": "path",
-   "t0": 189.4711,
-   "t1": 190.7683,
+   "t0": 196.3921,
+   "t1": 197.6893,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift",
    "kind": "line",
-   "t0": 190.7683,
-   "t1": 195.7377,
+   "t0": 197.6893,
+   "t1": 202.6586,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift:act",
    "kind": "hold",
-   "t0": 195.7377,
-   "t1": 196.5652,
+   "t0": 202.6586,
+   "t1": 203.4861,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:table/L0/C0/place_down",
    "kind": "line",
-   "t0": 196.5652,
-   "t1": 197.1902,
+   "t0": 203.4861,
+   "t1": 204.1111,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_down:act",
    "kind": "hold",
-   "t0": 197.1902,
-   "t1": 197.1902,
+   "t0": 204.1111,
+   "t1": 204.1111,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:table/L0/C0/retreat",
    "kind": "line",
-   "t0": 197.1902,
-   "t1": 202.1596,
+   "t0": 204.1111,
+   "t1": 209.0805,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "hold:wait",
    "kind": "hold",
-   "t0": 202.1596,
-   "t1": 202.1596,
+   "t0": 209.0805,
+   "t1": 209.0805,
    "caps": null,
    "event": "wait {'signal': 'inspection_done'}"
   },
   {
    "name": "free016:pick:table/L0/C0/sight_far",
    "kind": "free",
-   "t0": 202.1596,
-   "t1": 203.2961,
+   "t0": 209.0805,
+   "t1": 210.217,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_far:act",
    "kind": "hold",
-   "t0": 203.2961,
-   "t1": 203.2961,
+   "t0": 210.217,
+   "t1": 210.217,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:table/L0/C0/sight_near",
    "kind": "line",
-   "t0": 203.2961,
-   "t1": 203.7555,
+   "t0": 210.217,
+   "t1": 210.6765,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_near:act",
    "kind": "hold",
-   "t0": 203.7555,
-   "t1": 203.7555,
+   "t0": 210.6765,
+   "t1": 210.6765,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free017:pick:table/L0/C0/pre_insert",
    "kind": "free",
-   "t0": 203.7555,
-   "t1": 205.7385,
+   "t0": 210.6765,
+   "t1": 212.6594,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/insert",
    "kind": "line",
-   "t0": 205.7385,
-   "t1": 210.6678,
+   "t0": 212.6594,
+   "t1": 217.5888,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push",
    "kind": "line",
-   "t0": 210.6678,
-   "t1": 210.9777,
+   "t0": 217.5888,
+   "t1": 217.8986,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push:act",
    "kind": "hold",
-   "t0": 210.9777,
-   "t1": 210.9777,
+   "t0": 217.8986,
+   "t1": 217.8986,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:table/L0/C0/lift",
    "kind": "line",
-   "t0": 210.9777,
-   "t1": 211.6027,
+   "t0": 217.8986,
+   "t1": 218.5236,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/lift:act",
    "kind": "hold",
-   "t0": 211.6027,
-   "t1": 212.4302,
+   "t0": 218.5236,
+   "t1": 219.3511,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:table/L0/C0/withdraw",
    "kind": "line",
-   "t0": 212.4302,
-   "t1": 217.4796,
+   "t0": 219.3511,
+   "t1": 224.4005,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry",
    "kind": "path",
-   "t0": 217.4796,
-   "t1": 218.7768,
+   "t0": 224.4005,
+   "t1": 225.6977,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry:act",
    "kind": "hold",
-   "t0": 218.7768,
-   "t1": 218.7768,
+   "t0": 225.6977,
+   "t1": 225.6977,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free018:place:outgoing/L0/C2/carry",
    "kind": "free",
-   "t0": 218.7768,
-   "t1": 225.2815,
+   "t0": 225.6977,
+   "t1": 232.2024,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C2/withdraw",
    "kind": "path",
-   "t0": 225.2815,
-   "t1": 226.5787,
+   "t0": 232.2024,
+   "t1": 233.4996,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C2/place_lift",
    "kind": "line",
-   "t0": 226.5787,
-   "t1": 231.548,
+   "t0": 233.4996,
+   "t1": 238.469,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C2/place_lift:act",
    "kind": "hold",
-   "t0": 231.548,
-   "t1": 232.3755,
+   "t0": 238.469,
+   "t1": 239.2965,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:outgoing/L0/C2/place_down",
    "kind": "line",
-   "t0": 232.3755,
-   "t1": 233.0005,
+   "t0": 239.2965,
+   "t1": 239.9215,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C2/place_down:act",
    "kind": "hold",
-   "t0": 233.0005,
-   "t1": 233.0005,
+   "t0": 239.9215,
+   "t1": 239.9215,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:outgoing/L0/C2/retreat",
    "kind": "line",
-   "t0": 233.0005,
-   "t1": 237.9699,
+   "t0": 239.9215,
+   "t1": 244.8908,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "free019:pick:incoming/L2/C3/sight_far",
    "kind": "free",
-   "t0": 237.9699,
-   "t1": 243.2073,
+   "t0": 244.8908,
+   "t1": 250.1283,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C3/sight_far:act",
    "kind": "hold",
-   "t0": 243.2073,
-   "t1": 243.2073,
+   "t0": 250.1283,
+   "t1": 250.1283,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:incoming/L2/C3/sight_near",
    "kind": "line",
-   "t0": 243.2073,
-   "t1": 243.6668,
+   "t0": 250.1283,
+   "t1": 250.5877,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C3/sight_near:act",
    "kind": "hold",
-   "t0": 243.6668,
-   "t1": 243.6668,
+   "t0": 250.5877,
+   "t1": 250.5877,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free020:pick:incoming/L2/C3/pre_insert",
    "kind": "free",
-   "t0": 243.6668,
-   "t1": 245.8343,
+   "t0": 250.5877,
+   "t1": 252.7553,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C3/insert",
    "kind": "line",
-   "t0": 245.8343,
-   "t1": 250.7637,
+   "t0": 252.7553,
+   "t1": 257.6846,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C3/push",
    "kind": "line",
-   "t0": 250.7637,
-   "t1": 251.0736,
+   "t0": 257.6846,
+   "t1": 257.9945,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C3/push:act",
    "kind": "hold",
-   "t0": 251.0736,
-   "t1": 251.0736,
+   "t0": 257.9945,
+   "t1": 257.9945,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:incoming/L2/C3/lift",
    "kind": "line",
-   "t0": 251.0736,
-   "t1": 251.6986,
+   "t0": 257.9945,
+   "t1": 258.6195,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C3/lift:act",
    "kind": "hold",
-   "t0": 251.6986,
-   "t1": 252.5261,
+   "t0": 258.6195,
+   "t1": 259.447,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:incoming/L2/C3/withdraw",
    "kind": "line",
-   "t0": 252.5261,
-   "t1": 257.5754,
+   "t0": 259.447,
+   "t1": 264.4964,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C3/carry",
    "kind": "path",
-   "t0": 257.5754,
-   "t1": 258.8726,
+   "t0": 264.4964,
+   "t1": 265.7936,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L2/C3/carry:act",
    "kind": "hold",
-   "t0": 258.8726,
-   "t1": 258.8726,
+   "t0": 265.7936,
+   "t1": 265.7936,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free021:place:table/L0/C0/carry",
    "kind": "free",
-   "t0": 258.8726,
-   "t1": 269.5667,
+   "t0": 265.7936,
+   "t1": 280.3033,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/withdraw",
    "kind": "path",
-   "t0": 269.5667,
-   "t1": 270.8639,
+   "t0": 280.3033,
+   "t1": 281.6005,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift",
    "kind": "line",
-   "t0": 270.8639,
-   "t1": 275.8333,
+   "t0": 281.6005,
+   "t1": 286.5698,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift:act",
    "kind": "hold",
-   "t0": 275.8333,
-   "t1": 276.6608,
+   "t0": 286.5698,
+   "t1": 287.3973,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:table/L0/C0/place_down",
    "kind": "line",
-   "t0": 276.6608,
-   "t1": 277.2858,
+   "t0": 287.3973,
+   "t1": 288.0223,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_down:act",
    "kind": "hold",
-   "t0": 277.2858,
-   "t1": 277.2858,
+   "t0": 288.0223,
+   "t1": 288.0223,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:table/L0/C0/retreat",
    "kind": "line",
-   "t0": 277.2858,
-   "t1": 282.2552,
+   "t0": 288.0223,
+   "t1": 292.9917,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "hold:wait",
    "kind": "hold",
-   "t0": 282.2552,
-   "t1": 282.2552,
+   "t0": 292.9917,
+   "t1": 292.9917,
    "caps": null,
    "event": "wait {'signal': 'inspection_done'}"
   },
   {
    "name": "free022:pick:table/L0/C0/sight_far",
    "kind": "free",
-   "t0": 282.2552,
-   "t1": 283.3917,
+   "t0": 292.9917,
+   "t1": 294.1282,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_far:act",
    "kind": "hold",
-   "t0": 283.3917,
-   "t1": 283.3917,
+   "t0": 294.1282,
+   "t1": 294.1282,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:table/L0/C0/sight_near",
    "kind": "line",
-   "t0": 283.3917,
-   "t1": 283.8511,
+   "t0": 294.1282,
+   "t1": 294.5877,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_near:act",
    "kind": "hold",
-   "t0": 283.8511,
-   "t1": 283.8511,
+   "t0": 294.5877,
+   "t1": 294.5877,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free023:pick:table/L0/C0/pre_insert",
    "kind": "free",
-   "t0": 283.8511,
-   "t1": 285.8341,
+   "t0": 294.5877,
+   "t1": 296.5706,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/insert",
    "kind": "line",
-   "t0": 285.8341,
-   "t1": 290.7634,
+   "t0": 296.5706,
+   "t1": 301.5,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push",
    "kind": "line",
-   "t0": 290.7634,
-   "t1": 291.0733,
+   "t0": 301.5,
+   "t1": 301.8098,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push:act",
    "kind": "hold",
-   "t0": 291.0733,
-   "t1": 291.0733,
+   "t0": 301.8098,
+   "t1": 301.8098,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:table/L0/C0/lift",
    "kind": "line",
-   "t0": 291.0733,
-   "t1": 291.6983,
+   "t0": 301.8098,
+   "t1": 302.4348,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/lift:act",
    "kind": "hold",
-   "t0": 291.6983,
-   "t1": 292.5258,
+   "t0": 302.4348,
+   "t1": 303.2623,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:table/L0/C0/withdraw",
    "kind": "line",
-   "t0": 292.5258,
-   "t1": 297.5752,
+   "t0": 303.2623,
+   "t1": 308.3117,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry",
    "kind": "path",
-   "t0": 297.5752,
-   "t1": 298.8724,
+   "t0": 308.3117,
+   "t1": 309.6089,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry:act",
    "kind": "hold",
-   "t0": 298.8724,
-   "t1": 298.8724,
+   "t0": 309.6089,
+   "t1": 309.6089,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free024:place:outgoing/L0/C3/carry",
    "kind": "free",
-   "t0": 298.8724,
-   "t1": 318.0979,
+   "t0": 309.6089,
+   "t1": 332.4479,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C3/withdraw",
    "kind": "path",
-   "t0": 318.0979,
-   "t1": 319.3951,
+   "t0": 332.4479,
+   "t1": 333.7451,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C3/place_lift",
    "kind": "line",
-   "t0": 319.3951,
-   "t1": 324.3644,
+   "t0": 333.7451,
+   "t1": 338.7145,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C3/place_lift:act",
    "kind": "hold",
-   "t0": 324.3644,
-   "t1": 325.1919,
+   "t0": 338.7145,
+   "t1": 339.542,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:outgoing/L0/C3/place_down",
    "kind": "line",
-   "t0": 325.1919,
-   "t1": 325.8169,
+   "t0": 339.542,
+   "t1": 340.167,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C3/place_down:act",
    "kind": "hold",
-   "t0": 325.8169,
-   "t1": 325.8169,
+   "t0": 340.167,
+   "t1": 340.167,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:outgoing/L0/C3/retreat",
    "kind": "line",
-   "t0": 325.8169,
-   "t1": 330.7863,
+   "t0": 340.167,
+   "t1": 345.1364,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "free025:pick:incoming/L1/C0/sight_far",
    "kind": "free",
-   "t0": 330.7863,
-   "t1": 333.2778,
+   "t0": 345.1364,
+   "t1": 347.6279,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C0/sight_far:act",
    "kind": "hold",
-   "t0": 333.2778,
-   "t1": 333.2778,
+   "t0": 347.6279,
+   "t1": 347.6279,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:incoming/L1/C0/sight_near",
    "kind": "line",
-   "t0": 333.2778,
-   "t1": 333.7373,
+   "t0": 347.6279,
+   "t1": 348.0873,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C0/sight_near:act",
    "kind": "hold",
-   "t0": 333.7373,
-   "t1": 333.7373,
+   "t0": 348.0873,
+   "t1": 348.0873,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free026:pick:incoming/L1/C0/pre_insert",
    "kind": "free",
-   "t0": 333.7373,
-   "t1": 336.9743,
+   "t0": 348.0873,
+   "t1": 351.3244,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C0/insert",
    "kind": "line",
-   "t0": 336.9743,
-   "t1": 341.9037,
+   "t0": 351.3244,
+   "t1": 356.2538,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C0/push",
    "kind": "line",
-   "t0": 341.9037,
-   "t1": 342.2136,
+   "t0": 356.2538,
+   "t1": 356.5636,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C0/push:act",
    "kind": "hold",
-   "t0": 342.2136,
-   "t1": 342.2136,
+   "t0": 356.5636,
+   "t1": 356.5636,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:incoming/L1/C0/lift",
    "kind": "line",
-   "t0": 342.2136,
-   "t1": 342.8386,
+   "t0": 356.5636,
+   "t1": 357.1886,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C0/lift:act",
    "kind": "hold",
-   "t0": 342.8386,
-   "t1": 343.6661,
+   "t0": 357.1886,
+   "t1": 358.0161,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:incoming/L1/C0/withdraw",
    "kind": "line",
-   "t0": 343.6661,
-   "t1": 348.7154,
+   "t0": 358.0161,
+   "t1": 363.0655,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C0/carry",
    "kind": "path",
-   "t0": 348.7154,
-   "t1": 350.0126,
+   "t0": 363.0655,
+   "t1": 364.3627,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C0/carry:act",
    "kind": "hold",
-   "t0": 350.0126,
-   "t1": 350.0126,
+   "t0": 364.3627,
+   "t1": 364.3627,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free027:place:table/L0/C0/carry",
    "kind": "free",
-   "t0": 350.0126,
-   "t1": 366.6133,
+   "t0": 364.3627,
+   "t1": 385.5453,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/withdraw",
    "kind": "path",
-   "t0": 366.6133,
-   "t1": 367.9105,
+   "t0": 385.5453,
+   "t1": 386.8425,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift",
    "kind": "line",
-   "t0": 367.9105,
-   "t1": 372.8799,
+   "t0": 386.8425,
+   "t1": 391.8119,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift:act",
    "kind": "hold",
-   "t0": 372.8799,
-   "t1": 373.7074,
+   "t0": 391.8119,
+   "t1": 392.6394,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:table/L0/C0/place_down",
    "kind": "line",
-   "t0": 373.7074,
-   "t1": 374.3324,
+   "t0": 392.6394,
+   "t1": 393.2644,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_down:act",
    "kind": "hold",
-   "t0": 374.3324,
-   "t1": 374.3324,
+   "t0": 393.2644,
+   "t1": 393.2644,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:table/L0/C0/retreat",
    "kind": "line",
-   "t0": 374.3324,
-   "t1": 379.3017,
+   "t0": 393.2644,
+   "t1": 398.2338,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "hold:wait",
    "kind": "hold",
-   "t0": 379.3017,
-   "t1": 379.3017,
+   "t0": 398.2338,
+   "t1": 398.2338,
    "caps": null,
    "event": "wait {'signal': 'inspection_done'}"
   },
   {
    "name": "free028:pick:table/L0/C0/sight_far",
    "kind": "free",
-   "t0": 379.3017,
-   "t1": 380.4382,
+   "t0": 398.2338,
+   "t1": 399.3703,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_far:act",
    "kind": "hold",
-   "t0": 380.4382,
-   "t1": 380.4382,
+   "t0": 399.3703,
+   "t1": 399.3703,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:table/L0/C0/sight_near",
    "kind": "line",
-   "t0": 380.4382,
-   "t1": 380.8977,
+   "t0": 399.3703,
+   "t1": 399.8297,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_near:act",
    "kind": "hold",
-   "t0": 380.8977,
-   "t1": 380.8977,
+   "t0": 399.8297,
+   "t1": 399.8297,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free029:pick:table/L0/C0/pre_insert",
    "kind": "free",
-   "t0": 380.8977,
-   "t1": 382.8806,
+   "t0": 399.8297,
+   "t1": 401.8127,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/insert",
    "kind": "line",
-   "t0": 382.8806,
-   "t1": 387.81,
+   "t0": 401.8127,
+   "t1": 406.7421,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push",
    "kind": "line",
-   "t0": 387.81,
-   "t1": 388.1198,
+   "t0": 406.7421,
+   "t1": 407.0519,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push:act",
    "kind": "hold",
-   "t0": 388.1198,
-   "t1": 388.1198,
+   "t0": 407.0519,
+   "t1": 407.0519,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:table/L0/C0/lift",
    "kind": "line",
-   "t0": 388.1198,
-   "t1": 388.7448,
+   "t0": 407.0519,
+   "t1": 407.6769,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/lift:act",
    "kind": "hold",
-   "t0": 388.7448,
-   "t1": 389.5723,
+   "t0": 407.6769,
+   "t1": 408.5044,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:table/L0/C0/withdraw",
    "kind": "line",
-   "t0": 389.5723,
-   "t1": 394.6217,
+   "t0": 408.5044,
+   "t1": 413.5538,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry",
    "kind": "path",
-   "t0": 394.6217,
-   "t1": 395.9189,
+   "t0": 413.5538,
+   "t1": 414.851,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry:act",
    "kind": "hold",
-   "t0": 395.9189,
-   "t1": 395.9189,
+   "t0": 414.851,
+   "t1": 414.851,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free030:place:outgoing/L0/C4/carry",
    "kind": "free",
-   "t0": 395.9189,
-   "t1": 413.1802,
+   "t0": 414.851,
+   "t1": 435.2924,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C4/withdraw",
    "kind": "path",
-   "t0": 413.1802,
-   "t1": 414.4774,
+   "t0": 435.2924,
+   "t1": 436.5896,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C4/place_lift",
    "kind": "line",
-   "t0": 414.4774,
-   "t1": 419.4468,
+   "t0": 436.5896,
+   "t1": 441.559,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C4/place_lift:act",
    "kind": "hold",
-   "t0": 419.4468,
-   "t1": 420.2743,
+   "t0": 441.559,
+   "t1": 442.3865,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:outgoing/L0/C4/place_down",
    "kind": "line",
-   "t0": 420.2743,
-   "t1": 420.8993,
+   "t0": 442.3865,
+   "t1": 443.0115,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C4/place_down:act",
    "kind": "hold",
-   "t0": 420.8993,
-   "t1": 420.8993,
+   "t0": 443.0115,
+   "t1": 443.0115,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:outgoing/L0/C4/retreat",
    "kind": "line",
-   "t0": 420.8993,
-   "t1": 425.8687,
+   "t0": 443.0115,
+   "t1": 447.9808,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "free031:pick:incoming/L1/C1/sight_far",
    "kind": "free",
-   "t0": 425.8687,
-   "t1": 440.2921,
+   "t0": 447.9808,
+   "t1": 462.4043,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C1/sight_far:act",
    "kind": "hold",
-   "t0": 440.2921,
-   "t1": 440.2921,
+   "t0": 462.4043,
+   "t1": 462.4043,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:incoming/L1/C1/sight_near",
    "kind": "line",
-   "t0": 440.2921,
-   "t1": 440.7516,
+   "t0": 462.4043,
+   "t1": 462.8638,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C1/sight_near:act",
    "kind": "hold",
-   "t0": 440.7516,
-   "t1": 440.7516,
+   "t0": 462.8638,
+   "t1": 462.8638,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free032:pick:incoming/L1/C1/pre_insert",
    "kind": "free",
-   "t0": 440.7516,
-   "t1": 445.4229,
+   "t0": 462.8638,
+   "t1": 467.5351,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C1/insert",
    "kind": "line",
-   "t0": 445.4229,
-   "t1": 450.3523,
+   "t0": 467.5351,
+   "t1": 472.4645,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C1/push",
    "kind": "line",
-   "t0": 450.3523,
-   "t1": 450.6621,
+   "t0": 472.4645,
+   "t1": 472.7743,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C1/push:act",
    "kind": "hold",
-   "t0": 450.6621,
-   "t1": 450.6621,
+   "t0": 472.7743,
+   "t1": 472.7743,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:incoming/L1/C1/lift",
    "kind": "line",
-   "t0": 450.6621,
-   "t1": 451.2871,
+   "t0": 472.7743,
+   "t1": 473.3993,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C1/lift:act",
    "kind": "hold",
-   "t0": 451.2871,
-   "t1": 452.1146,
+   "t0": 473.3993,
+   "t1": 474.2268,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:incoming/L1/C1/withdraw",
    "kind": "line",
-   "t0": 452.1146,
-   "t1": 457.164,
+   "t0": 474.2268,
+   "t1": 479.2762,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C1/carry",
    "kind": "path",
-   "t0": 457.164,
-   "t1": 458.4612,
+   "t0": 479.2762,
+   "t1": 480.5734,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C1/carry:act",
    "kind": "hold",
-   "t0": 458.4612,
-   "t1": 458.4612,
+   "t0": 480.5734,
+   "t1": 480.5734,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free033:place:table/L0/C0/carry",
    "kind": "free",
-   "t0": 458.4612,
-   "t1": 468.4394,
+   "t0": 480.5734,
+   "t1": 493.3607,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/withdraw",
    "kind": "path",
-   "t0": 468.4394,
-   "t1": 469.7366,
+   "t0": 493.3607,
+   "t1": 494.6579,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift",
    "kind": "line",
-   "t0": 469.7366,
-   "t1": 474.706,
+   "t0": 494.6579,
+   "t1": 499.6272,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift:act",
    "kind": "hold",
-   "t0": 474.706,
-   "t1": 475.5335,
+   "t0": 499.6272,
+   "t1": 500.4547,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:table/L0/C0/place_down",
    "kind": "line",
-   "t0": 475.5335,
-   "t1": 476.1585,
+   "t0": 500.4547,
+   "t1": 501.0797,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_down:act",
    "kind": "hold",
-   "t0": 476.1585,
-   "t1": 476.1585,
+   "t0": 501.0797,
+   "t1": 501.0797,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:table/L0/C0/retreat",
    "kind": "line",
-   "t0": 476.1585,
-   "t1": 481.1278,
+   "t0": 501.0797,
+   "t1": 506.0491,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "hold:wait",
    "kind": "hold",
-   "t0": 481.1278,
-   "t1": 481.1278,
+   "t0": 506.0491,
+   "t1": 506.0491,
    "caps": null,
    "event": "wait {'signal': 'inspection_done'}"
   },
   {
    "name": "free034:pick:table/L0/C0/sight_far",
    "kind": "free",
-   "t0": 481.1278,
-   "t1": 482.2643,
+   "t0": 506.0491,
+   "t1": 507.1856,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_far:act",
    "kind": "hold",
-   "t0": 482.2643,
-   "t1": 482.2643,
+   "t0": 507.1856,
+   "t1": 507.1856,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:table/L0/C0/sight_near",
    "kind": "line",
-   "t0": 482.2643,
-   "t1": 482.7238,
+   "t0": 507.1856,
+   "t1": 507.6451,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_near:act",
    "kind": "hold",
-   "t0": 482.7238,
-   "t1": 482.7238,
+   "t0": 507.6451,
+   "t1": 507.6451,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free035:pick:table/L0/C0/pre_insert",
    "kind": "free",
-   "t0": 482.7238,
-   "t1": 484.7067,
+   "t0": 507.6451,
+   "t1": 509.628,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/insert",
    "kind": "line",
-   "t0": 484.7067,
-   "t1": 489.6361,
+   "t0": 509.628,
+   "t1": 514.5574,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push",
    "kind": "line",
-   "t0": 489.6361,
-   "t1": 489.9459,
+   "t0": 514.5574,
+   "t1": 514.8672,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push:act",
    "kind": "hold",
-   "t0": 489.9459,
-   "t1": 489.9459,
+   "t0": 514.8672,
+   "t1": 514.8672,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:table/L0/C0/lift",
    "kind": "line",
-   "t0": 489.9459,
-   "t1": 490.5709,
+   "t0": 514.8672,
+   "t1": 515.4922,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/lift:act",
    "kind": "hold",
-   "t0": 490.5709,
-   "t1": 491.3984,
+   "t0": 515.4922,
+   "t1": 516.3197,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:table/L0/C0/withdraw",
    "kind": "line",
-   "t0": 491.3984,
-   "t1": 496.4478,
+   "t0": 516.3197,
+   "t1": 521.3691,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry",
    "kind": "path",
-   "t0": 496.4478,
-   "t1": 497.745,
+   "t0": 521.3691,
+   "t1": 522.6663,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry:act",
    "kind": "hold",
-   "t0": 497.745,
-   "t1": 497.745,
+   "t0": 522.6663,
+   "t1": 522.6663,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free036:place:outgoing/L0/C5/carry",
    "kind": "free",
-   "t0": 497.745,
-   "t1": 513.893,
+   "t0": 522.6663,
+   "t1": 558.1438,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C5/withdraw",
    "kind": "path",
-   "t0": 513.893,
-   "t1": 515.1902,
+   "t0": 558.1438,
+   "t1": 559.441,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C5/place_lift",
    "kind": "line",
-   "t0": 515.1902,
-   "t1": 520.1596,
+   "t0": 559.441,
+   "t1": 564.4104,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C5/place_lift:act",
    "kind": "hold",
-   "t0": 520.1596,
-   "t1": 520.9871,
+   "t0": 564.4104,
+   "t1": 565.2379,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:outgoing/L0/C5/place_down",
    "kind": "line",
-   "t0": 520.9871,
-   "t1": 521.6121,
+   "t0": 565.2379,
+   "t1": 565.8629,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L0/C5/place_down:act",
    "kind": "hold",
-   "t0": 521.6121,
-   "t1": 521.6121,
+   "t0": 565.8629,
+   "t1": 565.8629,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:outgoing/L0/C5/retreat",
    "kind": "line",
-   "t0": 521.6121,
-   "t1": 526.5815,
+   "t0": 565.8629,
+   "t1": 570.8323,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "free037:pick:incoming/L1/C2/sight_far",
    "kind": "free",
-   "t0": 526.5815,
-   "t1": 531.7126,
+   "t0": 570.8323,
+   "t1": 575.9634,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C2/sight_far:act",
    "kind": "hold",
-   "t0": 531.7126,
-   "t1": 531.7126,
+   "t0": 575.9634,
+   "t1": 575.9634,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:incoming/L1/C2/sight_near",
    "kind": "line",
-   "t0": 531.7126,
-   "t1": 532.1721,
+   "t0": 575.9634,
+   "t1": 576.4229,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C2/sight_near:act",
    "kind": "hold",
-   "t0": 532.1721,
-   "t1": 532.1721,
+   "t0": 576.4229,
+   "t1": 576.4229,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free038:pick:incoming/L1/C2/pre_insert",
    "kind": "free",
-   "t0": 532.1721,
-   "t1": 534.0947,
+   "t0": 576.4229,
+   "t1": 578.3455,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C2/insert",
    "kind": "line",
-   "t0": 534.0947,
-   "t1": 539.0241,
+   "t0": 578.3455,
+   "t1": 583.2749,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C2/push",
    "kind": "line",
-   "t0": 539.0241,
-   "t1": 539.3339,
+   "t0": 583.2749,
+   "t1": 583.5847,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C2/push:act",
    "kind": "hold",
-   "t0": 539.3339,
-   "t1": 539.3339,
+   "t0": 583.5847,
+   "t1": 583.5847,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:incoming/L1/C2/lift",
    "kind": "line",
-   "t0": 539.3339,
-   "t1": 539.9589,
+   "t0": 583.5847,
+   "t1": 584.2097,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C2/lift:act",
    "kind": "hold",
-   "t0": 539.9589,
-   "t1": 540.7864,
+   "t0": 584.2097,
+   "t1": 585.0372,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:incoming/L1/C2/withdraw",
    "kind": "line",
-   "t0": 540.7864,
-   "t1": 545.8358,
+   "t0": 585.0372,
+   "t1": 590.0866,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C2/carry",
    "kind": "path",
-   "t0": 545.8358,
-   "t1": 547.133,
+   "t0": 590.0866,
+   "t1": 591.3838,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C2/carry:act",
    "kind": "hold",
-   "t0": 547.133,
-   "t1": 547.133,
+   "t0": 591.3838,
+   "t1": 591.3838,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free039:place:table/L0/C0/carry",
    "kind": "free",
-   "t0": 547.133,
-   "t1": 554.2279,
+   "t0": 591.3838,
+   "t1": 598.4787,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/withdraw",
    "kind": "path",
-   "t0": 554.2279,
-   "t1": 555.5251,
+   "t0": 598.4787,
+   "t1": 599.7759,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift",
    "kind": "line",
-   "t0": 555.5251,
-   "t1": 560.4945,
+   "t0": 599.7759,
+   "t1": 604.7453,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift:act",
    "kind": "hold",
-   "t0": 560.4945,
-   "t1": 561.322,
+   "t0": 604.7453,
+   "t1": 605.5728,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:table/L0/C0/place_down",
    "kind": "line",
-   "t0": 561.322,
-   "t1": 561.947,
+   "t0": 605.5728,
+   "t1": 606.1978,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_down:act",
    "kind": "hold",
-   "t0": 561.947,
-   "t1": 561.947,
+   "t0": 606.1978,
+   "t1": 606.1978,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:table/L0/C0/retreat",
    "kind": "line",
-   "t0": 561.947,
-   "t1": 566.9164,
+   "t0": 606.1978,
+   "t1": 611.1672,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "hold:wait",
    "kind": "hold",
-   "t0": 566.9164,
-   "t1": 566.9164,
+   "t0": 611.1672,
+   "t1": 611.1672,
    "caps": null,
    "event": "wait {'signal': 'inspection_done'}"
   },
   {
    "name": "free040:pick:table/L0/C0/sight_far",
    "kind": "free",
-   "t0": 566.9164,
-   "t1": 568.0529,
+   "t0": 611.1672,
+   "t1": 612.3037,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_far:act",
    "kind": "hold",
-   "t0": 568.0529,
-   "t1": 568.0529,
+   "t0": 612.3037,
+   "t1": 612.3037,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:table/L0/C0/sight_near",
    "kind": "line",
-   "t0": 568.0529,
-   "t1": 568.5123,
+   "t0": 612.3037,
+   "t1": 612.7631,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_near:act",
    "kind": "hold",
-   "t0": 568.5123,
-   "t1": 568.5123,
+   "t0": 612.7631,
+   "t1": 612.7631,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free041:pick:table/L0/C0/pre_insert",
    "kind": "free",
-   "t0": 568.5123,
-   "t1": 570.4953,
+   "t0": 612.7631,
+   "t1": 614.7461,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/insert",
    "kind": "line",
-   "t0": 570.4953,
-   "t1": 575.4246,
+   "t0": 614.7461,
+   "t1": 619.6754,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push",
    "kind": "line",
-   "t0": 575.4246,
-   "t1": 575.7345,
+   "t0": 619.6754,
+   "t1": 619.9853,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push:act",
    "kind": "hold",
-   "t0": 575.7345,
-   "t1": 575.7345,
+   "t0": 619.9853,
+   "t1": 619.9853,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:table/L0/C0/lift",
    "kind": "line",
-   "t0": 575.7345,
-   "t1": 576.3595,
+   "t0": 619.9853,
+   "t1": 620.6103,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/lift:act",
    "kind": "hold",
-   "t0": 576.3595,
-   "t1": 577.187,
+   "t0": 620.6103,
+   "t1": 621.4378,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:table/L0/C0/withdraw",
    "kind": "line",
-   "t0": 577.187,
-   "t1": 582.2363,
+   "t0": 621.4378,
+   "t1": 626.4871,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry",
    "kind": "path",
-   "t0": 582.2363,
-   "t1": 583.5335,
+   "t0": 626.4871,
+   "t1": 627.7843,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry:act",
    "kind": "hold",
-   "t0": 583.5335,
-   "t1": 583.5335,
+   "t0": 627.7843,
+   "t1": 627.7843,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free042:place:outgoing/L1/C0/carry",
    "kind": "free",
-   "t0": 583.5335,
-   "t1": 588.5717,
+   "t0": 627.7843,
+   "t1": 632.8225,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C0/withdraw",
    "kind": "path",
-   "t0": 588.5717,
-   "t1": 589.8689,
+   "t0": 632.8225,
+   "t1": 634.1197,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C0/place_lift",
    "kind": "line",
-   "t0": 589.8689,
-   "t1": 594.8382,
+   "t0": 634.1197,
+   "t1": 639.089,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C0/place_lift:act",
    "kind": "hold",
-   "t0": 594.8382,
-   "t1": 595.6657,
+   "t0": 639.089,
+   "t1": 639.9165,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:outgoing/L1/C0/place_down",
    "kind": "line",
-   "t0": 595.6657,
-   "t1": 596.2907,
+   "t0": 639.9165,
+   "t1": 640.5415,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C0/place_down:act",
    "kind": "hold",
-   "t0": 596.2907,
-   "t1": 596.2907,
+   "t0": 640.5415,
+   "t1": 640.5415,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:outgoing/L1/C0/retreat",
    "kind": "line",
-   "t0": 596.2907,
-   "t1": 601.2601,
+   "t0": 640.5415,
+   "t1": 645.5109,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "free043:pick:incoming/L1/C3/sight_far",
    "kind": "free",
-   "t0": 601.2601,
-   "t1": 603.6829,
+   "t0": 645.5109,
+   "t1": 647.9337,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C3/sight_far:act",
    "kind": "hold",
-   "t0": 603.6829,
-   "t1": 603.6829,
+   "t0": 647.9337,
+   "t1": 647.9337,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:incoming/L1/C3/sight_near",
    "kind": "line",
-   "t0": 603.6829,
-   "t1": 604.1423,
+   "t0": 647.9337,
+   "t1": 648.3931,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C3/sight_near:act",
    "kind": "hold",
-   "t0": 604.1423,
-   "t1": 604.1423,
+   "t0": 648.3931,
+   "t1": 648.3931,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free044:pick:incoming/L1/C3/pre_insert",
    "kind": "free",
-   "t0": 604.1423,
-   "t1": 606.2319,
+   "t0": 648.3931,
+   "t1": 650.4827,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C3/insert",
    "kind": "line",
-   "t0": 606.2319,
-   "t1": 611.1613,
+   "t0": 650.4827,
+   "t1": 655.4121,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C3/push",
    "kind": "line",
-   "t0": 611.1613,
-   "t1": 611.4711,
+   "t0": 655.4121,
+   "t1": 655.7219,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C3/push:act",
    "kind": "hold",
-   "t0": 611.4711,
-   "t1": 611.4711,
+   "t0": 655.7219,
+   "t1": 655.7219,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:incoming/L1/C3/lift",
    "kind": "line",
-   "t0": 611.4711,
-   "t1": 612.0961,
+   "t0": 655.7219,
+   "t1": 656.3469,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C3/lift:act",
    "kind": "hold",
-   "t0": 612.0961,
-   "t1": 612.9236,
+   "t0": 656.3469,
+   "t1": 657.1744,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:incoming/L1/C3/withdraw",
    "kind": "line",
-   "t0": 612.9236,
-   "t1": 617.973,
+   "t0": 657.1744,
+   "t1": 662.2238,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C3/carry",
    "kind": "path",
-   "t0": 617.973,
-   "t1": 619.2702,
+   "t0": 662.2238,
+   "t1": 663.521,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L1/C3/carry:act",
    "kind": "hold",
-   "t0": 619.2702,
-   "t1": 619.2702,
+   "t0": 663.521,
+   "t1": 663.521,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free045:place:table/L0/C0/carry",
    "kind": "free",
-   "t0": 619.2702,
-   "t1": 627.7582,
+   "t0": 663.521,
+   "t1": 672.009,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/withdraw",
    "kind": "path",
-   "t0": 627.7582,
-   "t1": 629.0554,
+   "t0": 672.009,
+   "t1": 673.3062,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift",
    "kind": "line",
-   "t0": 629.0554,
-   "t1": 634.0248,
+   "t0": 673.3062,
+   "t1": 678.2756,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift:act",
    "kind": "hold",
-   "t0": 634.0248,
-   "t1": 634.8523,
+   "t0": 678.2756,
+   "t1": 679.1031,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:table/L0/C0/place_down",
    "kind": "line",
-   "t0": 634.8523,
-   "t1": 635.4773,
+   "t0": 679.1031,
+   "t1": 679.7281,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_down:act",
    "kind": "hold",
-   "t0": 635.4773,
-   "t1": 635.4773,
+   "t0": 679.7281,
+   "t1": 679.7281,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:table/L0/C0/retreat",
    "kind": "line",
-   "t0": 635.4773,
-   "t1": 640.4467,
+   "t0": 679.7281,
+   "t1": 684.6975,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "hold:wait",
    "kind": "hold",
-   "t0": 640.4467,
-   "t1": 640.4467,
+   "t0": 684.6975,
+   "t1": 684.6975,
    "caps": null,
    "event": "wait {'signal': 'inspection_done'}"
   },
   {
    "name": "free046:pick:table/L0/C0/sight_far",
    "kind": "free",
-   "t0": 640.4467,
-   "t1": 641.5831,
+   "t0": 684.6975,
+   "t1": 685.834,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_far:act",
    "kind": "hold",
-   "t0": 641.5831,
-   "t1": 641.5831,
+   "t0": 685.834,
+   "t1": 685.834,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:table/L0/C0/sight_near",
    "kind": "line",
-   "t0": 641.5831,
-   "t1": 642.0426,
+   "t0": 685.834,
+   "t1": 686.2934,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_near:act",
    "kind": "hold",
-   "t0": 642.0426,
-   "t1": 642.0426,
+   "t0": 686.2934,
+   "t1": 686.2934,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free047:pick:table/L0/C0/pre_insert",
    "kind": "free",
-   "t0": 642.0426,
-   "t1": 644.0255,
+   "t0": 686.2934,
+   "t1": 688.2764,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/insert",
    "kind": "line",
-   "t0": 644.0255,
-   "t1": 648.9549,
+   "t0": 688.2764,
+   "t1": 693.2057,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push",
    "kind": "line",
-   "t0": 648.9549,
-   "t1": 649.2648,
+   "t0": 693.2057,
+   "t1": 693.5156,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push:act",
    "kind": "hold",
-   "t0": 649.2648,
-   "t1": 649.2648,
+   "t0": 693.5156,
+   "t1": 693.5156,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:table/L0/C0/lift",
    "kind": "line",
-   "t0": 649.2648,
-   "t1": 649.8898,
+   "t0": 693.5156,
+   "t1": 694.1406,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/lift:act",
    "kind": "hold",
-   "t0": 649.8898,
-   "t1": 650.7173,
+   "t0": 694.1406,
+   "t1": 694.9681,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:table/L0/C0/withdraw",
    "kind": "line",
-   "t0": 650.7173,
-   "t1": 655.7666,
+   "t0": 694.9681,
+   "t1": 700.0174,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry",
    "kind": "path",
-   "t0": 655.7666,
-   "t1": 657.0638,
+   "t0": 700.0174,
+   "t1": 701.3146,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry:act",
    "kind": "hold",
-   "t0": 657.0638,
-   "t1": 657.0638,
+   "t0": 701.3146,
+   "t1": 701.3146,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free048:place:outgoing/L1/C1/carry",
    "kind": "free",
-   "t0": 657.0638,
-   "t1": 662.9936,
+   "t0": 701.3146,
+   "t1": 707.2444,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C1/withdraw",
    "kind": "path",
-   "t0": 662.9936,
-   "t1": 664.2908,
+   "t0": 707.2444,
+   "t1": 708.5416,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C1/place_lift",
    "kind": "line",
-   "t0": 664.2908,
-   "t1": 669.2601,
+   "t0": 708.5416,
+   "t1": 713.511,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C1/place_lift:act",
    "kind": "hold",
-   "t0": 669.2601,
-   "t1": 670.0876,
+   "t0": 713.511,
+   "t1": 714.3385,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:outgoing/L1/C1/place_down",
    "kind": "line",
-   "t0": 670.0876,
-   "t1": 670.7126,
+   "t0": 714.3385,
+   "t1": 714.9635,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C1/place_down:act",
    "kind": "hold",
-   "t0": 670.7126,
-   "t1": 670.7126,
+   "t0": 714.9635,
+   "t1": 714.9635,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:outgoing/L1/C1/retreat",
    "kind": "line",
-   "t0": 670.7126,
-   "t1": 675.682,
+   "t0": 714.9635,
+   "t1": 719.9328,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "free049:pick:incoming/L0/C0/sight_far",
    "kind": "free",
-   "t0": 675.682,
-   "t1": 679.3874,
+   "t0": 719.9328,
+   "t1": 723.6382,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C0/sight_far:act",
    "kind": "hold",
-   "t0": 679.3874,
-   "t1": 679.3874,
+   "t0": 723.6382,
+   "t1": 723.6382,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:incoming/L0/C0/sight_near",
    "kind": "line",
-   "t0": 679.3874,
-   "t1": 679.8468,
+   "t0": 723.6382,
+   "t1": 724.0977,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C0/sight_near:act",
    "kind": "hold",
-   "t0": 679.8468,
-   "t1": 679.8468,
+   "t0": 724.0977,
+   "t1": 724.0977,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free050:pick:incoming/L0/C0/pre_insert",
    "kind": "free",
-   "t0": 679.8468,
-   "t1": 684.0731,
+   "t0": 724.0977,
+   "t1": 728.3239,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C0/insert",
    "kind": "line",
-   "t0": 684.0731,
-   "t1": 689.0025,
+   "t0": 728.3239,
+   "t1": 733.2533,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C0/push",
    "kind": "line",
-   "t0": 689.0025,
-   "t1": 689.3123,
+   "t0": 733.2533,
+   "t1": 733.5631,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C0/push:act",
    "kind": "hold",
-   "t0": 689.3123,
-   "t1": 689.3123,
+   "t0": 733.5631,
+   "t1": 733.5631,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:incoming/L0/C0/lift",
    "kind": "line",
-   "t0": 689.3123,
-   "t1": 689.9373,
+   "t0": 733.5631,
+   "t1": 734.1881,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C0/lift:act",
    "kind": "hold",
-   "t0": 689.9373,
-   "t1": 690.7648,
+   "t0": 734.1881,
+   "t1": 735.0156,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:incoming/L0/C0/withdraw",
    "kind": "line",
-   "t0": 690.7648,
-   "t1": 695.8142,
+   "t0": 735.0156,
+   "t1": 740.065,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C0/carry",
    "kind": "path",
-   "t0": 695.8142,
-   "t1": 697.1114,
+   "t0": 740.065,
+   "t1": 741.3622,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C0/carry:act",
    "kind": "hold",
-   "t0": 697.1114,
-   "t1": 697.1114,
+   "t0": 741.3622,
+   "t1": 741.3622,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free051:place:table/L0/C0/carry",
    "kind": "free",
-   "t0": 697.1114,
-   "t1": 709.9975,
+   "t0": 741.3622,
+   "t1": 753.9132,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/withdraw",
    "kind": "path",
-   "t0": 709.9975,
-   "t1": 711.2947,
+   "t0": 753.9132,
+   "t1": 755.2104,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift",
    "kind": "line",
-   "t0": 711.2947,
-   "t1": 716.2641,
+   "t0": 755.2104,
+   "t1": 760.1798,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift:act",
    "kind": "hold",
-   "t0": 716.2641,
-   "t1": 717.0916,
+   "t0": 760.1798,
+   "t1": 761.0073,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:table/L0/C0/place_down",
    "kind": "line",
-   "t0": 717.0916,
-   "t1": 717.7166,
+   "t0": 761.0073,
+   "t1": 761.6323,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_down:act",
    "kind": "hold",
-   "t0": 717.7166,
-   "t1": 717.7166,
+   "t0": 761.6323,
+   "t1": 761.6323,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:table/L0/C0/retreat",
    "kind": "line",
-   "t0": 717.7166,
-   "t1": 722.686,
+   "t0": 761.6323,
+   "t1": 766.6017,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "hold:wait",
    "kind": "hold",
-   "t0": 722.686,
-   "t1": 722.686,
+   "t0": 766.6017,
+   "t1": 766.6017,
    "caps": null,
    "event": "wait {'signal': 'inspection_done'}"
   },
   {
    "name": "free052:pick:table/L0/C0/sight_far",
    "kind": "free",
-   "t0": 722.686,
-   "t1": 723.8224,
+   "t0": 766.6017,
+   "t1": 767.7382,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_far:act",
    "kind": "hold",
-   "t0": 723.8224,
-   "t1": 723.8224,
+   "t0": 767.7382,
+   "t1": 767.7382,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:table/L0/C0/sight_near",
    "kind": "line",
-   "t0": 723.8224,
-   "t1": 724.2819,
+   "t0": 767.7382,
+   "t1": 768.1976,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_near:act",
    "kind": "hold",
-   "t0": 724.2819,
-   "t1": 724.2819,
+   "t0": 768.1976,
+   "t1": 768.1976,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free053:pick:table/L0/C0/pre_insert",
    "kind": "free",
-   "t0": 724.2819,
-   "t1": 726.2648,
+   "t0": 768.1976,
+   "t1": 770.1806,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/insert",
    "kind": "line",
-   "t0": 726.2648,
-   "t1": 731.1942,
+   "t0": 770.1806,
+   "t1": 775.1099,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push",
    "kind": "line",
-   "t0": 731.1942,
-   "t1": 731.5041,
+   "t0": 775.1099,
+   "t1": 775.4198,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push:act",
    "kind": "hold",
-   "t0": 731.5041,
-   "t1": 731.5041,
+   "t0": 775.4198,
+   "t1": 775.4198,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:table/L0/C0/lift",
    "kind": "line",
-   "t0": 731.5041,
-   "t1": 732.1291,
+   "t0": 775.4198,
+   "t1": 776.0448,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/lift:act",
    "kind": "hold",
-   "t0": 732.1291,
-   "t1": 732.9566,
+   "t0": 776.0448,
+   "t1": 776.8723,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:table/L0/C0/withdraw",
    "kind": "line",
-   "t0": 732.9566,
-   "t1": 738.0059,
+   "t0": 776.8723,
+   "t1": 781.9217,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry",
    "kind": "path",
-   "t0": 738.0059,
-   "t1": 739.3031,
+   "t0": 781.9217,
+   "t1": 783.2189,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry:act",
    "kind": "hold",
-   "t0": 739.3031,
-   "t1": 739.3031,
+   "t0": 783.2189,
+   "t1": 783.2189,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free054:place:outgoing/L1/C2/carry",
    "kind": "free",
-   "t0": 739.3031,
-   "t1": 745.2144,
+   "t0": 783.2189,
+   "t1": 789.1301,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C2/withdraw",
    "kind": "path",
-   "t0": 745.2144,
-   "t1": 746.5116,
+   "t0": 789.1301,
+   "t1": 790.4273,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C2/place_lift",
    "kind": "line",
-   "t0": 746.5116,
-   "t1": 751.481,
+   "t0": 790.4273,
+   "t1": 795.3967,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C2/place_lift:act",
    "kind": "hold",
-   "t0": 751.481,
-   "t1": 752.3085,
+   "t0": 795.3967,
+   "t1": 796.2242,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:outgoing/L1/C2/place_down",
    "kind": "line",
-   "t0": 752.3085,
-   "t1": 752.9335,
+   "t0": 796.2242,
+   "t1": 796.8492,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C2/place_down:act",
    "kind": "hold",
-   "t0": 752.9335,
-   "t1": 752.9335,
+   "t0": 796.8492,
+   "t1": 796.8492,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:outgoing/L1/C2/retreat",
    "kind": "line",
-   "t0": 752.9335,
-   "t1": 757.9028,
+   "t0": 796.8492,
+   "t1": 801.8186,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "free055:pick:incoming/L0/C1/sight_far",
    "kind": "free",
-   "t0": 757.9028,
-   "t1": 761.4823,
+   "t0": 801.8186,
+   "t1": 805.398,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C1/sight_far:act",
    "kind": "hold",
-   "t0": 761.4823,
-   "t1": 761.4823,
+   "t0": 805.398,
+   "t1": 805.398,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:incoming/L0/C1/sight_near",
    "kind": "line",
-   "t0": 761.4823,
-   "t1": 761.9417,
+   "t0": 805.398,
+   "t1": 805.8575,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C1/sight_near:act",
    "kind": "hold",
-   "t0": 761.9417,
-   "t1": 761.9417,
+   "t0": 805.8575,
+   "t1": 805.8575,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free056:pick:incoming/L0/C1/pre_insert",
    "kind": "free",
-   "t0": 761.9417,
-   "t1": 765.7031,
+   "t0": 805.8575,
+   "t1": 809.6188,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C1/insert",
    "kind": "line",
-   "t0": 765.7031,
-   "t1": 770.6325,
+   "t0": 809.6188,
+   "t1": 814.5482,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C1/push",
    "kind": "line",
-   "t0": 770.6325,
-   "t1": 770.9423,
+   "t0": 814.5482,
+   "t1": 814.8581,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C1/push:act",
    "kind": "hold",
-   "t0": 770.9423,
-   "t1": 770.9423,
+   "t0": 814.8581,
+   "t1": 814.8581,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:incoming/L0/C1/lift",
    "kind": "line",
-   "t0": 770.9423,
-   "t1": 771.5673,
+   "t0": 814.8581,
+   "t1": 815.4831,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C1/lift:act",
    "kind": "hold",
-   "t0": 771.5673,
-   "t1": 772.3948,
+   "t0": 815.4831,
+   "t1": 816.3106,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:incoming/L0/C1/withdraw",
    "kind": "line",
-   "t0": 772.3948,
-   "t1": 777.4442,
+   "t0": 816.3106,
+   "t1": 821.3599,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C1/carry",
    "kind": "path",
-   "t0": 777.4442,
-   "t1": 778.7414,
+   "t0": 821.3599,
+   "t1": 822.6571,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C1/carry:act",
    "kind": "hold",
-   "t0": 778.7414,
-   "t1": 778.7414,
+   "t0": 822.6571,
+   "t1": 822.6571,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free057:place:table/L0/C0/carry",
    "kind": "free",
-   "t0": 778.7414,
-   "t1": 799.6486,
+   "t0": 822.6571,
+   "t1": 837.7626,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/withdraw",
    "kind": "path",
-   "t0": 799.6486,
-   "t1": 800.9458,
+   "t0": 837.7626,
+   "t1": 839.0598,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift",
    "kind": "line",
-   "t0": 800.9458,
-   "t1": 805.9152,
+   "t0": 839.0598,
+   "t1": 844.0292,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift:act",
    "kind": "hold",
-   "t0": 805.9152,
-   "t1": 806.7427,
+   "t0": 844.0292,
+   "t1": 844.8567,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:table/L0/C0/place_down",
    "kind": "line",
-   "t0": 806.7427,
-   "t1": 807.3677,
+   "t0": 844.8567,
+   "t1": 845.4817,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_down:act",
    "kind": "hold",
-   "t0": 807.3677,
-   "t1": 807.3677,
+   "t0": 845.4817,
+   "t1": 845.4817,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:table/L0/C0/retreat",
    "kind": "line",
-   "t0": 807.3677,
-   "t1": 812.3371,
+   "t0": 845.4817,
+   "t1": 850.4511,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "hold:wait",
    "kind": "hold",
-   "t0": 812.3371,
-   "t1": 812.3371,
+   "t0": 850.4511,
+   "t1": 850.4511,
    "caps": null,
    "event": "wait {'signal': 'inspection_done'}"
   },
   {
    "name": "free058:pick:table/L0/C0/sight_far",
    "kind": "free",
-   "t0": 812.3371,
-   "t1": 813.4736,
+   "t0": 850.4511,
+   "t1": 851.5876,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_far:act",
    "kind": "hold",
-   "t0": 813.4736,
-   "t1": 813.4736,
+   "t0": 851.5876,
+   "t1": 851.5876,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:table/L0/C0/sight_near",
    "kind": "line",
-   "t0": 813.4736,
-   "t1": 813.933,
+   "t0": 851.5876,
+   "t1": 852.047,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_near:act",
    "kind": "hold",
-   "t0": 813.933,
-   "t1": 813.933,
+   "t0": 852.047,
+   "t1": 852.047,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free059:pick:table/L0/C0/pre_insert",
    "kind": "free",
-   "t0": 813.933,
-   "t1": 815.916,
+   "t0": 852.047,
+   "t1": 854.03,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/insert",
    "kind": "line",
-   "t0": 815.916,
-   "t1": 820.8454,
+   "t0": 854.03,
+   "t1": 858.9593,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push",
    "kind": "line",
-   "t0": 820.8454,
-   "t1": 821.1552,
+   "t0": 858.9593,
+   "t1": 859.2692,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push:act",
    "kind": "hold",
-   "t0": 821.1552,
-   "t1": 821.1552,
+   "t0": 859.2692,
+   "t1": 859.2692,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:table/L0/C0/lift",
    "kind": "line",
-   "t0": 821.1552,
-   "t1": 821.7802,
+   "t0": 859.2692,
+   "t1": 859.8942,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/lift:act",
    "kind": "hold",
-   "t0": 821.7802,
-   "t1": 822.6077,
+   "t0": 859.8942,
+   "t1": 860.7217,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:table/L0/C0/withdraw",
    "kind": "line",
-   "t0": 822.6077,
-   "t1": 827.6571,
+   "t0": 860.7217,
+   "t1": 865.771,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry",
    "kind": "path",
-   "t0": 827.6571,
-   "t1": 828.9543,
+   "t0": 865.771,
+   "t1": 867.0682,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry:act",
    "kind": "hold",
-   "t0": 828.9543,
-   "t1": 828.9543,
+   "t0": 867.0682,
+   "t1": 867.0682,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free060:place:outgoing/L1/C3/carry",
    "kind": "free",
-   "t0": 828.9543,
-   "t1": 856.0839,
+   "t0": 867.0682,
+   "t1": 886.6583,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C3/withdraw",
    "kind": "path",
-   "t0": 856.0839,
-   "t1": 857.3811,
+   "t0": 886.6583,
+   "t1": 887.9555,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C3/place_lift",
    "kind": "line",
-   "t0": 857.3811,
-   "t1": 862.3505,
+   "t0": 887.9555,
+   "t1": 892.9249,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C3/place_lift:act",
    "kind": "hold",
-   "t0": 862.3505,
-   "t1": 863.178,
+   "t0": 892.9249,
+   "t1": 893.7524,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:outgoing/L1/C3/place_down",
    "kind": "line",
-   "t0": 863.178,
-   "t1": 863.803,
+   "t0": 893.7524,
+   "t1": 894.3774,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C3/place_down:act",
    "kind": "hold",
-   "t0": 863.803,
-   "t1": 863.803,
+   "t0": 894.3774,
+   "t1": 894.3774,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:outgoing/L1/C3/retreat",
    "kind": "line",
-   "t0": 863.803,
-   "t1": 868.7723,
+   "t0": 894.3774,
+   "t1": 899.3468,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "free061:pick:incoming/L0/C2/sight_far",
    "kind": "free",
-   "t0": 868.7723,
-   "t1": 874.4772,
+   "t0": 899.3468,
+   "t1": 905.0516,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C2/sight_far:act",
    "kind": "hold",
-   "t0": 874.4772,
-   "t1": 874.4772,
+   "t0": 905.0516,
+   "t1": 905.0516,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:incoming/L0/C2/sight_near",
    "kind": "line",
-   "t0": 874.4772,
-   "t1": 874.9366,
+   "t0": 905.0516,
+   "t1": 905.5111,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C2/sight_near:act",
    "kind": "hold",
-   "t0": 874.9366,
-   "t1": 874.9366,
+   "t0": 905.5111,
+   "t1": 905.5111,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free062:pick:incoming/L0/C2/pre_insert",
    "kind": "free",
-   "t0": 874.9366,
-   "t1": 876.5562,
+   "t0": 905.5111,
+   "t1": 907.1306,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C2/insert",
    "kind": "line",
-   "t0": 876.5562,
-   "t1": 881.4856,
+   "t0": 907.1306,
+   "t1": 912.06,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C2/push",
    "kind": "line",
-   "t0": 881.4856,
-   "t1": 881.7954,
+   "t0": 912.06,
+   "t1": 912.3699,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C2/push:act",
    "kind": "hold",
-   "t0": 881.7954,
-   "t1": 881.7954,
+   "t0": 912.3699,
+   "t1": 912.3699,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:incoming/L0/C2/lift",
    "kind": "line",
-   "t0": 881.7954,
-   "t1": 882.4204,
+   "t0": 912.3699,
+   "t1": 912.9949,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C2/lift:act",
    "kind": "hold",
-   "t0": 882.4204,
-   "t1": 883.2479,
+   "t0": 912.9949,
+   "t1": 913.8224,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:incoming/L0/C2/withdraw",
    "kind": "line",
-   "t0": 883.2479,
-   "t1": 888.2973,
+   "t0": 913.8224,
+   "t1": 918.8717,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C2/carry",
    "kind": "path",
-   "t0": 888.2973,
-   "t1": 889.5945,
+   "t0": 918.8717,
+   "t1": 920.1689,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C2/carry:act",
    "kind": "hold",
-   "t0": 889.5945,
-   "t1": 889.5945,
+   "t0": 920.1689,
+   "t1": 920.1689,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free063:place:table/L0/C0/carry",
    "kind": "free",
-   "t0": 889.5945,
-   "t1": 895.5941,
+   "t0": 920.1689,
+   "t1": 926.1685,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/withdraw",
    "kind": "path",
-   "t0": 895.5941,
-   "t1": 896.8913,
+   "t0": 926.1685,
+   "t1": 927.4657,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift",
    "kind": "line",
-   "t0": 896.8913,
-   "t1": 901.8607,
+   "t0": 927.4657,
+   "t1": 932.4351,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift:act",
    "kind": "hold",
-   "t0": 901.8607,
-   "t1": 902.6882,
+   "t0": 932.4351,
+   "t1": 933.2626,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:table/L0/C0/place_down",
    "kind": "line",
-   "t0": 902.6882,
-   "t1": 903.3132,
+   "t0": 933.2626,
+   "t1": 933.8876,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_down:act",
    "kind": "hold",
-   "t0": 903.3132,
-   "t1": 903.3132,
+   "t0": 933.8876,
+   "t1": 933.8876,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:table/L0/C0/retreat",
    "kind": "line",
-   "t0": 903.3132,
-   "t1": 908.2825,
+   "t0": 933.8876,
+   "t1": 938.857,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "hold:wait",
    "kind": "hold",
-   "t0": 908.2825,
-   "t1": 908.2825,
+   "t0": 938.857,
+   "t1": 938.857,
    "caps": null,
    "event": "wait {'signal': 'inspection_done'}"
   },
   {
    "name": "free064:pick:table/L0/C0/sight_far",
    "kind": "free",
-   "t0": 908.2825,
-   "t1": 909.419,
+   "t0": 938.857,
+   "t1": 939.9935,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_far:act",
    "kind": "hold",
-   "t0": 909.419,
-   "t1": 909.419,
+   "t0": 939.9935,
+   "t1": 939.9935,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:table/L0/C0/sight_near",
    "kind": "line",
-   "t0": 909.419,
-   "t1": 909.8785,
+   "t0": 939.9935,
+   "t1": 940.4529,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_near:act",
    "kind": "hold",
-   "t0": 909.8785,
-   "t1": 909.8785,
+   "t0": 940.4529,
+   "t1": 940.4529,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free065:pick:table/L0/C0/pre_insert",
    "kind": "free",
-   "t0": 909.8785,
-   "t1": 911.8614,
+   "t0": 940.4529,
+   "t1": 942.4359,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/insert",
    "kind": "line",
-   "t0": 911.8614,
-   "t1": 916.7908,
+   "t0": 942.4359,
+   "t1": 947.3652,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push",
    "kind": "line",
-   "t0": 916.7908,
-   "t1": 917.1006,
+   "t0": 947.3652,
+   "t1": 947.6751,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push:act",
    "kind": "hold",
-   "t0": 917.1006,
-   "t1": 917.1006,
+   "t0": 947.6751,
+   "t1": 947.6751,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:table/L0/C0/lift",
    "kind": "line",
-   "t0": 917.1006,
-   "t1": 917.7256,
+   "t0": 947.6751,
+   "t1": 948.3001,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/lift:act",
    "kind": "hold",
-   "t0": 917.7256,
-   "t1": 918.5531,
+   "t0": 948.3001,
+   "t1": 949.1276,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:table/L0/C0/withdraw",
    "kind": "line",
-   "t0": 918.5531,
-   "t1": 923.6025,
+   "t0": 949.1276,
+   "t1": 954.1769,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry",
    "kind": "path",
-   "t0": 923.6025,
-   "t1": 924.8997,
+   "t0": 954.1769,
+   "t1": 955.4741,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry:act",
    "kind": "hold",
-   "t0": 924.8997,
-   "t1": 924.8997,
+   "t0": 955.4741,
+   "t1": 955.4741,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free066:place:outgoing/L1/C4/carry",
    "kind": "free",
-   "t0": 924.8997,
-   "t1": 953.0435,
+   "t0": 955.4741,
+   "t1": 971.2097,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C4/withdraw",
    "kind": "path",
-   "t0": 953.0435,
-   "t1": 954.3407,
+   "t0": 971.2097,
+   "t1": 972.5069,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C4/place_lift",
    "kind": "line",
-   "t0": 954.3407,
-   "t1": 959.3101,
+   "t0": 972.5069,
+   "t1": 977.4763,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C4/place_lift:act",
    "kind": "hold",
-   "t0": 959.3101,
-   "t1": 960.1376,
+   "t0": 977.4763,
+   "t1": 978.3038,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:outgoing/L1/C4/place_down",
    "kind": "line",
-   "t0": 960.1376,
-   "t1": 960.7626,
+   "t0": 978.3038,
+   "t1": 978.9288,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C4/place_down:act",
    "kind": "hold",
-   "t0": 960.7626,
-   "t1": 960.7626,
+   "t0": 978.9288,
+   "t1": 978.9288,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:outgoing/L1/C4/retreat",
    "kind": "line",
-   "t0": 960.7626,
-   "t1": 965.732,
+   "t0": 978.9288,
+   "t1": 983.8981,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "free067:pick:incoming/L0/C3/sight_far",
    "kind": "free",
-   "t0": 965.732,
-   "t1": 976.3552,
+   "t0": 983.8981,
+   "t1": 994.5214,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C3/sight_far:act",
    "kind": "hold",
-   "t0": 976.3552,
-   "t1": 976.3552,
+   "t0": 994.5214,
+   "t1": 994.5214,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:incoming/L0/C3/sight_near",
    "kind": "line",
-   "t0": 976.3552,
-   "t1": 976.8147,
+   "t0": 994.5214,
+   "t1": 994.9808,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C3/sight_near:act",
    "kind": "hold",
-   "t0": 976.8147,
-   "t1": 976.8147,
+   "t0": 994.9808,
+   "t1": 994.9808,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free068:pick:incoming/L0/C3/pre_insert",
    "kind": "free",
-   "t0": 976.8147,
-   "t1": 978.5143,
+   "t0": 994.9808,
+   "t1": 996.6805,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C3/insert",
    "kind": "line",
-   "t0": 978.5143,
-   "t1": 983.4437,
+   "t0": 996.6805,
+   "t1": 1001.6099,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C3/push",
    "kind": "line",
-   "t0": 983.4437,
-   "t1": 983.7536,
+   "t0": 1001.6099,
+   "t1": 1001.9197,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C3/push:act",
    "kind": "hold",
-   "t0": 983.7536,
-   "t1": 983.7536,
+   "t0": 1001.9197,
+   "t1": 1001.9197,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:incoming/L0/C3/lift",
    "kind": "line",
-   "t0": 983.7536,
-   "t1": 984.3786,
+   "t0": 1001.9197,
+   "t1": 1002.5447,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C3/lift:act",
    "kind": "hold",
-   "t0": 984.3786,
-   "t1": 985.2061,
+   "t0": 1002.5447,
+   "t1": 1003.3722,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:incoming/L0/C3/withdraw",
    "kind": "line",
-   "t0": 985.2061,
-   "t1": 990.2554,
+   "t0": 1003.3722,
+   "t1": 1008.4216,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C3/carry",
    "kind": "path",
-   "t0": 990.2554,
-   "t1": 991.5526,
+   "t0": 1008.4216,
+   "t1": 1009.7188,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:incoming/L0/C3/carry:act",
    "kind": "hold",
-   "t0": 991.5526,
-   "t1": 991.5526,
+   "t0": 1009.7188,
+   "t1": 1009.7188,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free069:place:table/L0/C0/carry",
    "kind": "free",
-   "t0": 991.5526,
-   "t1": 998.4302,
+   "t0": 1009.7188,
+   "t1": 1016.5963,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/withdraw",
    "kind": "path",
-   "t0": 998.4302,
-   "t1": 999.7274,
+   "t0": 1016.5963,
+   "t1": 1017.8935,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift",
    "kind": "line",
-   "t0": 999.7274,
-   "t1": 1004.6967,
+   "t0": 1017.8935,
+   "t1": 1022.8629,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_lift:act",
    "kind": "hold",
-   "t0": 1004.6967,
-   "t1": 1005.5242,
+   "t0": 1022.8629,
+   "t1": 1023.6904,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:table/L0/C0/place_down",
    "kind": "line",
-   "t0": 1005.5242,
-   "t1": 1006.1492,
+   "t0": 1023.6904,
+   "t1": 1024.3154,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:table/L0/C0/place_down:act",
    "kind": "hold",
-   "t0": 1006.1492,
-   "t1": 1006.1492,
+   "t0": 1024.3154,
+   "t1": 1024.3154,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:table/L0/C0/retreat",
    "kind": "line",
-   "t0": 1006.1492,
-   "t1": 1011.1186,
+   "t0": 1024.3154,
+   "t1": 1029.2848,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "hold:wait",
    "kind": "hold",
-   "t0": 1011.1186,
-   "t1": 1011.1186,
+   "t0": 1029.2848,
+   "t1": 1029.2848,
    "caps": null,
    "event": "wait {'signal': 'inspection_done'}"
   },
   {
    "name": "free070:pick:table/L0/C0/sight_far",
    "kind": "free",
-   "t0": 1011.1186,
-   "t1": 1012.2551,
+   "t0": 1029.2848,
+   "t1": 1030.4212,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_far:act",
    "kind": "hold",
-   "t0": 1012.2551,
-   "t1": 1012.2551,
+   "t0": 1030.4212,
+   "t1": 1030.4212,
    "caps": null,
    "event": "read the AprilGrid (far)"
   },
   {
    "name": "pick:table/L0/C0/sight_near",
    "kind": "line",
-   "t0": 1012.2551,
-   "t1": 1012.7146,
+   "t0": 1030.4212,
+   "t1": 1030.8807,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/sight_near:act",
    "kind": "hold",
-   "t0": 1012.7146,
-   "t1": 1012.7146,
+   "t0": 1030.8807,
+   "t1": 1030.8807,
    "caps": null,
    "event": "read the AprilGrid (near)"
   },
   {
    "name": "free071:pick:table/L0/C0/pre_insert",
    "kind": "free",
-   "t0": 1012.7146,
-   "t1": 1014.6975,
+   "t0": 1030.8807,
+   "t1": 1032.8636,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/insert",
    "kind": "line",
-   "t0": 1014.6975,
-   "t1": 1019.6269,
+   "t0": 1032.8636,
+   "t1": 1037.793,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push",
    "kind": "line",
-   "t0": 1019.6269,
-   "t1": 1019.9367,
+   "t0": 1037.793,
+   "t1": 1038.1029,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/push:act",
    "kind": "hold",
-   "t0": 1019.9367,
-   "t1": 1019.9367,
+   "t0": 1038.1029,
+   "t1": 1038.1029,
    "caps": null,
    "event": "tray pushed against the push plate"
   },
   {
    "name": "pick:table/L0/C0/lift",
    "kind": "line",
-   "t0": 1019.9367,
-   "t1": 1020.5617,
+   "t0": 1038.1029,
+   "t1": 1038.7279,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/lift:act",
    "kind": "hold",
-   "t0": 1020.5617,
-   "t1": 1021.3892,
+   "t0": 1038.7279,
+   "t1": 1039.5554,
    "caps": null,
    "event": "close the jaws to 0.0413"
   },
   {
    "name": "pick:table/L0/C0/withdraw",
    "kind": "line",
-   "t0": 1021.3892,
-   "t1": 1026.4386,
+   "t0": 1039.5554,
+   "t1": 1044.6047,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry",
    "kind": "path",
-   "t0": 1026.4386,
-   "t1": 1027.7358,
+   "t0": 1044.6047,
+   "t1": 1045.9019,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "pick:table/L0/C0/carry:act",
    "kind": "hold",
-   "t0": 1027.7358,
-   "t1": 1027.7358,
+   "t0": 1045.9019,
+   "t1": 1045.9019,
    "caps": null,
    "event": "tilted for transport"
   },
   {
    "name": "free072:place:outgoing/L1/C5/carry",
    "kind": "free",
-   "t0": 1027.7358,
-   "t1": 1057.9266,
+   "t0": 1045.9019,
+   "t1": 1083.8121,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C5/withdraw",
    "kind": "path",
-   "t0": 1057.9266,
-   "t1": 1059.2238,
+   "t0": 1083.8121,
+   "t1": 1085.1093,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C5/place_lift",
    "kind": "line",
-   "t0": 1059.2238,
-   "t1": 1064.1932,
+   "t0": 1085.1093,
+   "t1": 1090.0787,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C5/place_lift:act",
    "kind": "hold",
-   "t0": 1064.1932,
-   "t1": 1065.0207,
+   "t0": 1090.0787,
+   "t1": 1090.9062,
    "caps": null,
    "event": "open the jaws to 0.0577"
   },
   {
    "name": "place:outgoing/L1/C5/place_down",
    "kind": "line",
-   "t0": 1065.0207,
-   "t1": 1065.6457,
+   "t0": 1090.9062,
+   "t1": 1091.5312,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "place:outgoing/L1/C5/place_down:act",
    "kind": "hold",
-   "t0": 1065.6457,
-   "t1": 1065.6457,
+   "t0": 1091.5312,
+   "t1": 1091.5312,
    "caps": null,
    "event": "tray set down"
   },
   {
    "name": "place:outgoing/L1/C5/retreat",
    "kind": "line",
-   "t0": 1065.6457,
-   "t1": 1070.6151,
+   "t0": 1091.5312,
+   "t1": 1096.5005,
    "caps": "in_jig",
    "event": ""
   },
   {
    "name": "free073:home",
    "kind": "free",
-   "t0": 1070.6151,
-   "t1": 1075.6841,
+   "t0": 1096.5005,
+   "t1": 1101.5695,
    "caps": "empty",
    "event": ""
   }
@@ -3956,6 +3956,6 @@
   "paths": "cpu",
   "problems": [],
   "ok": true,
-  "seconds": 764.0
+  "seconds": 762.2
  }
 }
