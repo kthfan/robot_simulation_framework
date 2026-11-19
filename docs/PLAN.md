@@ -269,6 +269,10 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 
 P0–P2 先做；P3 起每個階段開始前再細化 todo。
 
+**130 mm tray 與小心攜帶（2026-11-19）**：tray 高度 130 mm；tilt 重新調整（flange 52.4 mm，64 取樣，≥ 10 mm）；三個 layout 37/37、74/74、26/26。
+攜帶限制 15°（CPU 受限取樣、cuRobo ToolPoseBound、碰撞檢查）；手臂姿態只在空手時切換（示教變體）。三個 layout 全流程模擬皆 24/24，
+模擬中實測攜帶傾角 ≤ 15.0°。
+
 **P6 準備（2026-11-19）**：模擬中的 AprilGrid 讀取：每個 slot 的 label（36h11 4×1）印在 jig 上、EIH 相機（手眼標定＋焦距組態）、
 使用者的 AprilgridDetector；strict 74/74 讀取找到正確 board，理想影像下位姿誤差 0.04 mm / 0.07°。見 `docs/p6_locating.md`。
 

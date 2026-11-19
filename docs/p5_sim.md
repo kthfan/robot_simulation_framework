@@ -117,6 +117,28 @@ Pictures of the first transfer: `docs/images/p5_transfer1_close.png` (close-up
 at the end of every phase), `p5_transfer1_wide.png` (overview),
 `p5_transfer1.gif` (whole transfer, ×4).
 
+### 130 mm tray, carries kept within 15 deg (2026-11-19)
+
+The tray is 130 mm tall (user correction) and must be handled with care: free
+carries keep it within `carry_max_tilt_deg` = 15 deg of how it was picked up
+(CPU planner with a constrained sampler, cuRobo with a ToolPoseBound, the
+gate), and the arm changes configuration only with the gripper empty (a
+taught variant of the table pick where a slot needs another configuration).
+The judge gained a sixth criterion, the carry tilt measured on the simulated
+tray.
+
+| layout | plan | free moves | gate | simulated | worst placement | worst slip | worst tracking | worst carry tilt |
+|---|---|---|---|---|---|---|---|---|
+| strict | 1007.7 s | cuRobo (ToolPoseBound) + CPU | 0 problems | **24/24 pass** | 0.47 mm / 0.02° | 0.48 mm | 0.43 mm | 15.0° |
+| as_built | 1029.8 s | CPU | 0 problems | **24/24 pass** | 0.44 mm / 0.01° | 0.33 mm | 0.45 mm | 14.8° |
+| recommended | 1041.3 s | CPU | 0 problems | **24/24 pass** | 0.42 mm / 0.01° | 0.36 mm | 0.43 mm | 14.9° |
+
+The pictures (`docs/images/p5_transfer1.gif`, `p5_transfer6.gif` — the latter
+the transfer that picks at the table in the destination's configuration) look
+at the tray from its side, nearly level, so its tilt reads true. An earlier
+close-up looked along the arm's reach; a tray pointing along the line of
+sight looked upright although it lay on the plate.
+
 ## Not yet / limits
 
 * Physical parameters not measured: tray–jig and tray–plate friction (D30's
