@@ -179,6 +179,20 @@ trajectory never contains them. Still failing in cuRobo: two moves to a far
 AprilGrid read and three carries onto the table (one of them fails without
 the tray too: tight ends, not the tray model).
 
+### Known failures and candidate fixes (deferred, 2026-11-19)
+
+All of them are handled today by the CPU fallback (the trajectory passes the
+gate); they are skipped for now and kept here to resume later.
+
+| # | case | segments | cause | verified? | candidate fixes |
+|---|---|---|---|---|---|
+| F1 | cuRobo finds no path to the far AprilGrid read (empty) | `free007:pick:incoming/L2/C1/sight_far`, `free061:pick:incoming/L0/C2/sight_far` | trajectory optimiser's result not collision-free by the meshes | no — not yet examined | check the end pose's real clearance and how close J3 is to its limit (sight_far is the tightest pose, P3); more attempts / graph-planner seeds; a via pose; move the far read (`standoff_far`) |
+| F2 | cuRobo finds no path for a carry onto the table, also without the tray | `free033:place:table/L0/C0/carry` | the ends are tight for the arm itself | partly — fails without the tray too | as F1; check the clearance at both ends; a via pose |
+| F3 | cuRobo finds no path for a carry onto the table with the tray only | `free039`, `free045` (`place:table/L0/C0/carry`) | the tray's collision spheres bulge past the box and steer the optimiser away; carry ends ~10 mm from the jig | partly — succeed without the tray | tray spheres kept inside the box (own sphere fit) or attached as a cuboid via cuRobo's attach API; the carry ends' tilt clearance |
+| F4 | the gate rejects cuRobo carry paths (tray 4.2–4.7 mm from a rack leg, 5.0 required) | `free027`, `free036`, `free069`, `free072` | cuRobo checks the meshes at its trajectory samples only (25 ms); the path dips between them | yes — the +1 mm pad removes all four | `--pad 0.001` (costs 2 planned carries: 66 vs 68), or a finer validation step / swept check in cuRobo |
+| F5 | with the pad, the gate rejects one empty move (`gripper_body` 3.4 mm from a jig part, 6 mm asked) | `free019:pick:incoming/L2/C3/sight_far` | more than sampling explains; possibly the per-link triangle budget (`max_triangles_per_link: 20000`) simplifying the gripper mesh | no | raise the budget / compare the simplified mesh with the original (distance error); cross-check that pose with `get_mesh_collision_distance` |
+| — | "Start or End state in collision" warnings (78 in one run) | many | the graph planner's start/end check uses the spheres only | yes (cuRobo docs) | not a failure: the optimiser still succeeds; would matter only if the graph planner were needed |
+
 ## Not yet
 
 * Blending through via points / between segments (every segment is rest to
