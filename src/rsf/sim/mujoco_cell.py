@@ -21,60 +21,15 @@ from __future__ import annotations
 
 import math
 import time
-from dataclasses import dataclass, field, replace
+from dataclasses import replace
 from typing import Optional
 
 import numpy as np
 
 from rsf.compile.mjcf import ROBOT_PREFIX, world_spec
+from rsf.sim.common import ARM_KP, ARM_KV, ExecReport, Reference, SimParams, T_of  # noqa: F401
 
-#: Joint servo gains per arm joint (N m / rad, N m s / rad), heavy joints first.
-ARM_KP = (5.0e4, 5.0e4, 3.0e4, 1.0e4, 1.0e4, 5.0e3)
-ARM_KV = (6.0e2, 6.0e2, 3.0e2, 5.0e1, 5.0e1, 2.5e1)
-
-
-@dataclass
-class SimParams:
-    timestep: float = 0.001
-    friction: dict = field(default_factory=lambda: {"robot": 0.4, "object": 0.3, "static": 0.5})
-    arm_kp: tuple = ARM_KP
-    arm_kv: tuple = ARM_KV
-    arm_ki_per_s: float = 20.0       #: integral gain = kp x this (a load leaves no steady error)
-    armature: float = 0.05
-    jaw_kp: float = 1.0e5            #: N/m: the EGU50 is screw driven, stiff (1 mm at its 100 N)
-    jaw_armature: float = 0.5
-    jaw_force: float = 100.0         #: N per jaw (the URDF's effort)
-    impratio: float = 10.0           #: elliptic cones, stiff friction (little creep)
-    noslip_iterations: int = 10      #: removes the soft-contact creep of objects held by friction
-    solref: tuple = (0.002, 1.0)     #: contact time constant (>= 2 timesteps) and damping ratio
-    solimp: tuple = (0.95, 0.99, 0.001)
-    sample_dt: float = 0.02
-    contact_dt: float = 0.005
-    contact_tol: float = 0.0         #: penetration (m) beyond which a contact is reported
-    settle: float = 0.5              #: s at the start, trajectory held at its first sample
-
-
-@dataclass
-class ExecReport:
-    """What a run did. Arrays are per sample (``t``)."""
-    t: np.ndarray
-    flange: np.ndarray               #: (n, 4, 4) actual
-    flange_planned: np.ndarray       #: (n, 4, 4)
-    q: np.ndarray                    #: (n, nq_robot) actual joints, trajectory order
-    objects: dict                    #: name -> (n, 4, 4) poses
-    contacts: list                   #: {t, link, other, depth}
-    segments: list                   #: from the trajectory
-    meta: dict = field(default_factory=dict)
-
-    def at(self, t: float) -> int:
-        return int(min(len(self.t) - 1, np.searchsorted(self.t, t)))
-
-
-def _T(pos, mat) -> np.ndarray:
-    T = np.eye(4)
-    T[:3, :3] = np.asarray(mat).reshape(3, 3)
-    T[:3, 3] = pos
-    return T
+_T = T_of
 
 
 class MujocoCell:
@@ -164,10 +119,8 @@ class MujocoCell:
 
         *on_sample(t, model, data)* is called at every sample (e.g. to render)."""
         mj, m, d, p = self.mj, self.m, self.d, self.p
-        names = traj["joint_names"]
-        T = np.asarray(traj["t"], float)
-        Q = np.asarray(traj["q"], float)
-        QD = np.asarray(traj.get("qd") or np.gradient(Q, T, axis=0), float)
+        ref = Reference(traj)
+        names, T, Q = ref.names, ref.T, ref.Q
         adr = self._qadr(names)
         act_pos = np.array([m.actuator(f"{ROBOT_PREFIX}{n}/pos").id for n in names])
         arm_idx = [i for i, n in enumerate(names) if ROBOT_PREFIX + n in self.arm]
@@ -181,7 +134,6 @@ class MujocoCell:
         every_c = max(1, int(round(p.contact_dt / p.timestep)))
         ts, fl, fp, qs, contacts = [], [], [], [], []
         objs = {n: [] for n in self.object_names}
-        i_seg, zero = 0, np.zeros(Q.shape[1])
         arm_adr = adr[arm_idx]
         arm_dof = np.array([m.joint(ROBOT_PREFIX + names[i]).dofadr[0] for i in arm_idx])
         ki = np.array(p.arm_kp[:len(arm_idx)]) * p.arm_ki_per_s
@@ -189,12 +141,7 @@ class MujocoCell:
         wall = time.time()
         for k in range(n_steps + 1):
             t = k * p.timestep - p.settle             # trajectory time (negative while settling)
-            tc = min(max(t, T[0]), T[-1])
-            while i_seg < len(T) - 2 and T[i_seg + 1] < tc:     # samples are in time order
-                i_seg += 1
-            u = (tc - T[i_seg]) / max(T[i_seg + 1] - T[i_seg], 1e-12)
-            q_ref = Q[i_seg] + (Q[i_seg + 1] - Q[i_seg]) * u
-            qd_ref = QD[i_seg] + (QD[i_seg + 1] - QD[i_seg]) * u if 0 <= t <= T[-1] else zero
+            q_ref, qd_ref = ref(t)
             d.ctrl[act_pos] = q_ref
             d.ctrl[act_vel] = qd_ref[arm_idx]
             e = q_ref[arm_idx] - d.qpos[arm_adr]

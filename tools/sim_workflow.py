@@ -1,4 +1,4 @@
-"""P5: replay a planned workflow run in MuJoCo and judge every transfer (D30 criteria).
+"""P5: replay a planned workflow run in simulation and judge every transfer (D30 criteria).
 
     PYTHONPATH=src python tools/sim_workflow.py cells/tm_tray/layouts/strict.yaml \\
         cells/tm_tray/workflows/inspect_and_sort.yaml --plan cells/tm_tray/plans/strict_inspect_and_sort_gpu.json \\
@@ -6,7 +6,9 @@
 
 ``--transfers N`` simulates up to the end of the N-th transfer (0: the whole
 plan). ``--set friction.robot=0.3`` etc. changes simulation parameters
-(``rsf.sim.mujoco_cell.SimParams``) for sensitivity runs.
+(``rsf.sim.common.SimParams``; Isaac: ``rsf.sim.isaac_cell.IsaacParams``) for
+sensitivity runs. ``--backend isaac`` replays it in Isaac Sim (PhysX) instead of
+MuJoCo: same world, servo and judge (needs Isaac Sim, see ``docs/p5_isaac.md``).
 """
 from __future__ import annotations
 
@@ -20,9 +22,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 
-def params(sets):
-    from rsf.sim.mujoco_cell import SimParams
-    p = SimParams()
+def params(sets, backend="mujoco"):
+    if backend == "isaac":
+        from rsf.sim.isaac_cell import IsaacParams as P
+    else:
+        from rsf.sim.common import SimParams as P
+    p = P()
     for s in sets or []:
         k, v = s.split("=", 1)
         v = json.loads(v)
@@ -41,12 +46,13 @@ def main(argv=None) -> int:
     ap.add_argument("--plan", required=True, help="rsf.trajectory/1 JSON (tools/plan_workflow.py assemble)")
     ap.add_argument("--transfers", type=int, default=0)
     ap.add_argument("--set", action="append", help="SimParams override, key=json")
+    ap.add_argument("--backend", choices=("mujoco", "isaac"), default="mujoco")
+    ap.add_argument("--usd", help="isaac: where to write the compiled stage (default: a temporary file)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
     from rsf.model.layout import load_world
     from rsf.model.workflow import Workflow
     from rsf.sim import judge as J
-    from rsf.sim.mujoco_cell import MujocoCell
     world = load_world(a.layout)
     wf = Workflow.from_file(a.workflow)
     occ = wf.initial_occupancy(world, wf.resolve_sets(world))
@@ -55,12 +61,17 @@ def main(argv=None) -> int:
     if a.transfers:
         trs = J.transfers(world, wf, traj["segments"], occ)
         t_end = trs[min(a.transfers, len(trs)) - 1].t1 + 0.5
-    cell = MujocoCell(world, occ, params(a.set))
+    if a.backend == "isaac":
+        from rsf.sim.isaac_cell import IsaacCell
+        cell = IsaacCell(world, occ, params(a.set, "isaac"), usd_path=a.usd)
+    else:
+        from rsf.sim.mujoco_cell import MujocoCell
+        cell = MujocoCell(world, occ, params(a.set))
     t0 = time.time()
     rep = cell.run(traj, t_end=t_end, progress=lambda t, w: print(f"  sim t={t:7.1f} s  wall {w:6.1f} s", flush=True))
     res = J.judge(world, wf, rep, occ, traj=traj)
     res["meta"] = {"layout": a.layout, "workflow": a.workflow, "plan": a.plan, "sim_seconds": round(float(rep.t[-1]), 2),
-                   "wall_seconds": round(time.time() - t0, 1), "params": {k: v for k, v in vars(cell.p).items()}}
+                   "wall_seconds": round(time.time() - t0, 1), "backend": a.backend, "params": {k: v for k, v in vars(cell.p).items()}}
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(res, indent=1, default=float))
     for t in res["transfers"]:
