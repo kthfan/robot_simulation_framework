@@ -22,6 +22,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 
+def load_plan(path) -> dict:
+    """A ``rsf.trajectory/1`` JSON file, gzipped (``.gz``) or not."""
+    import gzip
+    p = Path(path)
+    return json.loads(gzip.decompress(p.read_bytes()) if p.suffix == ".gz" else p.read_text())
+
+
 def params(sets, backend="mujoco"):
     if backend == "isaac":
         from rsf.sim.isaac_cell import IsaacParams as P
@@ -56,7 +63,7 @@ def main(argv=None) -> int:
     world = load_world(a.layout)
     wf = Workflow.from_file(a.workflow)
     occ = wf.initial_occupancy(world, wf.resolve_sets(world))
-    traj = json.loads(Path(a.plan).read_text())
+    traj = load_plan(a.plan)
     t_end = None
     if a.transfers:
         trs = J.transfers(world, wf, traj["segments"], occ)
