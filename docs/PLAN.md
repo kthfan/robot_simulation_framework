@@ -332,6 +332,14 @@ M3 碰撞判定移植、World→MuJoCo 編譯器。D29 夾爪 strict／as_built 
 - 實機已裝 air cylinder：預設模型包含；夾爪實際運行不會全關 → `tool.operating_range`（min 0.021）。
 - 實作原則：保持彈性與可擴充性（資產組合改由 `cells/<cell>/asset_spec.yaml` 宣告；幾何生成器放在 `rsf.model.primitives`）。
 
+### 待辦（使用者 2026-11-22，尚未實作）
+- **AprilGrid 真實影像條件**：模糊、雜訊、曝光、陰影、遮擋、光照（detector 的 `tools/agsim/render.py` degradations）；
+  偵測率與位姿誤差對這些條件的關係。
+- **slot 位置擾動後的定位與修正**：模擬中讓 incoming 或 outgoing 架子移動一個小 offset → AprilGrid 讀取 → 修正 slot pose →
+  重新示教／規劃 → 模擬 judge 仍通過（P6 驗收）。
+- **放寬攜帶限制**：傾角在 15° 以下都可接受。現行規則是「相對攜帶起點的重力方向 15° 錐，且重力不得把 tray 往開口側拉」，
+  實作時先確認基準（水平或攜帶起點）。
+
 ### 仍待確認
 - cuRobo CPU 移植是否進行、範圍（見 `docs/curobo_cpu_port.md` §4），以及是否把 kthfan/curobo 加入此 session。
 - Air cylinder 碰撞 mesh 是否也帶有 tm5s.usd 的安裝偏移（需實機量測）。
