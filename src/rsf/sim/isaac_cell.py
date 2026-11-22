@@ -63,6 +63,23 @@ def app(headless: bool = True):
     return _APP
 
 
+def start_physics(ctx, dt: float):
+    """Start PhysX on the context's stage and a numpy tensor view of it, as Isaac's own
+    ``SimulationContext.initialize_physics`` does: ``(physx, simulation interface, view)``."""
+    import omni.physics.tensors as tensors
+    import omni.physx
+    physx = omni.physx.get_physx_interface()
+    sim_if = omni.physx.get_physx_simulation_interface()
+    stage_id = ctx.get_stage_id()
+    physx.force_load_physics_from_usd()
+    physx.start_simulation()
+    physx.update_simulation(dt, 0.0)
+    view = tensors.create_simulation_view("numpy", stage_id=stage_id)
+    view.set_subspace_roots("/")
+    physx.update_simulation(dt, 0.0)
+    return physx, sim_if, view
+
+
 def _T7(x) -> np.ndarray:
     """``[px, py, pz, qx, qy, qz, qw]`` -> 4x4."""
     x = np.asarray(x, float)
@@ -106,17 +123,11 @@ class IsaacCell:
     # ── Isaac side ─────────────────────────────────────────────────────────
     def _start(self):
         app(self.p.headless)
-        import omni.physx
         import omni.usd
         ctx = omni.usd.get_context()
         ctx.open_stage(str(self.usd_path))
         _APP.update()
-        self.physx = omni.physx.get_physx_interface()
-        self.sim_if = omni.physx.get_physx_simulation_interface()
-        self.physx.start_simulation()
-        self.physx.update_simulation(1e-6, 0.0)            # create the PhysX scene
-        import omni.physics.tensors as tensors
-        self.view = tensors.create_simulation_view("numpy")
+        self.physx, self.sim_if, self.view = start_physics(ctx, self.p.timestep)
         self.art = self.view.create_articulation_view(self.robot_path)
         meta = self.art.shared_metatype
         self.dof_names = list(meta.dof_names)

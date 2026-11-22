@@ -16,6 +16,7 @@ import traceback
 from pathlib import Path
 
 os.environ.setdefault("OMNI_KIT_ACCEPT_EULA", "YES")
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 
 def main() -> int:
@@ -67,15 +68,13 @@ def main() -> int:
             UsdPhysics.RigidBodyAPI.Apply(b.GetPrim())
             UsdPhysics.MassAPI.Apply(b.GetPrim()).CreateMassAttr(1.0)
         stage("stage", prims=len(list(st.Traverse())))
-        phys = omni.physx.get_physx_interface()
-        phys.start_simulation()
+        from rsf.sim.isaac_cell import start_physics
+        phys, _, view = start_physics(ctx, 1e-3)
         dt, n = 1e-3, 1000
         w = time.time()
         for k in range(n):
             phys.update_simulation(dt, k * dt)
         stage("step", steps=n, wall_s=round(time.time() - w, 2))
-        import omni.physics.tensors as T
-        view = T.create_simulation_view("numpy")
         info = {}
         if a.usd:
             arts = [p.GetPath().pathString for p in st.Traverse() if p.HasAPI(UsdPhysics.ArticulationRootAPI)]
