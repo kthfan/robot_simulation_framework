@@ -269,6 +269,11 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 
 P0–P2 先做；P3 起每個階段開始前再細化 todo。
 
+**Isaac Sim adapter（2026-11-22，進行中）**：World → USD（`rsf.compile.usd`：UsdPhysics articulation 由 URDF 直接寫出、
+fixed joint 合併成剛體、凸包碰撞、與 MuJoCo 相同的質量／摩擦／伺服）＋ `rsf.sim.isaac_cell.IsaacCell`（omni.physx 步進、
+omni.physics.tensors 讀寫、同一 `ExecReport` 與 judge）；`tools/sim_workflow.py --backend isaac`。編譯器測試 8 項（FK 與 URDF < 1e-6、
+質量與 MuJoCo 一致）。Isaac Sim 6.2 已確認可在 Kaggle T4 headless 執行。見 `docs/p5_isaac.md`。
+
 **130 mm tray 與小心攜帶（2026-11-19）**：tray 高度 130 mm；tilt 重新調整（flange 52.4 mm，64 取樣，≥ 10 mm）；三個 layout 37/37、74/74、26/26。
 攜帶限制 15°（CPU 受限取樣、cuRobo ToolPoseBound、碰撞檢查）；手臂姿態只在空手時切換（示教變體）。三個 layout 全流程模擬皆 24/24，
 模擬中實測攜帶傾角 ≤ 15.0°。
