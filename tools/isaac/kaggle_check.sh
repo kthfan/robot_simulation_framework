@@ -16,6 +16,7 @@ world_stage(load_world("cells/tm_tray/layouts/strict.yaml"), "reports/isaac/stri
 print("compiled reports/isaac/strict.usda")
 app.close()
 PY
+timeout 900 python -m pytest -q -p no:cacheprovider tests/test_isaac.py --junitxml reports/isaac/test_isaac.xml || rc=1
 timeout 600 python tools/isaac/probe.py --usd reports/isaac/strict.usda --out reports/isaac/probe_strict.json || rc=1
 timeout ${ISAAC_SIM_TIMEOUT:-2400} python tools/sim_workflow.py cells/tm_tray/layouts/strict.yaml \
     cells/tm_tray/workflows/inspect_and_sort.yaml --plan cells/tm_tray/plans/strict_cycle1_gpu.json.gz \

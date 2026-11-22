@@ -133,6 +133,7 @@ class IsaacCell:
         self.dof_names = list(meta.dof_names)
         self.link_names = list(meta.link_names)
         self.objs = {n: self.view.create_rigid_body_view(p) for n, p in self.object_paths.items()}
+        self._obj0 = {n: v.get_transforms().copy() for n, v in self.objs.items()}     # where the run starts them
         self._idx = np.arange(1, dtype=np.int32)
         self._started = True
 
@@ -183,6 +184,9 @@ class IsaacCell:
         kp = np.zeros(len(self.dof_names))
         kp[arm] = np.array(p.arm_kp[:int(arm.sum())]) * p.arm_ki_per_s
         art, idx = self.art, self._idx
+        for n, v in self.objs.items():                    # every run starts from the layout
+            v.set_transforms(self._obj0[n], idx)
+            v.set_velocities(np.zeros((1, 6), np.float32), idx)
         art.set_dof_positions(Q[0][col][None], idx)
         art.set_dof_velocities(np.zeros((1, len(col))), idx)
         art.set_dof_position_targets(Q[0][col][None], idx)
