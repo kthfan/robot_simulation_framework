@@ -101,12 +101,20 @@ def test_job_round_trip(run, tmp_path):
     assert len(job["segments"]) == 7 and job["limit_margin_deg"] == 5.0
     carried = [s for s in job["segments"] if s["carried"]]
     assert len(carried) == 2 and len(carried[0]["carried"]["boxes"]) == 3
-    # the carry cone for cuRobo: up axis (opposite gravity at the pick tilt) within 15 deg of vertical
+    # the carry rule for cuRobo: a tool axis within a cone of the vertical, the largest cone
+    # inside both rules (15 deg from level, no outward pull: ~6 deg forward of level)
     b = carried[0]["tool_bound"]
-    assert b["max_angle"] == pytest.approx(math.radians(15.0)) and b["reference_axis"] == [0.0, 0.0, 1.0]
+    assert b["reference_axis"] == [0.0, 0.0, 1.0]
+    assert math.radians(8.0) < b["max_angle"] < math.radians(15.0)
     s0 = next(x for x in segs if x.name == carried[0]["name"])
-    up = eng.arm.fk(s0.q_start)[:3, :3] @ np.array(b["tool_axis"])
-    assert up == pytest.approx([0.0, 0.0, 1.0], abs=1e-9)
+    frame = PL.carry_frame(eng.arm, s0, **PL.carry_rule(PL._motion(world.process)))
+    axis = np.array(b["tool_axis"])
+    up0 = -(eng.arm.fk(s0.q_start)[:3, :3].T @ np.array([0.0, 0.0, -1.0]))   # tool-frame up at the start
+    assert math.acos(min(1.0, float(axis @ up0))) <= b["max_angle"]             # the start is inside
+    for k in range(36):                                                          # the cone's edge keeps both rules
+        e = _cone_edge(axis, b["max_angle"], 2 * math.pi * k / 36)
+        g = -e
+        assert float(g @ frame[0]) >= frame[2] - 1e-9 and float(g @ frame[1]) <= 1e-9
     assert all(s["tool_bound"] is None for s in job["segments"] if not s["carried"])
     assert len(job["scenes"]) < len(job["segments"])
     assert all("pedestal/plate" not in job["scenes"][s["scene"]]["cuboid"] for s in job["segments"])  # base mount
@@ -115,11 +123,45 @@ def test_job_round_trip(run, tmp_path):
     assert PL.attach_results(segs, fake) == [job["segments"][0]["name"]]
 
 
+def _cone_edge(axis, angle, phi):
+    a = np.asarray(axis, float)
+    u = np.cross(a, [1.0, 0.0, 0.0] if abs(a[0]) < 0.9 else [0.0, 1.0, 0.0])
+    u /= np.linalg.norm(u)
+    v = np.cross(a, u)
+    return math.cos(angle) * a + math.sin(angle) * (math.cos(phi) * u + math.sin(phi) * v)
+
+
+def test_carry_bound_geometry():
+    """The cuRobo cone: the whole tilt cone when the outward plane is farther than its
+    edge; else the largest cone between the two, touching both."""
+    g = np.array([0.0, 0.0, -1.0])
+    c = np.array([0.0, math.cos(math.radians(30.0)), math.sin(math.radians(30.0))])   # plane 30 deg away
+    axis, ang = PL.carry_bound((g, c, math.cos(math.radians(15.0))))
+    assert ang == pytest.approx(math.radians(15.0)) and axis == pytest.approx(-g)
+    c = np.array([0.0, math.cos(math.radians(6.0)), math.sin(math.radians(6.0))])     # plane 6 deg away
+    delta = math.asin(-float(g @ c))
+    assert delta == pytest.approx(math.radians(6.0))
+    axis, ang = PL.carry_bound((g, c, math.cos(math.radians(15.0))))
+    assert ang == pytest.approx(0.5 * (math.radians(15.0) + delta))
+    for k in range(24):
+        e = -_cone_edge(axis, ang, 2 * math.pi * k / 24)                   # gravity on the cone's edge
+        assert float(e @ g) >= math.cos(math.radians(15.0)) - 1e-9 and float(e @ c) <= 1e-9
+
+
 def test_carry_orientation(run):
     """A free carry may not roll the tray off the plate: J6 +60 deg rolls it."""
     world, segs, traj, problems, eng = run
     s = next(x for x in segs if x.kind == "free" and x.carried is not None)
-    frame = PL.carry_frame(eng.arm, s, 30.0)
+    # measured from level (the cell's rule): the start (5 deg back) is fine, a 20 deg roll is not
+    lv = PL.carry_frame(eng.arm, s, 15.0, "level")
+    assert PL.carry_violation(eng.arm, s.q_start, lv) is None
+    q = s.q_start.copy()
+    q[5] += math.radians(20.0)
+    assert "tilted" in PL.carry_violation(eng.arm, q, lv)
+    q[5] -= math.radians(12.0)                                            # 8 deg roll + 5 back: < 15 from level
+    assert PL.carry_violation(eng.arm, q, lv) is None
+    # measured from the carry's start
+    frame = PL.carry_frame(eng.arm, s, 30.0, "start")
     assert PL.carry_violation(eng.arm, s.q_start, frame) is None
     assert PL.carry_violation(eng.arm, s.q_goal, frame) is None          # set down the way it was picked
     q = s.q_start.copy()

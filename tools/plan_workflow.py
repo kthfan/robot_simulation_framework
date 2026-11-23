@@ -68,7 +68,7 @@ def main(argv=None) -> int:
     from rsf.planning.teach import make_engine
     eng = make_engine(world)
     mo = PL._motion(world.process)
-    tilt = float(mo.get("carry_max_tilt_deg", 15.0))
+    rule = PL.carry_rule(mo)
     if a.paths == "linear":
         for s in segs:
             if s.kind == "free":
@@ -85,7 +85,7 @@ def main(argv=None) -> int:
         if a.fallback == "cpu":                               # GPU paths the gate rejects: replan
             for s in segs:
                 if s.kind == "free" and s.name not in bad and s.Q is not None:
-                    p = PL.check_segment(eng.arm, eng.checker, s, max_tilt_deg=tilt)
+                    p = PL.check_segment(eng.arm, eng.checker, s, **rule)
                     if p:
                         print(f"  gate rejects the GPU path: {p[0]}", flush=True)
                         bad.append(s.name)

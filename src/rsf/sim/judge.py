@@ -13,8 +13,10 @@ fields) and the plan it executed:
    slow and close (segments with the ``in_jig`` caps);
 5. **caps**: the carried object's planned motion within the carry caps (D14);
 6. **carry tilt**: during free carries the object's simulated orientation keeps
-   gravity within ``carry_max_tilt_deg`` (+1 deg) of how it was held when the
-   carry began (user 2026-11-19: handle the tray with care).
+   gravity within ``carry_max_tilt_deg`` (+1 deg) of its reference
+   (``carry_tilt_reference``): how it was held when the carry began (``start``),
+   or level (``level``: the object's z axis vertical). User 2026-11-19: handle the
+   tray with care; 2026-11-23: any tilt up to 15 deg from level is acceptable.
 
 A *transfer* is a pick sequence followed by a place sequence in the trajectory
 (``pick:<from>/...``, ``place:<to>/...``). Where the carry begins and ends is
@@ -163,7 +165,9 @@ def judge(world, workflow, rep, occupancy: dict, *, carry_caps=None, traj: Optio
     report's planned flange samples (coarser: a corner between them reads
     differently with every alignment)."""
     planned = _planned_flange(world, traj) if traj is not None else None
-    max_tilt = float(((world.process.get("motion") or {}).get("carry_max_tilt_deg", 15.0)))
+    motion = world.process.get("motion") or {}
+    max_tilt = float(motion.get("carry_max_tilt_deg", 15.0))
+    level = str(motion.get("carry_tilt_reference", "start")) == "level"
     seat_solids = {s.name for s in world.solids(objects=False) if "robot_seat" in s.tags}
     if carry_caps is None:
         mo = (world.process.get("motion") or {}).get("caps", {})
@@ -219,8 +223,8 @@ def judge(world, workflow, rep, occupancy: dict, *, carry_caps=None, traj: Optio
             r["caps_ok"] = (k["v"] <= carry_caps.v * 1.05 and k["a"] <= carry_caps.a * 1.05
                             and k["w"] <= carry_caps.w * 1.05 and k["alpha"] <= carry_caps.alpha * 1.05
                             and k["a_down"] <= carry_caps.a_down * 1.05)
-        # 6. the tray as it was picked up: during free carries, its simulated orientation keeps
-        #    gravity within carry_max_tilt_deg (+1 deg of simulation compliance) of the carry's start
+        # 6. the tray handled with care: during free carries, its simulated orientation keeps
+        #    gravity within carry_max_tilt_deg (+1 deg of simulation compliance) of the reference
         tilt = 0.0
         if tr.obj in rep.objects:
             for sg in rep.segments:
@@ -229,7 +233,8 @@ def judge(world, workflow, rep, occupancy: dict, *, carry_caps=None, traj: Optio
                     if len(wf):
                         R = rep.objects[tr.obj][wf][:, :3, :3]
                         g = np.einsum("nji,j->ni", R, np.array([0.0, 0.0, -1.0]))
-                        c = np.clip(g @ g[0], -1.0, 1.0)
+                        ref = np.array([0.0, 0.0, -1.0]) if level else g[0]   # the object's own -z when level
+                        c = np.clip(g @ ref, -1.0, 1.0)
                         tilt = max(tilt, float(np.degrees(np.arccos(c.min()))))
         r["carry_tilt_deg"] = tilt
         r["checks"] = {"placement": r["seat_mm"] <= SEAT_MM and r["seat_deg"] <= SEAT_DEG,

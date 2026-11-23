@@ -13,8 +13,9 @@ plugins: [../plugin/tm_tray]
 process:
   standoff_far: 0.35      # far AprilGrid read, camera to label (m)
   standoff_near: 0.2768   # near read; plate-free standoff (D24, D28)
-  carry_tilt_deg: 15.0    # plate tilt while carrying, degrees: insurance on top of the push
-                          # (user 2026-11-12); D14's design value.
+  carry_tilt_deg: 5.0     # plate tilt while carrying, degrees: insurance on top of the push
+                          # (user 2026-11-12; D14's design value was 15). User 2026-11-23:
+                          # any tilt up to 15 deg is acceptable, about 5 deg for now.
   # withdraw -> carry is one motion: tilt about `pivot` (flange y, z at withdraw)
   # while backing out `retreat`; the flange only goes down and back (user
   # 2026-11-13), and every obstacle stays `clearance` away along the whole motion
@@ -44,11 +45,13 @@ process:
       carry:  {v: 0.25, a: 1.5, w: 0.5, alpha: 3.0, a_down: 4.0}
       empty:  {v: 0.25, a: 1.5, w: 0.5, alpha: 3.0}
     joint: {v: 1.0, a: 2.0}
-    # a free move carrying a tray keeps it as it was picked up: gravity within this
-    # angle of the tilt-back pose (user 2026-11-19: handle with care). 15 deg keeps
-    # the plate between level and 30 deg back, rolled at most 15 deg: gravity never
-    # pulls the tray toward the open side
+    # a free move carrying a tray handles it with care (user 2026-11-19): the plate
+    # stays within this angle of level (user 2026-11-23: up to 15 deg is acceptable),
+    # and gravity never pulls the tray toward the open side (it may tip forward only
+    # about 6 deg past level). `carry_tilt_reference: start` measures from the
+    # carry's start instead (the rule until 2026-11-23, with a 15 deg tilt-back).
     carry_max_tilt_deg: 15.0
+    carry_tilt_reference: level
     jaw: {speed: 0.05, settle: 0.5}
     home: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 

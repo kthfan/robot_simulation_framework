@@ -199,11 +199,13 @@ def write_job(world, segs: list, path, *, margin: float = 0.005, meta: Optional[
                                                 "pose_in_link": (T @ b.T).tolist()} for b in solids]}
         bound = None
         if carried is not None and arm is not None:
-            # the carry cone (carry_frame) as a cuRobo ToolPoseBound: the tool-frame axis
-            # opposite gravity at the pick tilt stays within the cone of the base's vertical
-            frame = carry_frame(arm, s, float(_motion(world.process).get("carry_max_tilt_deg", 15.0)))
-            bound = {"tool_axis": [float(v) for v in -frame[0]], "reference_axis": [0.0, 0.0, 1.0],
-                     "max_angle": math.acos(max(-1.0, min(1.0, frame[2])))}
+            # the carry rule (carry_frame) as a cuRobo ToolPoseBound: a tool-frame axis
+            # within a cone of the base's vertical (carry_bound: the largest cone that
+            # keeps both the tilt and the no-outward-pull rule)
+            frame = carry_frame(arm, s, **carry_rule(_motion(world.process)))
+            axis, angle = carry_bound(frame)
+            bound = {"tool_axis": [float(v) for v in axis], "reference_axis": [0.0, 0.0, 1.0],
+                     "max_angle": angle}
         items.append({"name": s.name, "q_start": [float(v) for v in s.q_start], "q_goal": [float(v) for v in s.q_goal],
                       "lock_joints": {k: float(v) for k, v in s.joints.items()}, "scene": scene, "carried": carried,
                       "tool_bound": bound})
@@ -328,22 +330,59 @@ def time_segment(arm, s: Segment, motion: dict) -> None:
 _DOWN = np.array([0.0, 0.0, -1.0])
 
 
-def carry_frame(arm, s: Segment, max_tilt_deg: float = 15.0) -> Optional[tuple]:
+def carry_rule(motion: dict) -> dict:
+    """``process.motion``'s carry rule as keyword arguments of :func:`carry_frame`:
+    ``carry_max_tilt_deg`` (default 15) and ``carry_tilt_reference`` (default ``start``)."""
+    return {"max_tilt_deg": float(motion.get("carry_max_tilt_deg", 15.0)),
+            "reference": str(motion.get("carry_tilt_reference", "start"))}
+
+
+def carry_frame(arm, s: Segment, max_tilt_deg: float = 15.0, reference: str = "start") -> Optional[tuple]:
     """For a free segment carrying an object: ``(g_nom, c_dir, cos_max)`` in the holding
-    link's frame: gravity at the start of the carry, the direction to the object's
+    link's frame: the reference direction of gravity, the direction to the object's
     centre, and the cosine of the largest tilt allowed. None otherwise.
 
     The object rests on the gripper (the tray on the plate, against the push
     plate, between the jaws) and nothing holds it from the open side: a free
-    move must not tilt gravity more than *max_tilt_deg* away from where it was
-    when the carry began, and gravity must never pull the object outward
-    (``g . c_dir <= 0``). The holding link is the arm's tool frame (``arm.fk``)."""
+    move must not tilt gravity more than *max_tilt_deg* away from the reference,
+    and gravity must never pull the object outward (``g . c_dir <= 0``). The
+    reference is gravity where the carry began (``start``) or the object level
+    (``level``: its own z axis vertical). The holding link is the arm's tool frame
+    (``arm.fk``)."""
     if s.kind != "free" or s.carried is None:
         return None
     name, link, solids, T = s.carried
-    c = np.mean([(np.asarray(T) @ x.T)[:3, 3] for x in solids], axis=0)
-    g_nom = arm.fk(s.q_start)[:3, :3].T @ _DOWN
+    T = np.asarray(T, float)
+    c = np.mean([(T @ x.T)[:3, 3] for x in solids], axis=0)
+    if reference == "level":
+        g_nom = -T[:3, 2]
+    elif reference == "start":
+        g_nom = arm.fk(s.q_start)[:3, :3].T @ _DOWN
+    else:
+        raise ValueError(f"carry_tilt_reference {reference!r}: 'start' or 'level'")
     return g_nom, c / np.linalg.norm(c), math.cos(math.radians(max_tilt_deg))
+
+
+def carry_bound(frame) -> tuple:
+    """The largest cone of gravity directions (in the holding link's frame) inside
+    both carry rules: ``(tool_axis, max_angle)``, the tool-frame axis that must stay
+    within *max_angle* (rad) of the vertical (it points up: minus gravity). The tilt
+    cone is cut by the plane ``g . c_dir = 0`` where gravity starts to pull outward;
+    when that plane is nearer than the cone's edge, the cone shrinks and moves away
+    from it."""
+    g_nom, c, cos_max = frame
+    theta = math.acos(max(-1.0, min(1.0, cos_max)))
+    delta = math.asin(max(-1.0, min(1.0, -float(g_nom @ c))))      # angle from g_nom to the plane
+    if delta >= theta:
+        return -g_nom, theta
+    away = -c - float(-c @ g_nom) * g_nom                          # in the plane of g_nom, away from c
+    n = np.linalg.norm(away)
+    if n < 1e-12 or theta + delta <= 0:
+        return -g_nom, max(0.0, 0.5 * (theta + delta))
+    away /= n
+    shift = 0.5 * (theta - delta)
+    g = math.cos(shift) * g_nom + math.sin(shift) * away
+    return -g, 0.5 * (theta + delta)
 
 
 def carry_sampler(arm, s: Segment, frame, sign_joints=(2, 4), margin: float = 0.3) -> Callable:
@@ -466,7 +505,7 @@ def carry_violation(arm, q, frame) -> Optional[str]:
     g = arm.fk(q)[:3, :3].T @ _DOWN
     if float(g @ g_nom) < cos_max - 1e-9:
         return f"carried object tilted {math.degrees(math.acos(min(1.0, float(g @ g_nom)))):.0f} deg " \
-               f"from how it was picked (max {math.degrees(math.acos(cos_max)):.0f})"
+               f"from its reference (max {math.degrees(math.acos(cos_max)):.0f})"
     if float(g @ c_dir) > 1e-9:
         return "gravity pulls the carried object outward"
     return None
@@ -484,7 +523,8 @@ def _load(checker, s: Segment) -> None:
 
 
 def plan_free_cpu(arm, checker, s: Segment, *, step: float = 0.01, seed: int = 0,
-                  max_iter: int = 4000, pad: float = 0.001, max_tilt_deg: float = 15.0) -> dict:
+                  max_iter: int = 4000, pad: float = 0.001, max_tilt_deg: float = 15.0,
+                  tilt_reference: str = "start") -> dict:
     """CPU fallback for a free segment: RRT-Connect + shortcut + smoothing under the
     gate's rules, every margin *pad* larger (the gate samples the timed path at
     other points than the planner's edge checks; a corner may dip between them).
@@ -501,7 +541,7 @@ def plan_free_cpu(arm, checker, s: Segment, *, step: float = 0.01, seed: int = 0
         checker._rule_cache.clear()
     n = {"checks": 0}
 
-    frame = carry_frame(arm, s, max_tilt_deg)
+    frame = carry_frame(arm, s, max_tilt_deg, tilt_reference)
 
     def valid(q):
         n["checks"] += 1
@@ -541,15 +581,16 @@ def plan_free_gated(arm, checker, s: Segment, motion: dict, *, tries: int = 5, *
     """:func:`plan_free_cpu`, then timed and gated as :func:`assemble` will; on a gate
     problem (e.g. a corner dipping below the margin between samples) planned again
     with the next seed. Leaves the untimed path in ``s.Q``."""
-    tilt = float(motion.get("carry_max_tilt_deg", 15.0))
+    rule = carry_rule(motion)
     r, why = {"success": False}, []
     for k in range(tries):
-        r = plan_free_cpu(arm, checker, s, seed=k, max_tilt_deg=tilt, **kw)
+        r = plan_free_cpu(arm, checker, s, seed=k, max_tilt_deg=rule["max_tilt_deg"],
+                          tilt_reference=rule["reference"], **kw)
         if not r["success"]:
             continue
         path = s.Q.copy()
         time_segment(arm, s, motion)
-        why = check_segment(arm, checker, s, max_tilt_deg=tilt)
+        why = check_segment(arm, checker, s, **rule)
         s.Q, s.t = path, None
         if not why:
             r["seed"] = k
@@ -558,7 +599,8 @@ def plan_free_gated(arm, checker, s: Segment, motion: dict, *, tries: int = 5, *
     return r
 
 
-def check_segment(arm, checker, s: Segment, step: float = 0.01, max_tilt_deg: float = 15.0) -> list:
+def check_segment(arm, checker, s: Segment, step: float = 0.01, max_tilt_deg: float = 15.0,
+                  reference: str = "start") -> list:
     """Problems of *s* on the CPU: every joint sample (densified to *step* rad) against its rules."""
     if s.Q is None or s.kind == "hold" or s.scene is None:
         return []
@@ -580,7 +622,7 @@ def check_segment(arm, checker, s: Segment, step: float = 0.01, max_tilt_deg: fl
             break
     if np.any(Q < arm.lower - 1e-9) or np.any(Q > arm.upper + 1e-9):
         out.append(f"{s.name}: outside the operating joint limits")
-    frame = carry_frame(arm, s, max_tilt_deg)
+    frame = carry_frame(arm, s, max_tilt_deg, reference)
     if frame is not None:
         for i, q in enumerate(dense):
             why = carry_violation(arm, q, frame)
@@ -615,7 +657,7 @@ def assemble(world, arm, checker, segs: list) -> tuple:
         except RuntimeError as e:
             problems.append(str(e))
             continue
-        problems += check_segment(arm, checker, s, max_tilt_deg=float(mo.get("carry_max_tilt_deg", 15.0)))
+        problems += check_segment(arm, checker, s, **carry_rule(mo))
     jaw_names = sorted({k for s in segs for k in (s.joints or {})} | {k for s in segs for k in (s.joints_end or {})})
     names = list(arm.joint_names) + jaw_names
     T, Qs, out_segs, t0 = [], [], [], 0.0
