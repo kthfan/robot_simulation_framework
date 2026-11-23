@@ -63,14 +63,19 @@ def main() -> int:
         if img.size:
             from PIL import Image
             Image.fromarray(img[..., :3].astype("uint8")).save(a.png)
+        _report(out, t0, a.out)                   # before close: closing the app ends the process
         app.close()
     except Exception as e:  # noqa: BLE001
         out["error"] = repr(e)
         out["trace"] = traceback.format_exc()
-    out["t_total"] = round(time.time() - t0, 1)
-    Path(a.out).write_text(json.dumps(out, indent=1))
-    print("[render]", json.dumps({k: v for k, v in out.items() if k != "trace"}), flush=True)
+    _report(out, t0, a.out)
     return 0 if out["ok"] else 1
+
+
+def _report(out, t0, path):
+    out["t_total"] = round(time.time() - t0, 1)
+    Path(path).write_text(json.dumps(out, indent=1))
+    print("[render]", json.dumps({k: v for k, v in out.items() if k != "trace"}), flush=True)
 
 
 if __name__ == "__main__":
