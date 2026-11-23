@@ -6,6 +6,7 @@
 # registers the ICD. Prints a verdict line "VULKAN: ok|fail ...".
 #   source tools/isaac/vulkan_setup.sh     (exports VK_ICD_FILENAMES, LD_LIBRARY_PATH)
 set -u
+_VK_CWD=$PWD
 VER=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -1 | tr -d ' ')
 DST=${VK_DRIVER_DIR:-/opt/nvidia-vk}
 echo "[vk] driver $VER  NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES:-unset}"
@@ -37,10 +38,18 @@ JSON
   export LD_LIBRARY_PATH="$DST${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   export VK_ICD_FILENAMES="$DST/nvidia_icd.json"
   echo "[vk] installed: $(ls $DST | grep -c "so.$VER") libs into $DST (api ${api:-?})"
-  cd - >/dev/null
 fi
+cd "$_VK_CWD"
+# the NVIDIA Vulkan driver also opens the modeset device; create it if the container lacks it
+if [ ! -e /dev/nvidia-modeset ] && [ "${VK_MKNOD_MODESET:-1}" = 1 ]; then
+  mknod -m 666 /dev/nvidia-modeset c 195 254 2>/dev/null && echo "[vk] created /dev/nvidia-modeset" \
+    || echo "[vk] cannot create /dev/nvidia-modeset"
+fi
+echo "[vk] ldd libGLX_nvidia: $(ldd $DST/libGLX_nvidia.so.0 2>&1 | grep -E 'not found' | tr -s ' \t' ' ' | tr '\n' ';')"
 if vulkaninfo --summary > /tmp/vulkaninfo.txt 2>&1; then
   echo "VULKAN: ok $(grep -m2 -E 'deviceName|apiVersion' /tmp/vulkaninfo.txt | tr -s ' ' | tr '\n' ' ')"
 else
   echo "VULKAN: fail $(tail -3 /tmp/vulkaninfo.txt | tr '\n' ' ')"
+  VK_LOADER_DEBUG=error,warn,driver vulkaninfo --summary > /tmp/vulkan_loader_debug.txt 2>&1
+  grep -iE "error|fail|driver|icd" /tmp/vulkan_loader_debug.txt | head -25
 fi
