@@ -75,7 +75,47 @@ OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src python tools/sim_workflow.py cells/tm_tr
     --backend isaac --transfers 2 --out reports/isaac_strict_1cycle.json
 ```
 
+## Results (Kaggle, 2026-11-23)
+
+Isaac Sim 6.2.0 (pip, Python 3.12) on a Kaggle T4, headless, CPU PhysX at 1 kHz
+(`tools/isaac/kaggle_check.sh`; setup 10 min, mostly the Isaac download; checks 4 min).
+
+| check | result |
+|---|---|
+| app start (headless) | 22 s; RTX renderer unavailable (no Vulkan on Kaggle): physics only, no camera images |
+| box on the ground (probe) | rests at z = 0.0500 m after 1 s |
+| compiled strict stage (720 prims) | loads; one articulation, 8 DOF and 9 bodies, names as authored; 1000 steps in 1.07 s |
+| `tests/test_isaac.py::test_cell_holds_still` | pass: arm held 2 s, trays seated, no contacts, tracking < 0.1 mm |
+| strict first cycle (2 transfers, 103.8 s simulated) | **2/2 pass**, 137.7 s wall |
+
+Same plan (`cells/tm_tray/plans/strict_cycle1_gpu.json.gz`), same judge, both simulators:
+
+| transfer | backend | seat | slip | track | carry tilt | contacts |
+|---|---|---|---|---|---|---|
+| incoming/L2/C0 → table/L0/C0 | MuJoCo | 0.36 mm / 0.01° | 0.23 mm | 0.43 mm | 15.0° | none |
+| | Isaac (PhysX) | 0.30 mm / 0.00° | 0.79 mm | 0.44 mm | 15.0° | none |
+| table/L0/C0 → outgoing/L0/C0 | MuJoCo | 0.41 mm / 0.02° | 0.21 mm | 0.39 mm | 5.6° | none |
+| | Isaac (PhysX) | 0.59 mm / 0.02° | 0.39 mm | 0.39 mm | 5.6° | none |
+
+Tracking and tilt agree to 0.01 mm / 0.01° (the same servo on the same arm). Placement
+and slip differ by up to 0.6 mm (the contact models differ: rigid PhysX contacts with
+patch friction vs MuJoCo's soft contacts), all well inside the criteria (2 mm, 5 mm).
+
+The first attempt simulated the cycle but the judge failed: it computed the planned
+flange with EAIK, which is not installed with Isaac. The judge now uses the URDF's FK
+(identical to 1e-15), and `sim_workflow --report` keeps the raw run before judging.
+
 ## Status
+
+* Done: compiler, Isaac cell, the cross-check above.
+* Next: the whole strict run (24 transfers, ~1000 s simulated, ~25 min on Kaggle) and
+  as_built / recommended; sensitivity runs (priority 4, physical parameters) can use
+  both simulators.
+* Camera images in Isaac need a Vulkan-capable host (Kaggle's T4 image has none); the
+  AprilGrid reads stay in MuJoCo for now.
+
+### Compiler tests
+
 
 * Compiler and its checks: done (`tests/test_usd.py`, 8 tests): FK of the authored
   articulation = URDF FK (< 1e-6 over random configurations), bodies authored where
