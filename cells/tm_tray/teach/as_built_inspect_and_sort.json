@@ -20,6 +20,14 @@
     "min": 0.021,
     "max": 0.06085
    },
+   "continuity": {
+    "prefer": {
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     }
+    }
+   },
    "push_plate": {
     "geometry": "air_cylinder_plate",
     "margin": 0.002,
@@ -522,7 +530,7 @@
   },
   "prefer": {
    "branch": {
-    "joint_3": -1,
+    "joint_3": 1,
     "joint_5": -1
    },
    "q_ref": [
@@ -534,7 +542,7 @@
     0.0
    ]
   },
-  "seconds": 286.4
+  "seconds": 281.4
  },
  "ok": true,
  "sequences": [
@@ -552,9 +560,9 @@
      "name": "sight_far",
      "q": [
       -1.251892,
-      0.087937,
-      -2.040748,
-      1.952811,
+      -1.781286,
+      2.040748,
+      -0.259461,
       -0.318905,
       0.0
      ],
@@ -585,7 +593,7 @@
      "manipulability": 0.014797,
      "limit_margin": 0.629606,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (far)"
@@ -595,9 +603,9 @@
      "name": "sight_near",
      "q": [
       -1.059949,
-      -0.048704,
-      -1.907317,
-      1.956021,
+      -1.807588,
+      1.907317,
+      -0.099729,
       -0.510847,
       0.0
      ],
@@ -628,7 +636,7 @@
      "manipulability": 0.028888,
      "limit_margin": 0.763037,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (near)"
@@ -638,9 +646,9 @@
      "name": "pre_insert",
      "q": [
       -1.083356,
-      0.036314,
-      -1.58863,
-      1.552316,
+      -1.444999,
+      1.58863,
+      -0.143631,
       -0.487441,
       0.0
      ],
@@ -671,7 +679,7 @@
      "manipulability": 0.028673,
      "limit_margin": 1.081724,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -681,9 +689,9 @@
      "name": "insert",
      "q": [
       -0.694686,
-      -0.480842,
-      -0.945681,
-      1.426524,
+      -1.372558,
+      0.945682,
+      0.426877,
       -0.87611,
       0.0
      ],
@@ -712,9 +720,9 @@
      "along_slack": 0.00078,
      "along_samples": 48,
      "manipulability": 0.059833,
-     "limit_margin": 1.724673,
+     "limit_margin": 1.724672,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -724,9 +732,9 @@
      "name": "push",
      "q": [
       -0.688126,
-      -0.496882,
-      -0.921176,
-      1.418059,
+      -1.365713,
+      0.921176,
+      0.444537,
       -0.88267,
       0.0
      ],
@@ -757,7 +765,7 @@
      "manipulability": 0.059647,
      "limit_margin": 1.749178,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray pushed against the push plate"
@@ -767,9 +775,9 @@
      "name": "lift",
      "q": [
       -0.688126,
-      -0.508597,
-      -0.847075,
-      1.355672,
+      -1.308109,
+      0.847075,
+      0.461035,
       -0.88267,
       0.0
      ],
@@ -793,14 +801,14 @@
      "margin": 0.0,
      "nearest": [
       "attached/tray",
-      "jig/incoming/L2/C0/Cube_03"
+      "jig/incoming/L2/C0/Cube_04"
      ],
      "along_slack": 0.01,
      "along_samples": 5,
      "manipulability": 0.056129,
      "limit_margin": 1.823279,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "close the jaws to 0.0413"
@@ -810,9 +818,9 @@
      "name": "withdraw",
      "q": [
       -1.083356,
-      0.034037,
-      -1.531325,
-      1.497288,
+      -1.395938,
+      1.531325,
+      -0.135386,
       -0.487441,
       0.0
      ],
@@ -843,7 +851,7 @@
      "manipulability": 0.028655,
      "limit_margin": 1.139029,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -853,9 +861,9 @@
      "name": "carry",
      "q": [
       -1.082132,
-      -0.021822,
-      -1.500579,
-      1.706934,
+      -1.42412,
+      1.500579,
+      0.108073,
       -0.49586,
       0.162729
      ],
@@ -886,7 +894,7 @@
      "manipulability": 0.029094,
      "limit_margin": 1.169775,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tilted for transport"
@@ -906,23 +914,23 @@
      "sequence": "place:table/L0/C0",
      "name": "carry",
      "q": [
-      1.150914,
-      -1.085073,
-      -2.149306,
-      3.329934,
-      -1.152631,
-      0.038904
+      -1.150915,
+      0.291825,
+      2.320239,
+      0.433045,
+      -1.154355,
+      3.102312
      ],
      "xyz": [
-      -0.0,
+      0.0,
       0.497,
       0.7835
      ],
      "quat_wxyz": [
       0.0,
-      0.0,
-      -0.67559,
-      -0.737277
+      -0.0,
+      0.67559,
+      0.737277
      ],
      "joints": {
       "right_gripper_joint": 0.0413,
@@ -937,10 +945,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.041931,
-     "limit_margin": 0.521048,
+     "manipulability": 0.03669,
+     "limit_margin": 0.350115,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -949,15 +957,15 @@
      "sequence": "place:table/L0/C0",
      "name": "withdraw",
      "q": [
-      1.150281,
-      -1.057462,
-      -2.196281,
-      3.253743,
-      -1.150281,
-      0.0
+      -1.150282,
+      0.278725,
+      2.280363,
+      0.581502,
+      -1.152006,
+      3.141184
      ],
      "xyz": [
-      -0.0,
+      0.0,
       0.497,
       0.7835
      ],
@@ -980,10 +988,10 @@
      ],
      "along_slack": -0.0,
      "along_samples": 64,
-     "manipulability": 0.040488,
-     "limit_margin": 0.474073,
+     "manipulability": 0.037918,
+     "limit_margin": 0.389991,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -992,15 +1000,15 @@
      "sequence": "place:table/L0/C0",
      "name": "place_lift",
      "q": [
-      1.32212,
-      -1.175378,
-      -1.462989,
-      2.638367,
       -1.322121,
-      0.0
+      0.703074,
+      1.529375,
+      0.908201,
+      -1.323846,
+      3.14136
      ],
      "xyz": [
-      0.0,
+      -0.0,
       0.735469,
       0.7835
      ],
@@ -1023,10 +1031,10 @@
      ],
      "along_slack": 0.00814,
      "along_samples": 48,
-     "manipulability": 0.092856,
-     "limit_margin": 1.207365,
+     "manipulability": 0.093359,
+     "limit_margin": 1.140979,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "open the jaws to 0.0577"
@@ -1035,23 +1043,23 @@
      "sequence": "place:table/L0/C0",
      "name": "place_down",
      "q": [
-      1.32212,
-      -1.219328,
-      -1.439268,
-      2.658596,
       -1.322121,
-      0.0
+      0.734334,
+      1.53958,
+      0.866735,
+      -1.323846,
+      3.14136
      ],
      "xyz": [
-      -0.0,
+      0.0,
       0.735469,
       0.76225
      ],
      "quat_wxyz": [
       0.0,
-      -0.0,
-      -0.707107,
-      -0.707107
+      0.0,
+      0.707107,
+      0.707107
      ],
      "joints": {
       "right_gripper_joint": 0.057675,
@@ -1066,10 +1074,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 5,
-     "manipulability": 0.092591,
-     "limit_margin": 1.231086,
+     "manipulability": 0.093393,
+     "limit_margin": 1.130774,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray set down"
@@ -1078,21 +1086,21 @@
      "sequence": "place:table/L0/C0",
      "name": "retreat",
      "q": [
-      1.150281,
-      -1.117458,
-      -2.167524,
-      3.284982,
-      -1.150281,
-      0.0
+      -1.150282,
+      0.334801,
+      2.293886,
+      0.511904,
+      -1.152006,
+      3.141184
      ],
      "xyz": [
-      -0.0,
+      0.0,
       0.497,
       0.76225
      ],
      "quat_wxyz": [
       0.0,
-      -0.0,
+      0.0,
       0.707107,
       0.707107
      ],
@@ -1109,10 +1117,10 @@
      ],
      "along_slack": 0.00497,
      "along_samples": 48,
-     "manipulability": 0.041312,
-     "limit_margin": 0.50283,
+     "manipulability": 0.037474,
+     "limit_margin": 0.376468,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -1132,12 +1140,12 @@
      "sequence": "pick:table/L0/C0",
      "name": "sight_far",
      "q": [
-      1.053433,
-      -1.569985,
-      -2.02558,
-      3.595566,
       -1.053433,
-      0.0
+      0.797995,
+      2.467126,
+      -0.124581,
+      -1.055158,
+      3.141072
      ],
      "xyz": [
       0.0,
@@ -1146,9 +1154,9 @@
      ],
      "quat_wxyz": [
       0.0,
-      0.0,
-      -0.707107,
-      -0.707107
+      -0.0,
+      0.707107,
+      0.707107
      ],
      "joints": {
       "right_gripper_joint": 0.057675,
@@ -1163,10 +1171,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.033564,
-     "limit_margin": 0.644774,
+     "manipulability": 0.023355,
+     "limit_margin": 0.203228,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (far)"
@@ -1175,15 +1183,15 @@
      "sequence": "pick:table/L0/C0",
      "name": "sight_near",
      "q": [
-      1.162249,
-      -1.501711,
-      -1.86606,
-      3.367771,
-      -1.162249,
-      0.0
+      -1.16225,
+      0.793713,
+      2.255982,
+      0.090901,
+      -1.163974,
+      3.141197
      ],
      "xyz": [
-      0.0,
+      -0.0,
       0.506983,
       0.609845
      ],
@@ -1206,10 +1214,10 @@
      ],
      "along_slack": 0.01702,
      "along_samples": 15,
-     "manipulability": 0.049619,
-     "limit_margin": 0.804294,
+     "manipulability": 0.040188,
+     "limit_margin": 0.414372,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (near)"
@@ -1218,12 +1226,12 @@
      "sequence": "pick:table/L0/C0",
      "name": "pre_insert",
      "q": [
-      1.150281,
-      -1.117458,
-      -2.167524,
-      3.284982,
-      -1.150281,
-      0.0
+      -1.150282,
+      0.334801,
+      2.293886,
+      0.511904,
+      -1.152006,
+      3.141184
      ],
      "xyz": [
       0.0,
@@ -1249,10 +1257,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.041312,
-     "limit_margin": 0.50283,
+     "manipulability": 0.037474,
+     "limit_margin": 0.376468,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -1261,12 +1269,12 @@
      "sequence": "pick:table/L0/C0",
      "name": "insert",
      "q": [
-      1.321272,
-      -1.217087,
-      -1.446568,
-      2.663655,
-      -1.321272,
-      0.0
+      -1.321273,
+      0.730668,
+      1.546822,
+      0.863158,
+      -1.322997,
+      3.14136
      ],
      "xyz": [
       -0.0,
@@ -1292,10 +1300,10 @@
      ],
      "along_slack": 0.002,
      "along_samples": 48,
-     "manipulability": 0.09233,
-     "limit_margin": 1.223786,
+     "manipulability": 0.093061,
+     "limit_margin": 1.123532,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -1304,23 +1312,23 @@
      "sequence": "pick:table/L0/C0",
      "name": "push",
      "q": [
-      1.3238,
-      -1.223882,
-      -1.424572,
-      2.648454,
       -1.323801,
-      0.0
+      0.741698,
+      1.525018,
+      0.873933,
+      -1.325525,
+      3.141362
      ],
      "xyz": [
-      0.0,
+      -0.0,
       0.739469,
       0.76225
      ],
      "quat_wxyz": [
       0.0,
       -0.0,
-      0.707107,
-      0.707107
+      -0.707107,
+      -0.707107
      ],
      "joints": {
       "right_gripper_joint": 0.057675,
@@ -1335,10 +1343,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 2,
-     "manipulability": 0.093096,
-     "limit_margin": 1.245782,
+     "manipulability": 0.094043,
+     "limit_margin": 1.145336,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray pushed against the push plate"
@@ -1347,12 +1355,12 @@
      "sequence": "pick:table/L0/C0",
      "name": "lift",
      "q": [
-      1.3238,
-      -1.180089,
-      -1.448338,
-      2.628427,
       -1.323801,
-      0.0
+      0.710692,
+      1.514806,
+      0.915152,
+      -1.325525,
+      3.141362
      ],
      "xyz": [
       -0.0,
@@ -1378,10 +1386,10 @@
      ],
      "along_slack": 0.01,
      "along_samples": 5,
-     "manipulability": 0.093396,
-     "limit_margin": 1.222016,
+     "manipulability": 0.093994,
+     "limit_margin": 1.155548,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "close the jaws to 0.0413"
@@ -1390,15 +1398,15 @@
      "sequence": "pick:table/L0/C0",
      "name": "withdraw",
      "q": [
-      1.150281,
-      -1.057462,
-      -2.196281,
-      3.253743,
-      -1.150281,
-      0.0
+      -1.150282,
+      0.278725,
+      2.280363,
+      0.581502,
+      -1.152006,
+      3.141184
      ],
      "xyz": [
-      0.0,
+      -0.0,
       0.497,
       0.7835
      ],
@@ -1421,10 +1429,10 @@
      ],
      "along_slack": 0.00814,
      "along_samples": 49,
-     "manipulability": 0.040488,
-     "limit_margin": 0.474073,
+     "manipulability": 0.037918,
+     "limit_margin": 0.389991,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -1433,23 +1441,23 @@
      "sequence": "pick:table/L0/C0",
      "name": "carry",
      "q": [
-      1.150914,
-      -1.085073,
-      -2.149306,
-      3.329934,
-      -1.152631,
-      0.038904
+      -1.150915,
+      0.291825,
+      2.320239,
+      0.433045,
+      -1.154355,
+      3.102312
      ],
      "xyz": [
-      -0.0,
+      0.0,
       0.497,
       0.7835
      ],
      "quat_wxyz": [
       0.0,
       -0.0,
-      0.67559,
-      0.737277
+      -0.67559,
+      -0.737277
      ],
      "joints": {
       "right_gripper_joint": 0.0413,
@@ -1464,10 +1472,10 @@
      ],
      "along_slack": 0.00048,
      "along_samples": 64,
-     "manipulability": 0.041931,
-     "limit_margin": 0.521048,
+     "manipulability": 0.03669,
+     "limit_margin": 0.350115,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tilted for transport"
@@ -1487,12 +1495,12 @@
      "sequence": "place:outgoing/L0/C0",
      "name": "carry",
      "q": [
-      1.902757,
-      -1.45698,
-      -1.385548,
-      3.105388,
-      -0.342968,
-      0.248197
+      -0.670225,
+      0.846644,
+      1.839807,
+      0.342725,
+      -2.2397,
+      3.211331
      ],
      "xyz": [
       -0.439,
@@ -1518,10 +1526,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.027616,
-     "limit_margin": 1.284806,
+     "manipulability": 0.063385,
+     "limit_margin": 0.830547,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -1530,12 +1538,12 @@
      "sequence": "place:outgoing/L0/C0",
      "name": "withdraw",
      "q": [
-      1.901797,
-      -1.420032,
-      -1.509249,
-      2.929282,
-      -0.331001,
-      0.0
+      -0.670856,
+      0.835678,
+      1.799858,
+      0.504889,
+      -2.243377,
+      3.142319
      ],
      "xyz": [
       -0.439,
@@ -1561,10 +1569,10 @@
      ],
      "along_slack": -0.0,
      "along_samples": 64,
-     "manipulability": 0.027083,
-     "limit_margin": 1.161105,
+     "manipulability": 0.063808,
+     "limit_margin": 0.870496,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -1573,12 +1581,12 @@
      "sequence": "place:outgoing/L0/C0",
      "name": "place_lift",
      "q": [
-      2.256221,
-      -1.609964,
-      -0.835142,
-      2.445107,
-      -0.685425,
-      0.0
+      -0.455053,
+      1.090521,
+      1.17838,
+      0.871673,
+      -2.027574,
+      3.14204
      ],
      "xyz": [
       -0.677469,
@@ -1604,10 +1612,10 @@
      ],
      "along_slack": 0.00317,
      "along_samples": 48,
-     "manipulability": 0.052502,
-     "limit_margin": 1.835212,
+     "manipulability": 0.092909,
+     "limit_margin": 1.491974,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "open the jaws to 0.0577"
@@ -1616,12 +1624,12 @@
      "sequence": "place:outgoing/L0/C0",
      "name": "place_down",
      "q": [
-      2.256221,
-      -1.662504,
-      -0.777615,
-      2.440119,
-      -0.685425,
-      0.0
+      -0.455053,
+      1.125586,
+      1.169959,
+      0.845028,
+      -2.027574,
+      3.14204
      ],
      "xyz": [
       -0.677469,
@@ -1647,10 +1655,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 5,
-     "manipulability": 0.049683,
-     "limit_margin": 1.892739,
+     "manipulability": 0.092582,
+     "limit_margin": 1.500395,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray set down"
@@ -1659,12 +1667,12 @@
      "sequence": "place:outgoing/L0/C0",
      "name": "retreat",
      "q": [
-      1.901797,
-      -1.468659,
-      -1.467588,
-      2.936248,
-      -0.331001,
-      0.0
+      -0.670856,
+      0.880575,
+      1.79189,
+      0.467959,
+      -2.243377,
+      3.142319
      ],
      "xyz": [
       -0.439,
@@ -1690,10 +1698,10 @@
      ],
      "along_slack": 0.00078,
      "along_samples": 48,
-     "manipulability": 0.02699,
-     "limit_margin": 1.202766,
+     "manipulability": 0.063924,
+     "limit_margin": 0.878464,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -1714,9 +1722,9 @@
      "name": "sight_far",
      "q": [
       -0.959207,
-      0.381925,
-      -2.254278,
-      1.872354,
+      -1.651228,
+      2.254278,
+      -0.60305,
       -0.61159,
       0.0
      ],
@@ -1747,7 +1755,7 @@
      "manipulability": 0.015366,
      "limit_margin": 0.416076,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (far)"
@@ -1757,9 +1765,9 @@
      "name": "sight_near",
      "q": [
       -0.738482,
-      0.163083,
-      -2.104655,
-      1.941572,
+      -1.757143,
+      2.104655,
+      -0.347512,
       -0.832314,
       0.0
      ],
@@ -1790,7 +1798,7 @@
      "manipulability": 0.030559,
      "limit_margin": 0.565699,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (near)"
@@ -1800,9 +1808,9 @@
      "name": "pre_insert",
      "q": [
       -0.762396,
-      0.250131,
-      -1.76857,
-      1.51844,
+      -1.389851,
+      1.76857,
+      -0.378718,
       -0.808401,
       0.0
      ],
@@ -1833,7 +1841,7 @@
      "manipulability": 0.032766,
      "limit_margin": 0.901784,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -1843,9 +1851,9 @@
      "name": "insert",
      "q": [
       -0.431224,
-      -0.337958,
-      -1.152136,
-      1.490095,
+      -1.421578,
+      1.152136,
+      0.269442,
       -1.139573,
       0.0
      ],
@@ -1876,7 +1884,7 @@
      "manipulability": 0.072401,
      "limit_margin": 1.518218,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -1886,9 +1894,9 @@
      "name": "push",
      "q": [
       -0.426516,
-      -0.353677,
-      -1.130475,
-      1.484152,
+      -1.417248,
+      1.130475,
+      0.286773,
       -1.14428,
       0.0
      ],
@@ -1919,7 +1927,7 @@
      "manipulability": 0.07268,
      "limit_margin": 1.539879,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray pushed against the push plate"
@@ -1928,10 +1936,10 @@
      "sequence": "pick:incoming/L2/C1",
      "name": "lift",
      "q": [
-      -0.426516,
-      -0.360094,
-      -1.06612,
-      1.426214,
+      -0.426517,
+      -1.363972,
+      1.06612,
+      0.297853,
       -1.14428,
       0.0
      ],
@@ -1955,14 +1963,14 @@
      "margin": 0.0,
      "nearest": [
       "attached/tray",
-      "jig/incoming/L2/C1/Cube_03"
+      "jig/incoming/L2/C1/Cube_04"
      ],
      "along_slack": 0.00695,
      "along_samples": 5,
      "manipulability": 0.070327,
      "limit_margin": 1.604234,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "close the jaws to 0.0413"
@@ -1972,9 +1980,9 @@
      "name": "withdraw",
      "q": [
       -0.762396,
-      0.246144,
-      -1.710442,
-      1.464299,
+      -1.343056,
+      1.710442,
+      -0.367386,
       -0.808401,
       0.0
      ],
@@ -2005,7 +2013,7 @@
      "manipulability": 0.033092,
      "limit_margin": 0.959912,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -2015,9 +2023,9 @@
      "name": "carry",
      "q": [
       -0.761128,
-      0.210044,
-      -1.711567,
-      1.621867,
+      -1.380143,
+      1.711567,
+      -0.211079,
       -0.813328,
       0.082901
      ],
@@ -2048,7 +2056,7 @@
      "manipulability": 0.033309,
      "limit_margin": 0.958787,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tilted for transport"
@@ -2068,12 +2076,12 @@
      "sequence": "place:outgoing/L0/C1",
      "name": "carry",
      "q": [
-      2.059462,
-      -1.424729,
-      -1.793422,
-      3.402683,
-      -0.495861,
-      0.162729
+      -0.323502,
+      0.737997,
+      2.221415,
+      0.089176,
+      -1.894733,
+      3.17112
      ],
      "xyz": [
       -0.439,
@@ -2095,14 +2103,14 @@
      "margin": 0.005,
      "nearest": [
       "attached/tray",
-      "jig/outgoing/L1/C1/Cube_01_1"
+      "jig/outgoing/L1/C1/Cube_02_1"
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.028447,
-     "limit_margin": 0.876932,
+     "manipulability": 0.046328,
+     "limit_margin": 0.448939,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -2111,12 +2119,12 @@
      "sequence": "place:outgoing/L0/C1",
      "name": "withdraw",
      "q": [
-      2.058238,
-      -1.408201,
-      -1.871088,
-      3.279289,
-      -0.487442,
-      0.0
+      -0.323942,
+      0.710054,
+      2.194673,
+      0.2359,
+      -1.896463,
+      3.1419
      ],
      "xyz": [
       -0.439,
@@ -2138,14 +2146,14 @@
      "margin": 0.0,
      "nearest": [
       "attached/tray",
-      "jig/outgoing/L0/C1/Cube_01"
+      "jig/outgoing/L0/C1/Cube_03"
      ],
      "along_slack": -0.0,
      "along_samples": 64,
-     "manipulability": 0.027394,
-     "limit_margin": 0.799266,
+     "manipulability": 0.047173,
+     "limit_margin": 0.475681,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -2154,12 +2162,12 @@
      "sequence": "place:outgoing/L0/C1",
      "name": "place_lift",
      "q": [
-      2.449106,
-      -1.476187,
-      -1.251641,
-      2.727828,
-      -0.87831,
-      0.0
+      -0.195324,
+      0.934923,
+      1.545563,
+      0.660174,
+      -1.767845,
+      3.141773
      ],
      "xyz": [
       -0.677469,
@@ -2185,10 +2193,10 @@
      ],
      "along_slack": 0.00317,
      "along_samples": 48,
-     "manipulability": 0.070414,
-     "limit_margin": 1.418713,
+     "manipulability": 0.094542,
+     "limit_margin": 1.124791,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "open the jaws to 0.0577"
@@ -2197,12 +2205,12 @@
      "sequence": "place:outgoing/L0/C1",
      "name": "place_down",
      "q": [
-      2.449106,
-      -1.524363,
-      -1.207581,
-      2.731944,
-      -0.87831,
-      0.0
+      -0.195324,
+      0.974519,
+      1.537793,
+      0.628348,
+      -1.767845,
+      3.141773
      ],
      "xyz": [
       -0.677469,
@@ -2228,10 +2236,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 5,
-     "manipulability": 0.069321,
-     "limit_margin": 1.462773,
+     "manipulability": 0.09452,
+     "limit_margin": 1.132561,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray set down"
@@ -2240,12 +2248,12 @@
      "sequence": "place:outgoing/L0/C1",
      "name": "retreat",
      "q": [
-      2.058238,
-      -1.459212,
-      -1.827902,
-      3.287114,
-      -0.487442,
-      0.0
+      -0.323942,
+      0.769525,
+      2.185136,
+      0.185966,
+      -1.896463,
+      3.1419
      ],
      "xyz": [
       -0.439,
@@ -2271,10 +2279,10 @@
      ],
      "along_slack": 0.00078,
      "along_samples": 48,
-     "manipulability": 0.027735,
-     "limit_margin": 0.842452,
+     "manipulability": 0.047495,
+     "limit_margin": 0.485218,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -2295,9 +2303,9 @@
      "name": "sight_far",
      "q": [
       -0.273246,
-      0.381925,
-      -2.254278,
-      1.872354,
+      -1.651228,
+      2.254278,
+      -0.60305,
       -1.297551,
       0.0
      ],
@@ -2328,7 +2336,7 @@
      "manipulability": 0.025795,
      "limit_margin": 0.416076,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (far)"
@@ -2338,9 +2346,9 @@
      "name": "sight_near",
      "q": [
       -0.203877,
-      0.163083,
-      -2.104655,
-      1.941572,
+      -1.757143,
+      2.104655,
+      -0.347512,
       -1.36692,
       0.0
      ],
@@ -2371,7 +2379,7 @@
      "manipulability": 0.040493,
      "limit_margin": 0.565699,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (near)"
@@ -2381,9 +2389,9 @@
      "name": "pre_insert",
      "q": [
       -0.2111,
-      0.250131,
-      -1.76857,
-      1.51844,
+      -1.389851,
+      1.76857,
+      -0.378718,
       -1.359696,
       0.0
      ],
@@ -2414,7 +2422,7 @@
      "manipulability": 0.044331,
      "limit_margin": 0.901784,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -2424,9 +2432,9 @@
      "name": "insert",
      "q": [
       -0.115656,
-      -0.337958,
-      -1.152136,
-      1.490095,
+      -1.421578,
+      1.152136,
+      0.269442,
       -1.455141,
       0.0
      ],
@@ -2457,7 +2465,7 @@
      "manipulability": 0.079188,
      "limit_margin": 1.518218,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -2467,9 +2475,9 @@
      "name": "push",
      "q": [
       -0.114357,
-      -0.353677,
-      -1.130475,
-      1.484152,
+      -1.417248,
+      1.130475,
+      0.286773,
       -1.45644,
       0.0
      ],
@@ -2500,7 +2508,7 @@
      "manipulability": 0.079334,
      "limit_margin": 1.539879,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray pushed against the push plate"
@@ -2510,9 +2518,9 @@
      "name": "lift",
      "q": [
       -0.114357,
-      -0.360094,
-      -1.06612,
-      1.426214,
+      -1.363972,
+      1.06612,
+      0.297853,
       -1.45644,
       0.0
      ],
@@ -2536,14 +2544,14 @@
      "margin": 0.0,
      "nearest": [
       "attached/tray",
-      "jig/incoming/L2/C2/Cube_03"
+      "jig/incoming/L2/C2/Cube_04"
      ],
      "along_slack": 0.00695,
      "along_samples": 5,
      "manipulability": 0.076765,
      "limit_margin": 1.604234,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "close the jaws to 0.0413"
@@ -2553,9 +2561,9 @@
      "name": "withdraw",
      "q": [
       -0.2111,
-      0.246144,
-      -1.710442,
-      1.464299,
+      -1.343056,
+      1.710442,
+      -0.367386,
       -1.359696,
       0.0
      ],
@@ -2586,7 +2594,7 @@
      "manipulability": 0.044772,
      "limit_margin": 0.959912,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -2596,10 +2604,10 @@
      "name": "carry",
      "q": [
       -0.210716,
-      0.219671,
-      -1.720018,
-      1.589593,
-      -1.360904,
+      -1.377928,
+      1.720018,
+      -0.252843,
+      -1.360903,
       0.018643
      ],
      "xyz": [
@@ -2629,7 +2637,7 @@
      "manipulability": 0.044811,
      "limit_margin": 0.950336,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tilted for transport"
@@ -2649,12 +2657,12 @@
      "sequence": "place:outgoing/L0/C2",
      "name": "carry",
      "q": [
-      2.380466,
-      -1.479363,
-      -2.010087,
-      3.609794,
-      -0.813329,
-      0.082901
+      0.210714,
+      0.716327,
+      2.460736,
+      -0.125619,
+      -1.362629,
+      3.122762
      ],
      "xyz": [
       -0.439,
@@ -2676,14 +2684,14 @@
      "margin": 0.005,
      "nearest": [
       "attached/tray",
-      "jig/outgoing/L1/C2/Cube_01_1"
+      "jig/outgoing/L1/C2/Cube_02_1"
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.030448,
-     "limit_margin": 0.660267,
+     "manipulability": 0.028534,
+     "limit_margin": 0.209618,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -2692,12 +2700,12 @@
      "sequence": "place:outgoing/L0/C2",
      "name": "withdraw",
      "q": [
-      2.379198,
-      -1.46848,
-      -2.065139,
-      3.533619,
-      -0.808402,
-      0.0
+      0.211099,
+      0.671335,
+      2.438372,
+      0.03095,
+      -1.361422,
+      3.141397
      ],
      "xyz": [
       -0.439,
@@ -2719,14 +2727,14 @@
      "margin": 0.0,
      "nearest": [
       "attached/tray",
-      "jig/outgoing/L0/C2/Cube_01"
+      "jig/outgoing/L0/C2/Cube_03"
      ],
      "along_slack": -0.0,
      "along_samples": 64,
-     "manipulability": 0.029417,
-     "limit_margin": 0.605215,
+     "manipulability": 0.029249,
+     "limit_margin": 0.231982,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -2735,12 +2743,12 @@
      "sequence": "place:outgoing/L0/C2",
      "name": "place_lift",
      "q": [
-      2.71195,
-      -1.433295,
-      -1.435271,
-      2.868566,
-      -1.141154,
-      0.0
+      0.115218,
+      0.863975,
+      1.724783,
+      0.551913,
+      -1.457302,
+      3.141487
      ],
      "xyz": [
       -0.677469,
@@ -2766,10 +2774,10 @@
      ],
      "along_slack": 0.00317,
      "along_samples": 48,
-     "manipulability": 0.078881,
-     "limit_margin": 1.235083,
+     "manipulability": 0.086003,
+     "limit_margin": 0.945571,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "open the jaws to 0.0577"
@@ -2778,12 +2786,12 @@
      "sequence": "place:outgoing/L0/C2",
      "name": "place_down",
      "q": [
-      2.71195,
-      -1.481631,
-      -1.393237,
-      2.874869,
-      -1.141154,
-      0.0
+      0.115218,
+      0.90707,
+      1.716928,
+      0.516674,
+      -1.457302,
+      3.141487
      ],
      "xyz": [
       -0.677469,
@@ -2809,10 +2817,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 5,
-     "manipulability": 0.07836,
-     "limit_margin": 1.277117,
+     "manipulability": 0.086105,
+     "limit_margin": 0.953426,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray set down"
@@ -2821,12 +2829,12 @@
      "sequence": "place:outgoing/L0/C2",
      "name": "retreat",
      "q": [
-      2.379198,
-      -1.519806,
-      -2.018544,
-      3.53835,
-      -0.808402,
-      0.0
+      0.211099,
+      0.747417,
+      2.426445,
+      -0.033205,
+      -1.361422,
+      3.141397
      ],
      "xyz": [
       -0.439,
@@ -2852,10 +2860,10 @@
      ],
      "along_slack": 0.00078,
      "along_samples": 48,
-     "manipulability": 0.030124,
-     "limit_margin": 0.65181,
+     "manipulability": 0.029658,
+     "limit_margin": 0.243909,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -2876,10 +2884,10 @@
      "name": "sight_far",
      "q": [
       0.387706,
-      0.087937,
-      -2.040748,
-      1.952812,
-      -1.958503,
+      -1.781286,
+      2.040748,
+      -0.259462,
+      -1.958502,
       0.0
      ],
      "xyz": [
@@ -2909,7 +2917,7 @@
      "manipulability": 0.043822,
      "limit_margin": 0.629606,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (far)"
@@ -2918,10 +2926,10 @@
      "sequence": "pick:incoming/L2/C3",
      "name": "sight_near",
      "q": [
-      0.315562,
-      -0.048704,
-      -1.907317,
-      1.956021,
+      0.315561,
+      -1.807587,
+      1.907317,
+      -0.099729,
       -1.886358,
       0.0
      ],
@@ -2952,7 +2960,7 @@
      "manipulability": 0.056271,
      "limit_margin": 0.763037,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (near)"
@@ -2962,9 +2970,9 @@
      "name": "pre_insert",
      "q": [
       0.323941,
-      0.036314,
-      -1.58863,
-      1.552316,
+      -1.444999,
+      1.58863,
+      -0.143631,
       -1.894738,
       0.0
      ],
@@ -2995,7 +3003,7 @@
      "manipulability": 0.058147,
      "limit_margin": 1.081724,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -3005,9 +3013,9 @@
      "name": "insert",
      "q": [
       0.195992,
-      -0.480842,
-      -0.945681,
-      1.426524,
+      -1.372558,
+      0.945682,
+      0.426877,
       -1.766788,
       0.0
      ],
@@ -3036,9 +3044,9 @@
      "along_slack": 0.00078,
      "along_samples": 48,
      "manipulability": 0.076459,
-     "limit_margin": 1.724673,
+     "limit_margin": 1.724672,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -3048,9 +3056,9 @@
      "name": "push",
      "q": [
       0.193998,
-      -0.496882,
-      -0.921176,
-      1.418059,
+      -1.365713,
+      0.921176,
+      0.444537,
       -1.764795,
       0.0
      ],
@@ -3081,7 +3089,7 @@
      "manipulability": 0.075837,
      "limit_margin": 1.749178,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray pushed against the push plate"
@@ -3091,9 +3099,9 @@
      "name": "lift",
      "q": [
       0.193998,
-      -0.508597,
-      -0.847075,
-      1.355672,
+      -1.308109,
+      0.847075,
+      0.461035,
       -1.764795,
       0.0
      ],
@@ -3124,7 +3132,7 @@
      "manipulability": 0.071364,
      "limit_margin": 1.823279,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "close the jaws to 0.0413"
@@ -3134,9 +3142,9 @@
      "name": "withdraw",
      "q": [
       0.323941,
-      0.034037,
-      -1.531325,
-      1.497289,
+      -1.395938,
+      1.531325,
+      -0.135386,
       -1.894738,
       0.0
      ],
@@ -3167,7 +3175,7 @@
      "manipulability": 0.058111,
      "limit_margin": 1.139029,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -3177,9 +3185,9 @@
      "name": "carry",
      "q": [
       0.3235,
-      0.006457,
-      -1.533448,
-      1.618979,
+      -1.425426,
+      1.533448,
+      -0.016034,
       -1.893008,
       -0.029205
      ],
@@ -3210,7 +3218,7 @@
      "manipulability": 0.058215,
      "limit_margin": 1.136906,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tilted for transport"
@@ -3230,12 +3238,12 @@
      "sequence": "place:outgoing/L0/C3",
      "name": "carry",
      "q": [
-      2.930878,
-      -1.484032,
-      -2.017141,
-      3.59042,
-      -1.360904,
-      0.018643
+      0.761126,
+      0.718578,
+      2.470969,
+      -0.169361,
+      -0.815048,
+      3.057962
      ],
      "xyz": [
       -0.439,
@@ -3257,14 +3265,14 @@
      "margin": 0.005,
      "nearest": [
       "attached/tray",
-      "jig/outgoing/L1/C3/Cube_01_1"
+      "jig/outgoing/L1/C3/Cube_02_1"
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.040875,
-     "limit_margin": 0.653213,
+     "manipulability": 0.020942,
+     "limit_margin": 0.199385,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -3273,12 +3281,12 @@
      "sequence": "place:outgoing/L0/C3",
      "name": "withdraw",
      "q": [
-      2.930493,
-      -1.46848,
-      -2.065139,
-      3.533619,
-      -1.359697,
-      0.0
+      0.762394,
+      0.67133,
+      2.438485,
+      0.030513,
+      -0.810126,
+      3.140719
      ],
      "xyz": [
       -0.439,
@@ -3304,10 +3312,10 @@
      ],
      "along_slack": -0.0,
      "along_samples": 64,
-     "manipulability": 0.039799,
-     "limit_margin": 0.605215,
+     "manipulability": 0.021643,
+     "limit_margin": 0.231869,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -3316,12 +3324,12 @@
      "sequence": "place:outgoing/L0/C3",
      "name": "place_lift",
      "q": [
-      3.026374,
-      -1.433295,
-      -1.435271,
-      2.868566,
-      -1.455578,
-      0.0
+      0.429642,
+      0.863961,
+      1.72482,
+      0.551806,
+      -1.142879,
+      3.141173
      ],
      "xyz": [
       -0.677469,
@@ -3347,10 +3355,10 @@
      ],
      "along_slack": 0.00317,
      "along_samples": 48,
-     "manipulability": 0.086218,
-     "limit_margin": 1.235083,
+     "manipulability": 0.078731,
+     "limit_margin": 0.945534,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "open the jaws to 0.0577"
@@ -3359,12 +3367,12 @@
      "sequence": "place:outgoing/L0/C3",
      "name": "place_down",
      "q": [
-      3.026374,
-      -1.481631,
-      -1.393237,
-      2.874869,
-      -1.455578,
-      0.0
+      0.429642,
+      0.907057,
+      1.716964,
+      0.516566,
+      -1.142879,
+      3.141173
      ],
      "xyz": [
       -0.677469,
@@ -3390,10 +3398,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 5,
-     "manipulability": 0.085647,
-     "limit_margin": 1.277117,
+     "manipulability": 0.078825,
+     "limit_margin": 0.95339,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray set down"
@@ -3402,12 +3410,12 @@
      "sequence": "place:outgoing/L0/C3",
      "name": "retreat",
      "q": [
-      2.930493,
-      -1.519806,
-      -2.018544,
-      3.53835,
-      -1.359697,
-      0.0
+      0.762394,
+      0.747422,
+      2.426556,
+      -0.03365,
+      -0.810126,
+      3.140719
      ],
      "xyz": [
       -0.439,
@@ -3433,10 +3441,10 @@
      ],
      "along_slack": 0.00078,
      "along_samples": 48,
-     "manipulability": 0.040755,
-     "limit_margin": 0.65181,
+     "manipulability": 0.021946,
+     "limit_margin": 0.243798,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -3456,12 +3464,12 @@
      "sequence": "pick:incoming/L1/C0",
      "name": "sight_far",
      "q": [
-      5.031294,
-      -0.422307,
-      -2.335122,
-      2.75743,
-      -0.318905,
-      0.0
+      2.753886,
+      -0.100255,
+      2.015658,
+      1.225201,
+      -1.960228,
+      3.141966
      ],
      "xyz": [
       0.375783,
@@ -3487,10 +3495,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.01198,
-     "limit_margin": 0.335232,
+     "manipulability": 0.044336,
+     "limit_margin": 0.654696,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (far)"
@@ -3499,12 +3507,12 @@
      "sequence": "pick:incoming/L1/C0",
      "name": "sight_near",
      "q": [
-      5.223236,
-      -0.494781,
-      -2.176587,
-      2.671368,
-      -0.510848,
-      0.0
+      2.82603,
+      0.036927,
+      1.883606,
+      1.220098,
+      -1.888083,
+      3.141891
      ],
      "xyz": [
       0.448983,
@@ -3530,10 +3538,10 @@
      ],
      "along_slack": 0.025,
      "along_samples": 15,
-     "manipulability": 0.025159,
-     "limit_margin": 0.493767,
+     "manipulability": 0.05669,
+     "limit_margin": 0.786748,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (near)"
@@ -3542,12 +3550,12 @@
      "sequence": "pick:incoming/L1/C0",
      "name": "pre_insert",
      "q": [
-      5.199829,
-      -0.155505,
-      -2.079595,
-      2.2351,
-      -0.487441,
-      0.0
+      2.817651,
+      -0.03554,
+      1.554187,
+      1.621981,
+      -1.896463,
+      3.1419
      ],
      "xyz": [
       0.439,
@@ -3573,10 +3581,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.025045,
-     "limit_margin": 0.590759,
+     "manipulability": 0.058114,
+     "limit_margin": 1.116167,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -3585,12 +3593,12 @@
      "sequence": "pick:incoming/L1/C0",
      "name": "insert",
      "q": [
-      5.588499,
-      -0.580517,
-      -1.45464,
-      2.035158,
-      -0.876111,
-      0.0
+      2.9456,
+      0.486644,
+      0.902708,
+      1.751308,
+      -1.768513,
+      3.141774
      ],
      "xyz": [
       0.675469,
@@ -3616,10 +3624,10 @@
      ],
      "along_slack": 0.00078,
      "along_samples": 48,
-     "manipulability": 0.073289,
-     "limit_margin": 0.60742,
+     "manipulability": 0.073992,
+     "limit_margin": 1.767646,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -3628,12 +3636,12 @@
      "sequence": "pick:incoming/L1/C0",
      "name": "push",
      "q": [
-      5.595059,
-      -0.592288,
-      -1.434789,
-      2.027077,
-      -0.88267,
-      0.0
+      2.947594,
+      0.503129,
+      0.87737,
+      1.760161,
+      -1.76652,
+      3.141772
      ],
      "xyz": [
       0.681469,
@@ -3659,10 +3667,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 2,
-     "manipulability": 0.074212,
-     "limit_margin": 0.60086,
+     "manipulability": 0.073216,
+     "limit_margin": 1.792984,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray pushed against the push plate"
@@ -3671,12 +3679,12 @@
      "sequence": "pick:incoming/L1/C0",
      "name": "lift",
      "q": [
-      5.595059,
-      -0.57127,
-      -1.409294,
-      1.980565,
-      -0.88267,
-      0.0
+      2.947594,
+      0.517846,
+      0.798002,
+      1.824812,
+      -1.76652,
+      3.141772
      ],
      "xyz": [
       0.681469,
@@ -3702,10 +3710,10 @@
      ],
      "along_slack": 0.00317,
      "along_samples": 5,
-     "manipulability": 0.073929,
-     "limit_margin": 0.60086,
+     "manipulability": 0.068161,
+     "limit_margin": 1.872352,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "close the jaws to 0.0413"
@@ -3714,12 +3722,12 @@
      "sequence": "pick:incoming/L1/C0",
      "name": "withdraw",
      "q": [
-      5.199829,
-      -0.122198,
-      -2.05095,
-      2.173149,
-      -0.487441,
-      0.0
+      2.817651,
+      -0.031592,
+      1.495153,
+      1.677068,
+      -1.896463,
+      3.1419
      ],
      "xyz": [
       0.439,
@@ -3745,10 +3753,10 @@
      ],
      "along_slack": 0.00317,
      "along_samples": 49,
-     "manipulability": 0.025435,
-     "limit_margin": 0.619404,
+     "manipulability": 0.057956,
+     "limit_margin": 1.175201,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -3757,12 +3765,12 @@
      "sequence": "pick:incoming/L1/C0",
      "name": "carry",
      "q": [
-      5.201053,
-      -0.188589,
-      -2.000753,
-      2.373875,
-      -0.49586,
-      0.162729
+      2.818092,
+      -0.061338,
+      1.555435,
+      1.55449,
+      -1.894733,
+      3.171119
      ],
      "xyz": [
       0.439,
@@ -3788,10 +3796,10 @@
      ],
      "along_slack": 0.00048,
      "along_samples": 64,
-     "manipulability": 0.026512,
-     "limit_margin": 0.669601,
+     "manipulability": 0.058216,
+     "limit_margin": 1.114919,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tilted for transport"
@@ -3811,12 +3819,12 @@
      "sequence": "place:outgoing/L0/C4",
      "name": "carry",
      "q": [
-      3.465093,
-      -1.431406,
-      -1.819157,
-      3.342551,
-      -1.893009,
-      -0.029205
+      1.08213,
+      0.737009,
+      2.253338,
+      -0.034621,
+      -0.497563,
+      2.97769
      ],
      "xyz": [
       -0.439,
@@ -3842,10 +3850,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.056469,
-     "limit_margin": 0.851197,
+     "manipulability": 0.022704,
+     "limit_margin": 0.417016,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -3854,12 +3862,12 @@
      "sequence": "place:outgoing/L0/C4",
      "name": "withdraw",
      "q": [
-      3.465534,
-      -1.408201,
-      -1.871088,
-      3.279289,
-      -1.894738,
-      0.0
+      1.083354,
+      0.709967,
+      2.19503,
+      0.234643,
+      -0.489166,
+      3.139868
      ],
      "xyz": [
       -0.439,
@@ -3885,10 +3893,10 @@
      ],
      "along_slack": -0.0,
      "along_samples": 64,
-     "manipulability": 0.055554,
-     "limit_margin": 0.799266,
+     "manipulability": 0.023345,
+     "limit_margin": 0.475324,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -3897,12 +3905,12 @@
      "sequence": "place:outgoing/L0/C4",
      "name": "place_lift",
      "q": [
-      3.336916,
-      -1.476187,
-      -1.251641,
-      2.727828,
-      -1.76612,
-      0.0
+      0.692486,
+      0.934875,
+      1.545682,
+      0.659848,
+      -0.880035,
+      3.140834
      ],
      "xyz": [
       -0.677469,
@@ -3924,14 +3932,14 @@
      "margin": 0.005,
      "nearest": [
       "gripper_body",
-      "jig/outgoing/L1/C4/Cube_02_1"
+      "jig/outgoing/L1/C4/Cube_01_1"
      ],
      "along_slack": 0.00317,
      "along_samples": 48,
-     "manipulability": 0.089827,
-     "limit_margin": 1.418713,
+     "manipulability": 0.074242,
+     "limit_margin": 1.124672,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "open the jaws to 0.0577"
@@ -3940,12 +3948,12 @@
      "sequence": "place:outgoing/L0/C4",
      "name": "place_down",
      "q": [
-      3.336916,
-      -1.524363,
-      -1.207581,
-      2.731944,
-      -1.76612,
-      0.0
+      0.692486,
+      0.974473,
+      1.537911,
+      0.62802,
+      -0.880035,
+      3.140834
      ],
      "xyz": [
       -0.677469,
@@ -3971,10 +3979,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 5,
-     "manipulability": 0.088432,
-     "limit_margin": 1.462773,
+     "manipulability": 0.074225,
+     "limit_margin": 1.132443,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray set down"
@@ -3983,12 +3991,12 @@
      "sequence": "place:outgoing/L0/C4",
      "name": "retreat",
      "q": [
-      3.465534,
-      -1.459212,
-      -1.827902,
-      3.287114,
-      -1.894738,
-      0.0
+      1.083354,
+      0.769457,
+      2.185491,
+      0.184693,
+      -0.489166,
+      3.139868
      ],
      "xyz": [
       -0.439,
@@ -4014,10 +4022,10 @@
      ],
      "along_slack": 0.00078,
      "along_samples": 48,
-     "manipulability": 0.056245,
-     "limit_margin": 0.842452,
+     "manipulability": 0.023505,
+     "limit_margin": 0.484863,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -4037,12 +4045,12 @@
      "sequence": "pick:incoming/L1/C1",
      "name": "sight_far",
      "q": [
-      5.323979,
-      -0.296228,
-      -2.627428,
-      2.923657,
-      -0.61159,
-      0.0
+      -2.868348,
+      -0.393017,
+      2.22546,
+      1.308199,
+      -1.299276,
+      3.141336
      ],
      "xyz": [
       0.375783,
@@ -4068,10 +4076,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.009746,
-     "limit_margin": 0.042926,
+     "manipulability": 0.026402,
+     "limit_margin": 0.444894,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (far)"
@@ -4080,12 +4088,12 @@
      "sequence": "pick:incoming/L1/C1",
      "name": "sight_near",
      "q": [
-      5.544703,
-      -0.386145,
-      -2.415939,
-      2.802085,
-      -0.832315,
-      0.0
+      -2.937717,
+      -0.175425,
+      2.078661,
+      1.237423,
+      -1.368645,
+      3.141403
      ],
      "xyz": [
       0.448983,
@@ -4111,10 +4119,10 @@
      ],
      "along_slack": 0.025,
      "along_samples": 15,
-     "manipulability": 0.023558,
-     "limit_margin": 0.254415,
+     "manipulability": 0.041116,
+     "limit_margin": 0.591693,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (near)"
@@ -4123,10 +4131,10 @@
      "sequence": "pick:incoming/L1/C1",
      "name": "pre_insert",
      "q": [
-      3.352692,
-      1.361089,
-      -1.733481,
-      3.513049,
+      -2.930493,
+      -0.248298,
+      1.733481,
+      1.655474,
       -1.361422,
       3.141397
      ],
@@ -4157,7 +4165,7 @@
      "manipulability": 0.044632,
      "limit_margin": 0.936873,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -4166,10 +4174,10 @@
      "sequence": "pick:incoming/L1/C1",
      "name": "insert",
      "q": [
-      3.257247,
-      1.389439,
-      -1.114221,
-      2.865453,
+      -3.025938,
+      0.340927,
+      1.114221,
+      1.685524,
       -1.456866,
       3.141486
      ],
@@ -4200,7 +4208,7 @@
      "manipulability": 0.077811,
      "limit_margin": 1.556133,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -4209,10 +4217,10 @@
      "sequence": "pick:incoming/L1/C1",
      "name": "push",
      "q": [
-      3.255948,
-      1.384937,
-      -1.092163,
-      2.847898,
+      -3.027237,
+      0.35688,
+      1.092163,
+      1.691628,
       -1.458165,
       3.141488
      ],
@@ -4243,7 +4251,7 @@
      "manipulability": 0.077859,
      "limit_margin": 1.578191,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray pushed against the push plate"
@@ -4252,10 +4260,10 @@
      "sequence": "pick:incoming/L1/C1",
      "name": "lift",
      "q": [
-      3.255948,
-      1.330625,
-      -1.024497,
-      2.834544,
+      -3.027237,
+      0.365447,
+      1.024497,
+      1.750728,
       -1.458165,
       3.141488
      ],
@@ -4279,14 +4287,14 @@
      "margin": 0.005,
      "nearest": [
       "gripper_body",
-      "jig/incoming/L2/C1/Cube_02_1"
+      "jig/incoming/L2/C1/Cube_01_1"
      ],
      "along_slack": 0.00317,
      "along_samples": 5,
      "manipulability": 0.074949,
      "limit_margin": 1.645857,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "close the jaws to 0.0413"
@@ -4295,11 +4303,11 @@
      "sequence": "pick:incoming/L1/C1",
      "name": "withdraw",
      "q": [
-      3.352692,
-      1.31442,
-      -1.673985,
-      3.500222,
-      -1.361422,
+      -2.930493,
+      -0.242685,
+      1.673985,
+      1.709357,
+      -1.361421,
       3.141397
      ],
      "xyz": [
@@ -4322,14 +4330,14 @@
      "margin": 0.0,
      "nearest": [
       "attached/tray",
-      "jig/incoming/L1/C1/Cube_01"
+      "jig/incoming/L1/C1/Cube_03"
      ],
      "along_slack": 0.00317,
      "along_samples": 49,
      "manipulability": 0.044988,
      "limit_margin": 0.996369,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -4338,10 +4346,10 @@
      "sequence": "pick:incoming/L1/C1",
      "name": "carry",
      "q": [
-      3.352307,
-      1.331617,
-      -1.727321,
-      3.447148,
+      -2.930878,
+      -0.27238,
+      1.727321,
+      1.596502,
       -1.362628,
       3.122762
      ],
@@ -4372,7 +4380,7 @@
      "manipulability": 0.044777,
      "limit_margin": 0.943033,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tilted for transport"
@@ -4392,12 +4400,12 @@
      "sequence": "place:outgoing/L0/C5",
      "name": "carry",
      "q": [
-      3.811817,
-      -1.452938,
-      -1.441759,
-      3.005798,
-      -2.237979,
-      -0.068924
+      1.238835,
+      0.834907,
+      1.89789,
+      0.144477,
+      -0.344639,
+      2.892021
      ],
      "xyz": [
       -0.439,
@@ -4423,10 +4431,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.065292,
-     "limit_margin": 1.228595,
+     "manipulability": 0.026732,
+     "limit_margin": 0.772464,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -4435,12 +4443,12 @@
      "sequence": "place:outgoing/L0/C5",
      "name": "withdraw",
      "q": [
-      3.812448,
-      -1.420032,
-      -1.509249,
-      2.929281,
-      -2.241652,
-      0.0
+      1.239795,
+      0.835428,
+      1.800534,
+      0.502819,
+      -0.332726,
+      3.138935
      ],
      "xyz": [
       -0.439,
@@ -4466,10 +4474,10 @@
      ],
      "along_slack": -0.0,
      "along_samples": 64,
-     "manipulability": 0.065484,
-     "limit_margin": 1.161105,
+     "manipulability": 0.026554,
+     "limit_margin": 0.86982,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -4478,12 +4486,12 @@
      "sequence": "place:outgoing/L0/C5",
      "name": "place_lift",
      "q": [
-      3.596645,
-      -1.609964,
-      -0.835142,
-      2.445107,
-      -2.025849,
-      0.0
+      0.885371,
+      1.090413,
+      1.178628,
+      0.871107,
+      -0.68715,
+      3.140474
      ],
      "xyz": [
       -0.677469,
@@ -4509,10 +4517,10 @@
      ],
      "along_slack": 0.00317,
      "along_samples": 48,
-     "manipulability": 0.074612,
-     "limit_margin": 1.835212,
+     "manipulability": 0.065578,
+     "limit_margin": 1.491726,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "open the jaws to 0.0577"
@@ -4521,12 +4529,12 @@
      "sequence": "place:outgoing/L0/C5",
      "name": "place_down",
      "q": [
-      3.596645,
-      -1.662504,
-      -0.777615,
-      2.440119,
-      -2.025849,
-      0.0
+      0.885371,
+      1.12548,
+      1.170208,
+      0.84446,
+      -0.68715,
+      3.140474
      ],
      "xyz": [
       -0.677469,
@@ -4552,10 +4560,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 5,
-     "manipulability": 0.070605,
-     "limit_margin": 1.892739,
+     "manipulability": 0.065347,
+     "limit_margin": 1.500146,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray set down"
@@ -4564,12 +4572,12 @@
      "sequence": "place:outgoing/L0/C5",
      "name": "retreat",
      "q": [
-      3.812448,
-      -1.468659,
-      -1.467588,
-      2.936248,
-      -2.241652,
-      0.0
+      1.239795,
+      0.880343,
+      1.792565,
+      0.465874,
+      -0.332726,
+      3.138935
      ],
      "xyz": [
       -0.439,
@@ -4595,10 +4603,10 @@
      ],
      "along_slack": 0.00078,
      "along_samples": 48,
-     "manipulability": 0.06526,
-     "limit_margin": 1.202766,
+     "manipulability": 0.026603,
+     "limit_margin": 0.877789,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -4618,10 +4626,10 @@
      "sequence": "pick:incoming/L1/C2",
      "name": "sight_far",
      "q": [
-      4.100798,
-      1.619092,
-      -2.225594,
-      3.746502,
+      -2.182387,
+      -0.393256,
+      2.225594,
+      1.307662,
       -0.613315,
       3.140289
      ],
@@ -4652,7 +4660,7 @@
      "manipulability": 0.015758,
      "limit_margin": 0.44476,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (far)"
@@ -4661,10 +4669,10 @@
      "sequence": "pick:incoming/L1/C2",
      "name": "sight_near",
      "q": [
-      3.880073,
-      1.724186,
-      -2.078741,
-      3.49491,
+      -2.403111,
+      -0.175525,
+      2.078741,
+      1.23714,
       -0.83404,
       3.14076
      ],
@@ -4695,7 +4703,7 @@
      "manipulability": 0.031065,
      "limit_margin": 0.591613,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (near)"
@@ -4704,10 +4712,10 @@
      "sequence": "pick:incoming/L1/C2",
      "name": "pre_insert",
      "q": [
-      3.903987,
-      1.361052,
-      -1.733555,
-      3.512831,
+      -2.379198,
+      -0.2484,
+      1.733555,
+      1.655173,
       -0.810126,
       3.140719
      ],
@@ -4738,7 +4746,7 @@
      "manipulability": 0.03303,
      "limit_margin": 0.936799,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -4747,10 +4755,10 @@
      "sequence": "pick:incoming/L1/C2",
      "name": "insert",
      "q": [
-      3.572815,
-      1.389447,
-      -1.114261,
-      2.865399,
+      -2.71037,
+      0.340898,
+      1.114261,
+      1.685427,
       -1.141298,
       3.141172
      ],
@@ -4781,7 +4789,7 @@
      "manipulability": 0.071186,
      "limit_margin": 1.556093,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -4790,10 +4798,10 @@
      "sequence": "pick:incoming/L1/C2",
      "name": "push",
      "q": [
-      3.568108,
-      1.384946,
-      -1.092203,
-      2.847845,
+      -2.715077,
+      0.356851,
+      1.092204,
+      1.691533,
       -1.146005,
       3.141177
      ],
@@ -4822,9 +4830,9 @@
      "along_slack": 0.0,
      "along_samples": 2,
      "manipulability": 0.071372,
-     "limit_margin": 1.578151,
+     "limit_margin": 1.57815,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray pushed against the push plate"
@@ -4833,10 +4841,10 @@
      "sequence": "pick:incoming/L1/C2",
      "name": "lift",
      "q": [
-      3.568108,
-      1.330634,
-      -1.024539,
-      2.834492,
+      -2.715077,
+      0.365417,
+      1.024539,
+      1.750632,
       -1.146005,
       3.141177
      ],
@@ -4867,7 +4875,7 @@
      "manipulability": 0.068705,
      "limit_margin": 1.645815,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "close the jaws to 0.0413"
@@ -4876,10 +4884,10 @@
      "sequence": "pick:incoming/L1/C2",
      "name": "withdraw",
      "q": [
-      3.903987,
-      1.314384,
-      -1.674059,
-      3.500002,
+      -2.379198,
+      -0.242786,
+      1.674059,
+      1.709055,
       -0.810126,
       3.140719
      ],
@@ -4903,14 +4911,14 @@
      "margin": 0.0,
      "nearest": [
       "attached/tray",
-      "jig/incoming/L1/C2/Cube_01"
+      "jig/incoming/L1/C2/Cube_03"
      ],
      "along_slack": 0.00317,
      "along_samples": 49,
      "manipulability": 0.033294,
      "limit_margin": 0.996295,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -4919,10 +4927,10 @@
      "sequence": "pick:incoming/L1/C2",
      "name": "carry",
      "q": [
-      3.902719,
-      1.328793,
-      -1.735186,
-      3.426579,
+      -2.380465,
+      -0.282085,
+      1.735186,
+      1.567085,
       -0.815047,
       3.057962
      ],
@@ -4953,7 +4961,7 @@
      "manipulability": 0.033242,
      "limit_margin": 0.935168,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tilted for transport"
@@ -4973,12 +4981,12 @@
      "sequence": "place:outgoing/L1/C0",
      "name": "carry",
      "q": [
-      1.902757,
-      -0.918139,
-      -1.681445,
-      2.862444,
-      -0.342968,
-      0.248197
+      -0.670225,
+      0.397142,
+      1.743055,
+      0.88898,
+      -2.2397,
+      3.211331
      ],
      "xyz": [
       -0.439,
@@ -5004,10 +5012,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.027925,
-     "limit_margin": 0.988909,
+     "manipulability": 0.064777,
+     "limit_margin": 0.927299,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -5016,12 +5024,12 @@
      "sequence": "place:outgoing/L1/C0",
      "name": "withdraw",
      "q": [
-      1.901797,
-      -0.863221,
-      -1.794833,
-      2.658054,
-      -0.331001,
-      0.0
+      -0.670856,
+      0.410464,
+      1.684727,
+      1.045234,
+      -2.243377,
+      3.142319
      ],
      "xyz": [
       -0.439,
@@ -5047,10 +5055,10 @@
      ],
      "along_slack": -0.0,
      "along_samples": 64,
-     "manipulability": 0.026456,
-     "limit_margin": 0.875521,
+     "manipulability": 0.065094,
+     "limit_margin": 0.985627,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -5059,12 +5067,12 @@
      "sequence": "place:outgoing/L1/C0",
      "name": "place_lift",
      "q": [
-      2.256221,
-      -1.112085,
-      -1.17299,
-      2.285075,
-      -0.685425,
-      0.0
+      -0.455053,
+      0.787678,
+      1.052039,
+      1.300857,
+      -2.027574,
+      3.14204
      ],
      "xyz": [
       -0.677469,
@@ -5086,14 +5094,14 @@
      "margin": 0.005,
      "nearest": [
       "gripper_body",
-      "jig/outgoing/L2/C0/Cube_01_1"
+      "jig/outgoing/L2/C0/Cube_02_1"
      ],
      "along_slack": 0.00317,
      "along_samples": 48,
-     "manipulability": 0.065286,
-     "limit_margin": 1.497364,
+     "manipulability": 0.087323,
+     "limit_margin": 1.618315,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "open the jaws to 0.0577"
@@ -5102,12 +5110,12 @@
      "sequence": "place:outgoing/L1/C0",
      "name": "place_down",
      "q": [
-      2.256221,
-      -1.147877,
-      -1.162733,
-      2.31061,
-      -0.685425,
-      0.0
+      -0.455053,
+      0.803912,
+      1.07982,
+      1.256842,
+      -2.027574,
+      3.14204
      ],
      "xyz": [
       -0.677469,
@@ -5133,10 +5141,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 5,
-     "manipulability": 0.065001,
-     "limit_margin": 1.507621,
+     "manipulability": 0.088674,
+     "limit_margin": 1.590534,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray set down"
@@ -5145,12 +5153,12 @@
      "sequence": "place:outgoing/L1/C0",
      "name": "retreat",
      "q": [
-      1.901797,
-      -0.908568,
-      -1.785166,
-      2.693735,
-      -0.331001,
-      0.0
+      -0.670856,
+      0.436549,
+      1.709237,
+      0.994638,
+      -2.243377,
+      3.142319
      ],
      "xyz": [
       -0.439,
@@ -5176,10 +5184,10 @@
      ],
      "along_slack": 0.00078,
      "along_samples": 48,
-     "manipulability": 0.026513,
-     "limit_margin": 0.885188,
+     "manipulability": 0.064892,
+     "limit_margin": 0.961117,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -5199,12 +5207,12 @@
      "sequence": "pick:incoming/L1/C3",
      "name": "sight_far",
      "q": [
-      0.387706,
-      -0.422307,
-      -2.335122,
-      2.75743,
-      -1.958503,
-      0.0
+      -1.889702,
+      -0.10087,
+      2.016201,
+      1.223348,
+      -0.32063,
+      3.138827
      ],
      "xyz": [
       0.375783,
@@ -5230,10 +5238,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.03548,
-     "limit_margin": 0.335232,
+     "manipulability": 0.015056,
+     "limit_margin": 0.654153,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (far)"
@@ -5242,12 +5250,12 @@
      "sequence": "pick:incoming/L1/C3",
      "name": "sight_near",
      "q": [
-      0.315562,
-      -0.494781,
-      -2.176587,
-      2.671368,
-      -1.886358,
-      0.0
+      -2.081644,
+      0.036652,
+      1.883893,
+      1.219178,
+      -0.512572,
+      3.139962
      ],
      "xyz": [
       0.448983,
@@ -5273,10 +5281,10 @@
      ],
      "along_slack": 0.025,
      "along_samples": 15,
-     "manipulability": 0.049006,
-     "limit_margin": 0.493767,
+     "manipulability": 0.029207,
+     "limit_margin": 0.786461,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (near)"
@@ -5285,12 +5293,12 @@
      "sequence": "pick:incoming/L1/C3",
      "name": "pre_insert",
      "q": [
-      0.323941,
-      -0.155505,
-      -2.079595,
-      2.235101,
-      -1.894738,
-      0.0
+      -2.058238,
+      -0.035842,
+      1.554477,
+      1.621006,
+      -0.489166,
+      3.139868
      ],
      "xyz": [
       0.439,
@@ -5316,10 +5324,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.05079,
-     "limit_margin": 0.590759,
+     "manipulability": 0.028767,
+     "limit_margin": 1.115877,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -5328,12 +5336,12 @@
      "sequence": "pick:incoming/L1/C3",
      "name": "insert",
      "q": [
-      0.195992,
-      -0.580517,
-      -1.45464,
-      2.035158,
-      -1.766788,
-      0.0
+      -2.446907,
+      0.486545,
+      0.90286,
+      1.750997,
+      -0.877835,
+      3.140831
      ],
      "xyz": [
       0.675469,
@@ -5359,10 +5367,10 @@
      ],
      "along_slack": 0.00078,
      "along_samples": 48,
-     "manipulability": 0.093654,
-     "limit_margin": 1.215714,
+     "manipulability": 0.058013,
+     "limit_margin": 1.767494,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -5371,12 +5379,12 @@
      "sequence": "pick:incoming/L1/C3",
      "name": "push",
      "q": [
-      0.193998,
-      -0.592288,
-      -1.434789,
-      2.027077,
-      -1.764795,
-      0.0
+      -2.453467,
+      0.50303,
+      0.877523,
+      1.759856,
+      -0.884395,
+      3.140841
      ],
      "xyz": [
       0.681469,
@@ -5402,10 +5410,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 2,
-     "manipulability": 0.094355,
-     "limit_margin": 1.235565,
+     "manipulability": 0.057694,
+     "limit_margin": 1.792831,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray pushed against the push plate"
@@ -5414,12 +5422,12 @@
      "sequence": "pick:incoming/L1/C3",
      "name": "lift",
      "q": [
-      0.193998,
-      -0.57127,
-      -1.409294,
-      1.980565,
-      -1.764795,
-      0.0
+      -2.453467,
+      0.517742,
+      0.798166,
+      1.8245,
+      -0.884395,
+      3.140841
      ],
      "xyz": [
       0.681469,
@@ -5441,14 +5449,14 @@
      "margin": 0.005,
      "nearest": [
       "gripper_body",
-      "jig/incoming/L2/C3/Cube_01_1"
+      "jig/incoming/L2/C3/Cube_02_1"
      ],
      "along_slack": 0.00317,
      "along_samples": 5,
-     "manipulability": 0.093995,
-     "limit_margin": 1.26106,
+     "manipulability": 0.053713,
+     "limit_margin": 1.872188,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "close the jaws to 0.0413"
@@ -5457,12 +5465,12 @@
      "sequence": "pick:incoming/L1/C3",
      "name": "withdraw",
      "q": [
-      0.323941,
-      -0.122198,
-      -2.05095,
-      2.173149,
-      -1.894738,
-      0.0
+      -2.058238,
+      -0.031894,
+      1.495444,
+      1.676091,
+      -0.489166,
+      3.139868
      ],
      "xyz": [
       0.439,
@@ -5488,10 +5496,10 @@
      ],
      "along_slack": 0.00317,
      "along_samples": 49,
-     "manipulability": 0.05158,
-     "limit_margin": 0.619404,
+     "manipulability": 0.02869,
+     "limit_margin": 1.17491,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -5500,12 +5508,12 @@
      "sequence": "pick:incoming/L1/C3",
      "name": "carry",
      "q": [
-      0.3235,
-      -0.165846,
-      -2.034339,
-      2.292174,
-      -1.893009,
-      -0.029205
+      -2.059462,
+      -0.089735,
+      1.585853,
+      1.459608,
+      -0.497562,
+      2.97769
      ],
      "xyz": [
       0.439,
@@ -5531,10 +5539,10 @@
      ],
      "along_slack": 0.00048,
      "along_samples": 64,
-     "manipulability": 0.052108,
-     "limit_margin": 0.636015,
+     "manipulability": 0.029255,
+     "limit_margin": 1.084501,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tilted for transport"
@@ -5554,12 +5562,12 @@
      "sequence": "place:outgoing/L1/C1",
      "name": "carry",
      "q": [
-      2.059461,
-      -0.787502,
-      -2.116305,
-      3.08834,
-      -0.495861,
-      0.162729
+      -0.323501,
+      0.127343,
+      2.107044,
+      0.8142,
+      -1.894733,
+      3.17112
      ],
      "xyz": [
       -0.439,
@@ -5585,10 +5593,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.024933,
-     "limit_margin": 0.554049,
+     "manipulability": 0.05005,
+     "limit_margin": 0.56331,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -5597,12 +5605,12 @@
      "sequence": "place:outgoing/L1/C1",
      "name": "withdraw",
      "q": [
-      2.058237,
-      -0.746484,
-      -2.18888,
-      2.935364,
-      -0.487441,
-      0.0
+      -0.323942,
+      0.132531,
+      2.061001,
+      0.947096,
+      -1.896463,
+      3.1419
      ],
      "xyz": [
       -0.439,
@@ -5624,14 +5632,14 @@
      "margin": 0.0,
      "nearest": [
       "attached/tray",
-      "jig/outgoing/L1/C1/Cube_01"
+      "jig/outgoing/L1/C1/Cube_03"
      ],
      "along_slack": -0.0,
      "along_samples": 64,
-     "manipulability": 0.023372,
-     "limit_margin": 0.481474,
+     "manipulability": 0.051278,
+     "limit_margin": 0.609353,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -5640,12 +5648,12 @@
      "sequence": "place:outgoing/L1/C1",
      "name": "place_lift",
      "q": [
-      2.449106,
-      -0.959203,
-      -1.540703,
-      2.499906,
-      -0.87831,
-      0.0
+      -0.195324,
+      0.569713,
+      1.431739,
+      1.139208,
+      -1.767845,
+      3.141773
      ],
      "xyz": [
       -0.677469,
@@ -5671,10 +5679,10 @@
      ],
      "along_slack": 0.00317,
      "along_samples": 48,
-     "manipulability": 0.074125,
-     "limit_margin": 1.129651,
+     "manipulability": 0.093659,
+     "limit_margin": 1.238615,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "open the jaws to 0.0577"
@@ -5683,12 +5691,12 @@
      "sequence": "place:outgoing/L1/C1",
      "name": "place_down",
      "q": [
-      2.449106,
-      -0.999362,
-      -1.531262,
-      2.530624,
-      -0.87831,
-      0.0
+      -0.195324,
+      0.591607,
+      1.456251,
+      1.092803,
+      -1.767845,
+      3.141773
      ],
      "xyz": [
       -0.677469,
@@ -5714,10 +5722,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 5,
-     "manipulability": 0.074101,
-     "limit_margin": 1.139092,
+     "manipulability": 0.093952,
+     "limit_margin": 1.214103,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray set down"
@@ -5726,12 +5734,12 @@
      "sequence": "place:outgoing/L1/C1",
      "name": "retreat",
      "q": [
-      2.058237,
-      -0.806021,
-      -2.17735,
-      2.983372,
-      -0.487441,
-      0.0
+      -0.323942,
+      0.16694,
+      2.088771,
+      0.884917,
+      -1.896463,
+      3.1419
      ],
      "xyz": [
       -0.439,
@@ -5757,10 +5765,10 @@
      ],
      "along_slack": 0.00078,
      "along_samples": 48,
-     "manipulability": 0.023562,
-     "limit_margin": 0.493004,
+     "manipulability": 0.050498,
+     "limit_margin": 0.581583,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -5780,12 +5788,12 @@
      "sequence": "pick:incoming/L0/C0",
      "name": "sight_far",
      "q": [
-      -1.251891,
-      -1.184281,
-      -2.157751,
-      3.342033,
-      -0.318906,
-      0.0
+      -3.529299,
+      0.383639,
+      2.331134,
+      0.425832,
+      -1.960228,
+      3.141966
      ],
      "xyz": [
       0.375783,
@@ -5811,10 +5819,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.013819,
-     "limit_margin": 0.512603,
+     "manipulability": 0.03559,
+     "limit_margin": 0.33922,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (far)"
@@ -5823,12 +5831,12 @@
      "sequence": "pick:incoming/L0/C0",
      "name": "sight_near",
      "q": [
-      -1.059949,
-      -1.165559,
-      -2.016608,
-      3.182168,
-      -0.510848,
-      0.0
+      -3.457155,
+      0.462096,
+      2.173129,
+      0.505405,
+      -1.888084,
+      3.141891
      ],
      "xyz": [
       0.448983,
@@ -5854,10 +5862,10 @@
      ],
      "along_slack": 0.025,
      "along_samples": 15,
-     "manipulability": 0.027613,
-     "limit_margin": 0.653746,
+     "manipulability": 0.049096,
+     "limit_margin": 0.497225,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (near)"
@@ -5866,12 +5874,12 @@
      "sequence": "pick:incoming/L0/C0",
      "name": "pre_insert",
      "q": [
-      -1.083355,
-      -0.749983,
-      -2.188292,
-      2.938276,
-      -0.487441,
-      0.0
+      -3.465535,
+      0.134463,
+      2.062709,
+      0.943456,
+      -1.896463,
+      3.1419
      ],
      "xyz": [
       0.439,
@@ -5897,10 +5905,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.023382,
-     "limit_margin": 0.482062,
+     "manipulability": 0.051231,
+     "limit_margin": 0.607645,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -5909,12 +5917,12 @@
      "sequence": "pick:incoming/L0/C0",
      "name": "insert",
      "q": [
-      -0.694686,
-      -0.958953,
-      -1.546766,
-      2.505719,
-      -0.876111,
-      0.0
+      -3.337585,
+      0.56697,
+      1.439857,
+      1.133832,
+      -1.768513,
+      3.141774
      ],
      "xyz": [
       0.675469,
@@ -5940,10 +5948,10 @@
      ],
      "along_slack": 0.00078,
      "along_samples": 48,
-     "manipulability": 0.073765,
-     "limit_margin": 1.123588,
+     "manipulability": 0.09345,
+     "limit_margin": 1.230497,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -5952,12 +5960,12 @@
      "sequence": "pick:incoming/L0/C0",
      "name": "push",
      "q": [
-      -0.688126,
-      -0.966761,
-      -1.527061,
-      2.493822,
-      -0.882671,
-      0.0
+      -3.335592,
+      0.578925,
+      1.419971,
+      1.141764,
+      -1.76652,
+      3.141772
      ],
      "xyz": [
       0.681469,
@@ -5983,10 +5991,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 2,
-     "manipulability": 0.074832,
-     "limit_margin": 1.143293,
+     "manipulability": 0.094122,
+     "limit_margin": 1.250383,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray pushed against the push plate"
@@ -5995,12 +6003,12 @@
      "sequence": "pick:incoming/L0/C0",
      "name": "lift",
      "q": [
-      -0.688126,
-      -0.927713,
-      -1.533935,
-      2.461648,
-      -0.882671,
-      0.0
+      -3.335592,
+      0.55916,
+      1.392721,
+      1.188779,
+      -1.76652,
+      3.141772
      ],
      "xyz": [
       0.681469,
@@ -6026,10 +6034,10 @@
      ],
      "along_slack": 0.00317,
      "along_samples": 5,
-     "manipulability": 0.074852,
-     "limit_margin": 1.136419,
+     "manipulability": 0.093697,
+     "limit_margin": 1.277633,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "close the jaws to 0.0413"
@@ -6038,12 +6046,12 @@
      "sequence": "pick:incoming/L0/C0",
      "name": "withdraw",
      "q": [
-      -1.083355,
-      -0.690626,
-      -2.196742,
-      2.887368,
-      -0.487441,
-      0.0
+      -3.465535,
+      0.103184,
+      2.032452,
+      1.004991,
+      -1.896463,
+      3.1419
      ],
      "xyz": [
       0.439,
@@ -6065,14 +6073,14 @@
      "margin": 0.0,
      "nearest": [
       "attached/tray",
-      "jig/incoming/L0/C0/Cube_03"
+      "jig/incoming/L0/C0/Cube_01"
      ],
      "along_slack": 0.00317,
      "along_samples": 49,
-     "manipulability": 0.023241,
-     "limit_margin": 0.473612,
+     "manipulability": 0.052038,
+     "limit_margin": 0.637902,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -6081,12 +6089,12 @@
      "sequence": "pick:incoming/L0/C0",
      "name": "carry",
      "q": [
-      -1.082131,
-      -0.734649,
-      -2.125149,
-      3.044331,
-      -0.495861,
-      0.162729
+      -3.465094,
+      0.095479,
+      2.07948,
+      0.873628,
+      -1.894733,
+      3.17112
      ],
      "xyz": [
       0.439,
@@ -6112,10 +6120,10 @@
      ],
      "along_slack": 0.00048,
      "along_samples": 64,
-     "manipulability": 0.024798,
-     "limit_margin": 0.545205,
+     "manipulability": 0.050851,
+     "limit_margin": 0.590874,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tilted for transport"
@@ -6136,9 +6144,9 @@
      "name": "carry",
      "q": [
       0.210714,
-      1.999554,
-      -2.321587,
-      3.373476,
+      -0.080433,
+      2.321587,
+      0.81029,
       -1.362629,
       3.122762
      ],
@@ -6162,14 +6170,14 @@
      "margin": 0.005,
      "nearest": [
       "attached/tray",
-      "jig/outgoing/L2/C2/Cube_01_1"
+      "jig/outgoing/L2/C2/Cube_02_1"
      ],
      "along_slack": null,
      "along_samples": 0,
      "manipulability": 0.033144,
      "limit_margin": 0.348767,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -6179,9 +6187,9 @@
      "name": "withdraw",
      "q": [
       0.211099,
-      1.973731,
-      -2.27757,
-      3.444496,
+      -0.075962,
+      2.27757,
+      0.939049,
       -1.361422,
       3.141397
      ],
@@ -6212,7 +6220,7 @@
      "manipulability": 0.034395,
      "limit_margin": 0.392784,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -6221,10 +6229,10 @@
      "sequence": "place:outgoing/L1/C2",
      "name": "place_lift",
      "q": [
-      0.115218,
-      1.959659,
-      -1.610807,
-      2.791819,
+      0.115219,
+      0.458573,
+      1.610807,
+      1.071292,
       -1.457302,
       3.141487
      ],
@@ -6248,14 +6256,14 @@
      "margin": 0.005,
      "nearest": [
       "gripper_body",
-      "jig/outgoing/L2/C2/Cube_02_1"
+      "jig/outgoing/L2/C2/Cube_01_1"
      ],
      "along_slack": 0.00317,
      "along_samples": 48,
      "manipulability": 0.086963,
      "limit_margin": 1.059547,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "open the jaws to 0.0577"
@@ -6264,10 +6272,10 @@
      "sequence": "place:outgoing/L1/C2",
      "name": "place_down",
      "q": [
-      0.115218,
-      2.006087,
-      -1.635155,
-      2.769739,
+      0.115219,
+      0.483355,
+      1.635155,
+      1.022162,
       -1.457302,
       3.141487
      ],
@@ -6298,7 +6306,7 @@
      "manipulability": 0.086853,
      "limit_margin": 1.035199,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray set down"
@@ -6308,9 +6316,9 @@
      "name": "retreat",
      "q": [
       0.211099,
-      2.037073,
-      -2.309998,
-      3.413582,
+      -0.035068,
+      2.309999,
+      0.865727,
       -1.361422,
       3.141397
      ],
@@ -6339,9 +6347,9 @@
      "along_slack": 0.00078,
      "along_samples": 48,
      "manipulability": 0.033424,
-     "limit_margin": 0.360356,
+     "limit_margin": 0.360355,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -6361,12 +6369,12 @@
      "sequence": "pick:incoming/L0/C1",
      "name": "sight_far",
      "q": [
-      -0.959206,
-      4.971409,
-      -2.392757,
-      3.704533,
-      -0.611591,
-      0.0
+      -2.868348,
+      0.236702,
+      2.621404,
+      0.282536,
+      -1.299276,
+      3.141336
      ],
      "xyz": [
       0.375783,
@@ -6384,18 +6392,18 @@
       "left_gripper_joint": 0.057675
      },
      "arrive": "free",
-     "clearance": 0.01197,
+     "clearance": 0.03,
      "margin": 0.005,
      "nearest": [
-      "link_3",
-      "pedestal/plate"
+      "link_0",
+      "pedestal/leg0"
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.013492,
-     "limit_margin": 0.277597,
+     "manipulability": 0.016544,
+     "limit_margin": 0.04895,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (far)"
@@ -6404,12 +6412,12 @@
      "sequence": "pick:incoming/L0/C1",
      "name": "sight_near",
      "q": [
-      -0.738482,
-      5.077736,
-      -2.22666,
-      3.43211,
-      -0.832315,
-      0.0
+      -2.937717,
+      0.343409,
+      2.411549,
+      0.3857,
+      -1.368646,
+      3.141404
      ],
      "xyz": [
       0.448983,
@@ -6433,12 +6441,12 @@
       "link_0",
       "pedestal/leg0"
      ],
-     "along_slack": 0.01112,
+     "along_slack": 0.025,
      "along_samples": 15,
-     "manipulability": 0.028133,
-     "limit_margin": 0.443694,
+     "manipulability": 0.031381,
+     "limit_margin": 0.258805,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (near)"
@@ -6448,9 +6456,9 @@
      "name": "pre_insert",
      "q": [
       -2.930494,
-      1.977391,
-      -2.279552,
-      3.442818,
+      -0.073694,
+      2.279552,
+      0.934799,
       -1.361422,
       3.141397
      ],
@@ -6481,7 +6489,7 @@
      "manipulability": 0.034337,
      "limit_margin": 0.390802,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -6491,9 +6499,9 @@
      "name": "insert",
      "q": [
       -3.025938,
-      1.96403,
-      -1.618859,
-      2.795501,
+      0.455777,
+      1.618859,
+      1.066036,
       -1.456866,
       3.141486
      ],
@@ -6524,7 +6532,7 @@
      "manipulability": 0.086591,
      "limit_margin": 1.051495,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -6534,9 +6542,9 @@
      "name": "push",
      "q": [
       -3.027237,
-      1.959074,
-      -1.599155,
-      2.780753,
+      0.46837,
+      1.599155,
+      1.073147,
       -1.458165,
       3.141488
      ],
@@ -6567,7 +6575,7 @@
      "manipulability": 0.087681,
      "limit_margin": 1.071199,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray pushed against the push plate"
@@ -6577,9 +6585,9 @@
      "name": "lift",
      "q": [
       -3.027237,
-      1.912536,
-      -1.572271,
-      2.800406,
+      0.445844,
+      1.572271,
+      1.122557,
       -1.458165,
       3.141488
      ],
@@ -6603,14 +6611,14 @@
      "margin": 0.005,
      "nearest": [
       "gripper_body",
-      "jig/incoming/L1/C1/Cube_01_1"
+      "jig/incoming/L1/C1/Cube_02_1"
      ],
      "along_slack": 0.00317,
      "along_samples": 5,
      "manipulability": 0.087716,
      "limit_margin": 1.098083,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "close the jaws to 0.0413"
@@ -6620,9 +6628,9 @@
      "name": "withdraw",
      "q": [
       -2.930494,
-      1.916255,
-      -2.244659,
-      3.46906,
+      -0.109972,
+      2.244659,
+      1.00597,
       -1.361422,
       3.141397
      ],
@@ -6646,14 +6654,14 @@
      "margin": 0.0,
      "nearest": [
       "attached/tray",
-      "jig/incoming/L0/C1/Cube_03"
+      "jig/incoming/L0/C1/Cube_01"
      ],
      "along_slack": 0.00317,
      "along_samples": 49,
      "manipulability": 0.035343,
      "limit_margin": 0.425695,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -6663,9 +6671,9 @@
      "name": "carry",
      "q": [
       -2.930878,
-      1.940223,
-      -2.28939,
-      3.40061,
+      -0.117733,
+      2.28939,
+      0.879787,
       -1.362629,
       3.122762
      ],
@@ -6696,7 +6704,7 @@
      "manipulability": 0.034122,
      "limit_margin": 0.380964,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tilted for transport"
@@ -6717,9 +6725,9 @@
      "name": "carry",
      "q": [
       0.761127,
-      1.996648,
-      -2.331281,
-      3.354819,
+      -0.089825,
+      2.331281,
+      0.77873,
       -0.815048,
       3.057962
      ],
@@ -6743,14 +6751,14 @@
      "margin": 0.005,
      "nearest": [
       "attached/tray",
-      "jig/outgoing/L2/C3/Cube_01_1"
+      "jig/outgoing/L2/C3/Cube_02_1"
      ],
      "along_slack": null,
      "along_samples": 0,
      "manipulability": 0.024413,
      "limit_margin": 0.339073,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -6760,9 +6768,9 @@
      "name": "withdraw",
      "q": [
       0.762395,
-      1.973691,
-      -2.277666,
-      3.444303,
+      -0.076069,
+      2.277667,
+      0.938731,
       -0.810126,
       3.140719
      ],
@@ -6791,9 +6799,9 @@
      "along_slack": -0.0,
      "along_samples": 64,
      "manipulability": 0.025453,
-     "limit_margin": 0.392688,
+     "limit_margin": 0.392687,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -6803,9 +6811,9 @@
      "name": "place_lift",
      "q": [
       0.429642,
-      1.959668,
-      -1.610843,
-      2.79176,
+      0.45855,
+      1.610843,
+      1.071194,
       -1.142879,
       3.141173
      ],
@@ -6836,7 +6844,7 @@
      "manipulability": 0.079611,
      "limit_margin": 1.059511,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "open the jaws to 0.0577"
@@ -6846,9 +6854,9 @@
      "name": "place_down",
      "q": [
       0.429642,
-      2.006097,
-      -1.635191,
-      2.76968,
+      0.483332,
+      1.635191,
+      1.022063,
       -1.142879,
       3.141173
      ],
@@ -6879,7 +6887,7 @@
      "manipulability": 0.079509,
      "limit_margin": 1.035163,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray set down"
@@ -6889,9 +6897,9 @@
      "name": "retreat",
      "q": [
       0.762395,
-      2.037037,
-      -2.310097,
-      3.413388,
+      -0.035172,
+      2.310097,
+      0.865403,
       -0.810126,
       3.140719
      ],
@@ -6922,7 +6930,7 @@
      "manipulability": 0.024734,
      "limit_margin": 0.360257,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -6942,12 +6950,12 @@
      "sequence": "pick:incoming/L0/C2",
      "name": "sight_far",
      "q": [
-      -0.273245,
-      4.971409,
-      -2.392757,
-      3.704533,
-      -1.297552,
-      0.0
+      -2.182387,
+      0.236592,
+      2.621619,
+      0.28179,
+      -0.613316,
+      3.140289
      ],
      "xyz": [
       0.375783,
@@ -6973,10 +6981,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.022648,
-     "limit_margin": 0.277597,
+     "manipulability": 0.009871,
+     "limit_margin": 0.048735,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (far)"
@@ -6985,12 +6993,12 @@
      "sequence": "pick:incoming/L0/C2",
      "name": "sight_near",
      "q": [
-      -0.203876,
-      5.077736,
-      -2.22666,
-      3.43211,
-      -1.366921,
-      0.0
+      -2.403112,
+      0.343357,
+      2.411654,
+      0.385345,
+      -0.83404,
+      3.14076
      ],
      "xyz": [
       0.448983,
@@ -7016,10 +7024,10 @@
      ],
      "along_slack": 0.025,
      "along_samples": 15,
-     "manipulability": 0.037279,
-     "limit_margin": 0.443694,
+     "manipulability": 0.023708,
+     "limit_margin": 0.2587,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (near)"
@@ -7029,9 +7037,9 @@
      "name": "pre_insert",
      "q": [
       -2.379198,
-      1.977352,
-      -2.279648,
-      3.442624,
+      -0.073801,
+      2.279648,
+      0.93448,
       -0.810126,
       3.140719
      ],
@@ -7062,7 +7070,7 @@
      "manipulability": 0.025409,
      "limit_margin": 0.390706,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -7072,9 +7080,9 @@
      "name": "insert",
      "q": [
       -2.71037,
-      1.964039,
-      -1.618895,
-      2.795442,
+      0.455754,
+      1.618895,
+      1.065937,
       -1.141298,
       3.141172
      ],
@@ -7105,7 +7113,7 @@
      "manipulability": 0.079216,
      "limit_margin": 1.051459,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -7115,9 +7123,9 @@
      "name": "push",
      "q": [
       -2.715077,
-      1.959083,
-      -1.599191,
-      2.780695,
+      0.468347,
+      1.599191,
+      1.07305,
       -1.146005,
       3.141177
      ],
@@ -7148,7 +7156,7 @@
      "manipulability": 0.080374,
      "limit_margin": 1.071163,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray pushed against the push plate"
@@ -7158,9 +7166,9 @@
      "name": "lift",
      "q": [
       -2.715077,
-      1.912544,
-      -1.572306,
-      2.800349,
+      0.445821,
+      1.572306,
+      1.122461,
       -1.146005,
       3.141177
      ],
@@ -7191,7 +7199,7 @@
      "manipulability": 0.080406,
      "limit_margin": 1.098048,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "close the jaws to 0.0413"
@@ -7201,9 +7209,9 @@
      "name": "withdraw",
      "q": [
       -2.379198,
-      1.916214,
-      -2.244752,
-      3.468866,
+      -0.110081,
+      2.244752,
+      1.005657,
       -0.810126,
       3.140719
      ],
@@ -7234,7 +7242,7 @@
      "manipulability": 0.026154,
      "limit_margin": 0.425602,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -7244,9 +7252,9 @@
      "name": "carry",
      "q": [
       -2.380466,
-      1.937065,
-      -2.298873,
-      3.381994,
+      -0.127455,
+      2.298873,
+      0.848768,
       -0.815048,
       3.057962
      ],
@@ -7277,7 +7285,7 @@
      "manipulability": 0.025153,
      "limit_margin": 0.371481,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tilted for transport"
@@ -7297,12 +7305,12 @@
      "sequence": "place:outgoing/L1/C4",
      "name": "carry",
      "q": [
-      3.465093,
-      -0.784669,
-      -2.148866,
-      3.025523,
-      -1.893009,
-      -0.029205
+      1.082131,
+      0.104239,
+      2.139528,
+      0.711959,
+      -0.497562,
+      2.97769
      ],
      "xyz": [
       -0.439,
@@ -7328,10 +7336,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.048791,
-     "limit_margin": 0.521488,
+     "manipulability": 0.024653,
+     "limit_margin": 0.530826,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -7340,12 +7348,12 @@
      "sequence": "place:outgoing/L1/C4",
      "name": "withdraw",
      "q": [
-      3.465534,
-      -0.746484,
-      -2.18888,
-      2.935364,
-      -1.894738,
-      0.0
+      1.083355,
+      0.132253,
+      2.06133,
+      0.946058,
+      -0.489166,
+      3.139868
      ],
      "xyz": [
       -0.439,
@@ -7367,14 +7375,14 @@
      "margin": 0.0,
      "nearest": [
       "attached/tray",
-      "jig/outgoing/L1/C4/Cube_01"
+      "jig/outgoing/L1/C4/Cube_03"
      ],
      "along_slack": -0.0,
      "along_samples": 64,
-     "manipulability": 0.047397,
-     "limit_margin": 0.481474,
+     "manipulability": 0.025379,
+     "limit_margin": 0.609024,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -7383,12 +7391,12 @@
      "sequence": "place:outgoing/L1/C4",
      "name": "place_lift",
      "q": [
-      3.336915,
-      -0.959203,
-      -1.540703,
-      2.499906,
-      -1.76612,
-      0.0
+      0.692486,
+      0.569641,
+      1.431858,
+      1.138905,
+      -0.880035,
+      3.140834
      ],
      "xyz": [
       -0.677469,
@@ -7414,10 +7422,10 @@
      ],
      "along_slack": 0.00317,
      "along_samples": 48,
-     "manipulability": 0.094561,
-     "limit_margin": 1.129651,
+     "manipulability": 0.073549,
+     "limit_margin": 1.238496,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "open the jaws to 0.0577"
@@ -7426,12 +7434,12 @@
      "sequence": "place:outgoing/L1/C4",
      "name": "place_down",
      "q": [
-      3.336915,
-      -0.999362,
-      -1.531262,
-      2.530624,
-      -1.76612,
-      0.0
+      0.692486,
+      0.591537,
+      1.45637,
+      1.092498,
+      -0.880035,
+      3.140834
      ],
      "xyz": [
       -0.677469,
@@ -7457,10 +7465,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 5,
-     "manipulability": 0.09453,
-     "limit_margin": 1.139092,
+     "manipulability": 0.073779,
+     "limit_margin": 1.213984,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray set down"
@@ -7469,12 +7477,12 @@
      "sequence": "place:outgoing/L1/C4",
      "name": "retreat",
      "q": [
-      3.465534,
-      -0.806021,
-      -2.17735,
-      2.983372,
-      -1.894738,
-      0.0
+      1.083355,
+      0.166671,
+      2.089105,
+      0.883865,
+      -0.489166,
+      3.139868
      ],
      "xyz": [
       -0.439,
@@ -7500,10 +7508,10 @@
      ],
      "along_slack": 0.00078,
      "along_samples": 48,
-     "manipulability": 0.047782,
-     "limit_margin": 0.493004,
+     "manipulability": 0.024992,
+     "limit_margin": 0.581249,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -7523,12 +7531,12 @@
      "sequence": "pick:incoming/L0/C3",
      "name": "sight_far",
      "q": [
-      0.387706,
-      -1.184281,
-      -2.157751,
-      3.342033,
-      -1.958503,
-      0.0
+      -1.889702,
+      0.383303,
+      2.33181,
+      0.423567,
+      -0.32063,
+      3.138827
      ],
      "xyz": [
       0.375783,
@@ -7554,10 +7562,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.040925,
-     "limit_margin": 0.512603,
+     "manipulability": 0.012081,
+     "limit_margin": 0.338544,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (far)"
@@ -7566,12 +7574,12 @@
      "sequence": "pick:incoming/L0/C3",
      "name": "sight_near",
      "q": [
-      0.315562,
-      -1.165559,
-      -2.016608,
-      3.182168,
-      -1.886359,
-      0.0
+      -2.081645,
+      0.461933,
+      2.17346,
+      0.50433,
+      -0.512573,
+      3.139962
      ],
      "xyz": [
       0.448983,
@@ -7597,10 +7605,10 @@
      ],
      "along_slack": 0.025,
      "along_samples": 15,
-     "manipulability": 0.053788,
-     "limit_margin": 0.653746,
+     "manipulability": 0.025291,
+     "limit_margin": 0.496894,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "read the AprilGrid (near)"
@@ -7609,12 +7617,12 @@
      "sequence": "pick:incoming/L0/C3",
      "name": "pre_insert",
      "q": [
-      0.323942,
-      -0.749983,
-      -2.188292,
-      2.938276,
-      -1.894738,
-      0.0
+      -2.058238,
+      0.134185,
+      2.063038,
+      0.942418,
+      -0.489166,
+      3.139868
      ],
      "xyz": [
       0.439,
@@ -7640,10 +7648,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.047417,
-     "limit_margin": 0.482062,
+     "manipulability": 0.025355,
+     "limit_margin": 0.607316,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -7652,12 +7660,12 @@
      "sequence": "pick:incoming/L0/C3",
      "name": "insert",
      "q": [
-      0.195992,
-      -0.958953,
-      -1.546766,
-      2.505719,
-      -1.766789,
-      0.0
+      -2.446907,
+      0.566898,
+      1.439977,
+      1.133527,
+      -0.877836,
+      3.140831
      ],
      "xyz": [
       0.675469,
@@ -7683,10 +7691,10 @@
      ],
      "along_slack": 0.00078,
      "along_samples": 48,
-     "manipulability": 0.094262,
-     "limit_margin": 1.123588,
+     "manipulability": 0.073261,
+     "limit_margin": 1.230377,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -7695,12 +7703,12 @@
      "sequence": "pick:incoming/L0/C3",
      "name": "push",
      "q": [
-      0.193998,
-      -0.966761,
-      -1.527061,
-      2.493822,
-      -1.764795,
-      0.0
+      -2.453467,
+      0.578854,
+      1.420089,
+      1.141465,
+      -0.884395,
+      3.140841
      ],
      "xyz": [
       0.681469,
@@ -7726,10 +7734,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 2,
-     "manipulability": 0.095144,
-     "limit_margin": 1.143293,
+     "manipulability": 0.074159,
+     "limit_margin": 1.250265,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray pushed against the push plate"
@@ -7738,12 +7746,12 @@
      "sequence": "pick:incoming/L0/C3",
      "name": "lift",
      "q": [
-      0.193998,
-      -0.927713,
-      -1.533935,
-      2.461648,
-      -1.764795,
-      0.0
+      -2.453467,
+      0.559087,
+      1.39284,
+      1.188481,
+      -0.884395,
+      3.140841
      ],
      "xyz": [
       0.681469,
@@ -7769,10 +7777,10 @@
      ],
      "along_slack": 0.00317,
      "along_samples": 5,
-     "manipulability": 0.09517,
-     "limit_margin": 1.136419,
+     "manipulability": 0.073825,
+     "limit_margin": 1.277514,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "close the jaws to 0.0413"
@@ -7781,12 +7789,12 @@
      "sequence": "pick:incoming/L0/C3",
      "name": "withdraw",
      "q": [
-      0.323941,
-      -0.690626,
-      -2.196742,
-      2.887368,
-      -1.894738,
-      0.0
+      -2.058238,
+      0.102899,
+      2.032777,
+      1.003965,
+      -0.489166,
+      3.139868
      ],
      "xyz": [
       0.439,
@@ -7808,14 +7816,14 @@
      "margin": 0.0,
      "nearest": [
       "attached/tray",
-      "jig/incoming/L0/C3/Cube_03"
+      "jig/incoming/L0/C3/Cube_01"
      ],
      "along_slack": 0.00317,
      "along_samples": 49,
-     "manipulability": 0.04713,
-     "limit_margin": 0.473612,
+     "manipulability": 0.025755,
+     "limit_margin": 0.637577,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -7824,12 +7832,12 @@
      "sequence": "pick:incoming/L0/C3",
      "name": "carry",
      "q": [
-      0.323501,
-      -0.730306,
-      -2.158138,
-      2.980433,
-      -1.893009,
-      -0.029205
+      -2.059462,
+      0.071368,
+      2.111667,
+      0.77269,
+      -0.497562,
+      2.97769
      ],
      "xyz": [
       0.439,
@@ -7855,10 +7863,10 @@
      ],
      "along_slack": 0.00048,
      "along_samples": 64,
-     "manipulability": 0.048493,
-     "limit_margin": 0.512216,
+     "manipulability": 0.025082,
+     "limit_margin": 0.558687,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tilted for transport"
@@ -7878,12 +7886,12 @@
      "sequence": "place:outgoing/L1/C5",
      "name": "carry",
      "q": [
-      -2.471368,
-      -0.902847,
-      -1.743177,
-      2.757125,
-      -2.237979,
-      -0.068924
+      1.238835,
+      0.363107,
+      1.80551,
+      0.708657,
+      -0.344639,
+      2.892021
      ],
      "xyz": [
       -0.439,
@@ -7909,10 +7917,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.064864,
-     "limit_margin": 0.927177,
+     "manipulability": 0.027455,
+     "limit_margin": 0.864844,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -7921,12 +7929,12 @@
      "sequence": "place:outgoing/L1/C5",
      "name": "withdraw",
      "q": [
-      -2.470737,
-      -0.86322,
-      -1.794833,
-      2.658054,
-      -2.241652,
-      0.0
+      1.239795,
+      0.410025,
+      1.685391,
+      1.043366,
+      -0.332725,
+      3.138935
      ],
      "xyz": [
       -0.439,
@@ -7952,10 +7960,10 @@
      ],
      "along_slack": -0.0,
      "along_samples": 64,
-     "manipulability": 0.063969,
-     "limit_margin": 0.875521,
+     "manipulability": 0.027092,
+     "limit_margin": 0.984963,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
@@ -7964,12 +7972,12 @@
      "sequence": "place:outgoing/L1/C5",
      "name": "place_lift",
      "q": [
-      -2.68654,
-      -1.112085,
-      -1.17299,
-      2.285075,
-      -2.025849,
-      0.0
+      0.885371,
+      0.787533,
+      1.052302,
+      1.300313,
+      -0.68715,
+      3.140474
      ],
      "xyz": [
       -0.677469,
@@ -7995,10 +8003,10 @@
      ],
      "along_slack": 0.00317,
      "along_samples": 48,
-     "manipulability": 0.092779,
-     "limit_margin": 1.497364,
+     "manipulability": 0.061638,
+     "limit_margin": 1.618052,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "open the jaws to 0.0577"
@@ -8007,12 +8015,12 @@
      "sequence": "place:outgoing/L1/C5",
      "name": "place_down",
      "q": [
-      -2.68654,
-      -1.147877,
-      -1.162733,
-      2.31061,
-      -2.025849,
-      0.0
+      0.885371,
+      0.803771,
+      1.08008,
+      1.256297,
+      -0.68715,
+      3.140474
      ],
      "xyz": [
       -0.677469,
@@ -8038,10 +8046,10 @@
      ],
      "along_slack": 0.0,
      "along_samples": 5,
-     "manipulability": 0.092374,
-     "limit_margin": 1.507621,
+     "manipulability": 0.062591,
+     "limit_margin": 1.590274,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": "tray set down"
@@ -8050,12 +8058,12 @@
      "sequence": "place:outgoing/L1/C5",
      "name": "retreat",
      "q": [
-      -2.470737,
-      -0.908568,
-      -1.785166,
-      2.693735,
-      -2.241652,
-      0.0
+      1.239795,
+      0.436123,
+      1.709903,
+      0.992756,
+      -0.332725,
+      3.138935
      ],
      "xyz": [
       -0.439,
@@ -8081,10 +8089,10 @@
      ],
      "along_slack": 0.00078,
      "along_samples": 48,
-     "manipulability": 0.064107,
-     "limit_margin": 0.885188,
+     "manipulability": 0.027007,
+     "limit_margin": 0.960451,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": -1
      },
      "action": ""
