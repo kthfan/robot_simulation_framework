@@ -27,7 +27,10 @@ process:
   # tune_tilt over all three layouts, 64 samples, every sample after the start
   # 0.2 mm beyond the clearance (so the motion between samples keeps 10 mm):
   # flange 52.4 mm (41 down, 32 back)
-  tilt_motion: {pivot: [0.16, 0.18], retreat: 0.08, samples: 64, clearance: 0.010}
+  # 5 deg tilt (2026-11-23): a pure turn about the flange origin keeps 10 mm on every slot
+  # of all three layouts (tune_tilt, 64 samples, 0.2 mm allowance): no flange travel
+  # (15 deg needed 52.4 mm: pivot [0.16, 0.18], retreat 0.08).
+  tilt_motion: {pivot: [0.0, 0.0], retreat: 0.0, samples: 64, clearance: 0.010}
   jaw_operating_range: {min: 0.0210, max: 0.06085}   # assets/asset_spec.yaml
   # The fixed push plate (user 2026-11-12). Pick: insert stops `margin` before
   # the plate meets a tray placed `place_offset` shallow, then the arm pushes the
