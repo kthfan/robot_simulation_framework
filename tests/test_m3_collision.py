@@ -116,16 +116,21 @@ def test_pick_and_place_pass_with_the_push_plate(with_air):
 
 
 def test_tilting_in_place_would_hit_the_jig_above(with_air):
-    """Why the tilt moves down and back: tilted about the flange at the withdraw
-    pose, the carried tray's back end (still inside the shelf) rises into the jig
-    above. The check follows the whole motion, not only its end."""
+    """Why a 15 deg tilt had to move down and back: tilted 15 deg about the flange at
+    the withdraw pose, the carried tray's back end (still inside the shelf) rises into
+    the jig above. The check follows the whole motion, not only its end. 5 deg (the
+    tilt since 2026-11-23) turns in place with 10 mm to spare."""
     from dataclasses import replace
     from rsf_plugins.tm_tray.collision_check import check_cell
-    world = replace(with_air, process=dict(with_air.process, tilt_motion={"pivot": [0.0, 0.0], "retreat": 0.0}))
+    in_place = {"pivot": [0.0, 0.0], "retreat": 0.0, "samples": 64, "clearance": 0.010}
+    world = replace(with_air, process=dict(with_air.process, carry_tilt_deg=15.0, tilt_motion=in_place))
     s = check_cell(world, select=["incoming/L0/C0"])["slots"][0]
     assert "pick/carry" in s["missing"]
     paths = [b.get("path") or "" for b in s["phases"]["pick"]["carry"]]
     assert any("attached/tray vs jig/incoming/L1/" in p for p in paths)
+    world = replace(with_air, process=dict(with_air.process, carry_tilt_deg=5.0, tilt_motion=in_place))
+    s = check_cell(world, select=["incoming/L0/C0"])["slots"][0]
+    assert "pick/carry" not in s["missing"]
 
 
 def test_tilt_motion_is_one_continuous_checked_move(with_air):
@@ -139,9 +144,9 @@ def test_tilt_motion_is_one_continuous_checked_move(with_air):
     assert carry and all(b["path_min_slack"] >= 0.0 and b["from"] is not None for b in carry)
     tm = SEQ.tilt_motion(with_air.process)
     d = tm.displacement(math.radians(with_air.process["carry_tilt_deg"]))
-    # the 130 mm tray's far end must clear the jig above while it rises
-    # (tune_tilt, 2026-11-19): 52.4 mm, down and back only
-    assert d == pytest.approx(0.0524, abs=0.0005)
+    # 5 deg (2026-11-23): a pure turn about the flange keeps 10 mm on every slot (tune_tilt);
+    # 15 deg needed 52.4 mm down and back for the 130 mm tray's far end
+    assert d == pytest.approx(0.0, abs=1e-9)
 
 
 @pytest.mark.slow
