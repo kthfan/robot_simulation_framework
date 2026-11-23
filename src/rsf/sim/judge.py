@@ -129,10 +129,26 @@ def _window(rep, t0, t1):
     return np.flatnonzero((rep.t >= t0 - 1e-9) & (rep.t <= t1 + 1e-9))
 
 
+class _UrdfArm:
+    """The robot's FK from its URDF, base to tool frame (the judge needs no IK, and no
+    kinematics library: it runs wherever a simulator does)."""
+
+    def __init__(self, world):
+        from rsf.model.urdf import UrdfModel
+        r = world.robot
+        self.model = r.urdf if isinstance(r.urdf, UrdfModel) else UrdfModel.from_file(r.urdf)
+        self.tool = r.tool_frame
+        self.base = np.asarray(r.base, float)
+        self.joint_names = [j for j in self.model.chain(self.tool)
+                            if self.model.joints[j].movable and self.model.joints[j].mimic is None]
+
+    def fk(self, q) -> np.ndarray:
+        return self.base @ self.model.link_pose(self.tool, dict(zip(self.joint_names, q)))
+
+
 def _planned_flange(world, traj):
     """``(t, flange poses)`` of a trajectory at its own samples (for the caps)."""
-    from rsf.kinematics import load_arm
-    arm = load_arm(world)
+    arm = _UrdfArm(world)
     T = np.asarray(traj["t"], float)
     Q = np.asarray(traj["q"], float)
     idx = [traj["joint_names"].index(n) for n in arm.joint_names]

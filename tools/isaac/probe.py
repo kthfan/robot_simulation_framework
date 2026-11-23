@@ -58,8 +58,8 @@ def main() -> int:
             UsdPhysics.Scene.Define(st, "/physicsScene").CreateGravityMagnitudeAttr(9.81)
             g = UsdGeom.Cube.Define(st, "/ground")
             g.CreateSizeAttr(1.0)
-            g.AddScaleOp().Set(Gf.Vec3f(2, 2, 0.1))
-            g.AddTranslateOp(UsdGeom.XformOp.PrecisionDouble, "pre").Set(Gf.Vec3d(0, 0, -0.05))
+            g.AddTranslateOp(UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(0, 0, -0.05))
+            g.AddScaleOp().Set(Gf.Vec3f(2, 2, 0.1))                 # top face at z = 0
             UsdPhysics.CollisionAPI.Apply(g.GetPrim())
             b = UsdGeom.Cube.Define(st, "/box")
             b.CreateSizeAttr(0.1)

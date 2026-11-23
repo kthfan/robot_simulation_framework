@@ -29,6 +29,16 @@ def load_plan(path) -> dict:
     return json.loads(gzip.decompress(p.read_bytes()) if p.suffix == ".gz" else p.read_text())
 
 
+def save_report(rep, path) -> None:
+    """An ``ExecReport`` as ``.npz`` (arrays; contacts, segments and meta as JSON)."""
+    import numpy as np
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(path, t=rep.t, flange=rep.flange, flange_planned=rep.flange_planned, q=rep.q,
+                        object_names=np.array(list(rep.objects)), objects=np.array(list(rep.objects.values())),
+                        json=json.dumps({"contacts": rep.contacts, "segments": rep.segments, "meta": rep.meta},
+                                        default=str))
+
+
 def params(sets, backend="mujoco"):
     if backend == "isaac":
         from rsf.sim.isaac_cell import IsaacParams as P
@@ -55,6 +65,7 @@ def main(argv=None) -> int:
     ap.add_argument("--set", action="append", help="SimParams override, key=json")
     ap.add_argument("--backend", choices=("mujoco", "isaac"), default="mujoco")
     ap.add_argument("--usd", help="isaac: where to write the compiled stage (default: a temporary file)")
+    ap.add_argument("--report", help="also save the raw execution report (.npz)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
     from rsf.model.layout import load_world
@@ -76,6 +87,8 @@ def main(argv=None) -> int:
         cell = MujocoCell(world, occ, params(a.set))
     t0 = time.time()
     rep = cell.run(traj, t_end=t_end, progress=lambda t, w: print(f"  sim t={t:7.1f} s  wall {w:6.1f} s", flush=True))
+    if a.report:                                      # the raw run, kept even if judging fails
+        save_report(rep, a.report)
     res = J.judge(world, wf, rep, occ, traj=traj)
     res["meta"] = {"layout": a.layout, "workflow": a.workflow, "plan": a.plan, "sim_seconds": round(float(rep.t[-1]), 2),
                    "wall_seconds": round(time.time() - t0, 1), "backend": a.backend, "params": {k: v for k, v in vars(cell.p).items()}}
