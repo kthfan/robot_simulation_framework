@@ -26,11 +26,13 @@ def demo_stage(st):
     UsdGeom.SetStageMetersPerUnit(st, 1.0)
     UsdGeom.Xform.Define(st, "/World")
     g = UsdGeom.Cube.Define(st, "/World/ground")
+    g.CreateSizeAttr(1.0)                     # UsdGeom.Cube defaults to size 2
     g.AddTranslateOp().Set(Gf.Vec3d(0, 0, -0.05))
     g.AddScaleOp().Set(Gf.Vec3f(2, 2, 0.1))
-    for i, (name, geom, pos, rgb) in enumerate([("box", UsdGeom.Cube, (0, 0, 0.1), (0.8, 0.3, 0.2)),
+    for i, (name, geom, pos, rgb) in enumerate([("box", UsdGeom.Cube, (0, 0, 0.05), (0.8, 0.3, 0.2)),
                                                  ("ball", UsdGeom.Sphere, (0.4, 0.2, 0.15), (0.2, 0.5, 0.8))]):
         p = geom.Define(st, f"/World/{name}")
+        p.GetPrim().GetAttribute("size" if name == "box" else "radius").Set(1.0)
         p.AddTranslateOp().Set(Gf.Vec3d(*pos))
         p.AddScaleOp().Set(Gf.Vec3f(0.1, 0.1, 0.1) if name == "box" else Gf.Vec3f(0.15, 0.15, 0.15))
         m = UsdShade.Material.Define(st, f"/World/looks/{name}")

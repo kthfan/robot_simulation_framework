@@ -43,6 +43,7 @@ def main() -> int:
             UsdGeom.SetStageMetersPerUnit(st, 1.0)
             UsdPhysics.Scene.Define(st, "/physicsScene").CreateGravityMagnitudeAttr(9.81)
             g = UsdGeom.Cube.Define(st, "/ground")
+            g.CreateSizeAttr(1.0)                                 # UsdGeom.Cube defaults to size 2
             g.AddTranslateOp(UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(0, 0, -0.05))   # translate, then scale:
             g.AddScaleOp().Set(Gf.Vec3f(2, 2, 0.1))                                        # top face at z = 0
             UsdPhysics.CollisionAPI.Apply(g.GetPrim())

@@ -111,7 +111,8 @@ for h in headers:
 - Units: `UsdGeom.SetStageUpAxis(st, "Z")` and `SetStageMetersPerUnit(st, 1.0)`.
 - Mind the xform op order: `AddTranslateOp()` then `AddScaleOp()` scales first and then
   translates. In the other order the translation is scaled too.
-- Use `UsdGeom.Cube` with `size = 1` and a scale op for boxes.
+- Use `UsdGeom.Cube` with `CreateSizeAttr(1.0)` and a scale op for boxes. **A Cube's default
+  size is 2** (it spans −1 to 1), so a box authored without the size is twice as big.
 - Meshes: `UsdPhysics.MeshCollisionAPI.Apply(mesh).CreateApproximationAttr("convexHull")`
   for dynamic bodies. Triangle meshes only collide as static geometry.
 - **Articulation**: `ArticulationRootAPI` on the robot root prim, and
