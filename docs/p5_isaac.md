@@ -142,6 +142,30 @@ which also sets up Vulkan).
   `env.tar` holds only the uv Python, and the restore script installs `zstd` and unpacks the
   venv.
 
+Measured (2026-11-23, T4):
+
+| step | fresh install | prebuilt `isaac62` |
+|---|---|---|
+| Isaac Sim | 540–610 s (pip) | 158 s (unpack 10.7 GB → 24 GB) |
+| Vulkan (`vulkan_setup.sh`) | 71 s | 71 s |
+| first RTX frame (1280 × 960) | 630 s (shader compile) | 1.6 s (441 MB shader cache shipped) |
+| next frames | 0.29 s | 0.29 s |
+| render + Isaac tests + strict first cycle, whole kernel | ~1350 s | 638 s |
+
+The cycle's verdict is the same with either (2/2, identical numbers).
+
+```bash
+# once (GPU kernel, ~25 min): install, warm the shaders, pack
+bash kaggle_run.sh run --python 3.12 --slug kgt-env-isaac62 --timeout 100m \
+    --setup "bash tools/isaac/kaggle_setup.sh" --cmd "bash tools/isaac/kaggle_env_build.sh"
+# every run
+bash kaggle_run.sh run --env isaac62 --setup "bash tools/isaac/kaggle_env_restore.sh" --cmd "..."
+```
+
+Rebuild it when the Isaac version changes or Kaggle's driver changes (the shader cache is
+for this driver and GPU; `vulkan_setup.sh` always installs the libraries of the running
+driver). Do not `fetch` the env kernel: its output is the 10.7 GB archive.
+
 ## Status
 
 * Done: compiler, Isaac cell, the cross-check above.
