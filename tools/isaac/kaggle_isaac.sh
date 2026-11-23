@@ -84,7 +84,7 @@ case "$cmd" in
     user=${KAGGLE_USERNAME:-$(kaggle config view 2>/dev/null | awk '/username/{print $NF}')}
     kaggle kernels status "$user/$ENV_SLUG" 2>&1 | tail -1
     kaggle kernels output "$user/$ENV_SLUG" -p "$d" --file-pattern '^env\.json$' >/dev/null 2>&1
-    cat "$d/env.json" 2>/dev/null || echo "[isaac] no env.json: the cache was never built (tools/isaac/kaggle_isaac.sh rebuild)"
+    cat "$d/env.json" 2>/dev/null || echo "[isaac] no env.json in the latest version of $ENV_SLUG (never built, or that version is queued, running, failed or cancelled; runs mount the last completed version, if any)"
     rm -rf "$d";;
   *)
     sed -n 2,17p "$0"; exit 2;;

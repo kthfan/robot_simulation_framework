@@ -107,6 +107,14 @@ If Vulkan fails, physics still works, but there are no camera images.
 Also rebuild when you change `tools/isaac/kaggle_setup.sh`, for example to pin a new Isaac
 version or add a package.
 
+**A cancelled or failed rebuild leaves the old cache in use.** Runs mount the latest
+*completed* version of the env kernel. `status` reads the latest version, so after a
+cancelled or failed rebuild it shows no `env.json` although runs still work.
+
+**A standalone copy of this skill** for other repositories is in `tools/isaac/standalone/`
+(`kaggle-isaac-sim.zip`, skill name `kaggle-isaac-sim`). It bundles its own Kaggle runner and ships its Kaggle-side scripts
+with each job. It uses the same cache format, so both can share `kgt-env-isaac62`.
+
 ## Things that cost time if you don't know them
 
 - **Never `fetch` the env kernel** (`kgt-env-*`): its output is the 10+ GB archive. Use
