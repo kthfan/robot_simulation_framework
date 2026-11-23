@@ -3,7 +3,7 @@
 set -uo pipefail
 export OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src
 mkdir -p reports/isaac
-source tools/isaac/vulkan_setup.sh 2>&1 | tee reports/isaac/vulkan_setup.log
+source tools/isaac/vulkan_setup.sh > reports/isaac/vulkan_setup.log 2>&1; cat reports/isaac/vulkan_setup.log
 cp /tmp/vulkaninfo.txt reports/isaac/ 2>/dev/null
 timeout 600 python - <<'PY'
 from isaacsim import SimulationApp

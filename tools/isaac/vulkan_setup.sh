@@ -33,6 +33,7 @@ if ! ldconfig -p | grep -q libGLX_nvidia.so.0; then
 {"file_format_version": "1.0.1", "ICD": {"library_path": "$DST/libGLX_nvidia.so.0", "api_version": "${api:-1.3.0}"}}
 JSON
   mkdir -p /etc/vulkan/icd.d && cp "$DST/nvidia_icd.json" /etc/vulkan/icd.d/nvidia_icd.json
+  echo "$DST" > /etc/ld.so.conf.d/zz-nvidia-vk.conf && ldconfig     # every process finds them
   export LD_LIBRARY_PATH="$DST${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   export VK_ICD_FILENAMES="$DST/nvidia_icd.json"
   echo "[vk] installed: $(ls $DST | grep -c "so.$VER") libs into $DST (api ${api:-?})"
