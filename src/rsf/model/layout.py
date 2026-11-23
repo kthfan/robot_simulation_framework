@@ -10,11 +10,20 @@
     entities:                       # built in order; later ones may use earlier features
       pedestal: {generator: tm_tray.pedestal, params: {...}}
       fence:    {urdf: assets/fence.urdf, pose: {xyz: [0, 1, 0], rpy: [0, 0, 0]}}
+      incoming: {generator: ..., params: {...},
+                 displace: {xyz: [0.006, -0.004, 0], rpy: [0, 0, 0.01], about: [1.0, 0, 0]}}
     placements:                     # one fixed copy per selected feature
       jig: {urdf: ..., at: {kind: slot}, offset: {xyz: [...]}}
     objects:                        # movable things, initially at selected features
       tray: {urdf: ..., at: {kind: slot}, offset: {...}, initially: all}
     robot: {urdf: ..., base: {feature: pedestal/arm_base}, tool_frame: flange}
+
+``displace`` moves a built entity rigidly in the world (where it really stands, or
+where a measurement says it stands): its solids and features, and so whatever is
+later built on those features (placements, objects). The rotation is about
+``about`` (a world point; default the origin), then ``xyz`` is added; or
+``{matrix}``. Features whose attributes encode their pose are rebuilt by a
+``feature_move`` hook registered for their kind.
 
 Paths are relative to the YAML file that wrote them. Overrides are dotted paths
 into the resolved document (``entities.pedestal.params.leg_height``); a path
@@ -188,18 +197,55 @@ def _urdf_entity(name: str, spec: dict, ctx: BuildContext) -> Entity:
     return Entity(name, spec.get("kind", "static"), solids, (), {"urdf": spec["urdf"]})
 
 
+def displacement(spec: Optional[dict]) -> np.ndarray:
+    """A ``displace`` spec as a world transform: ``{xyz, rpy, about}`` (rotate *rpy*
+    about the world point *about*, then translate *xyz*) or ``{matrix}``."""
+    if not spec:
+        return np.eye(4)
+    spec = dict(spec)
+    if "matrix" in spec:
+        if set(spec) != {"matrix"}:
+            raise LayoutError("displace: 'matrix' stands alone")
+        return np.asarray(spec["matrix"], dtype=float).reshape(4, 4)
+    unknown = set(spec) - {"xyz", "rpy", "about"}
+    if unknown:
+        raise LayoutError(f"displace keys {sorted(unknown)}")
+    c = np.asarray(spec.get("about", (0.0, 0.0, 0.0)), dtype=float)
+    R = se3.rpy_to_matrix(spec.get("rpy", (0.0, 0.0, 0.0)))
+    t = np.asarray(spec.get("xyz", (0.0, 0.0, 0.0)), dtype=float) + c - R @ c
+    return se3.make_T(R, t)
+
+
+def displace_entity(ent: Entity, D: np.ndarray) -> Entity:
+    """*ent* moved rigidly by the world transform *D*: solids and features (through
+    the ``feature_move`` hook of the feature's kind when one is registered)."""
+    from dataclasses import replace
+    D = np.asarray(D, dtype=float)
+    feats = []
+    for f in ent.features:
+        if f.kind in registry.names("feature_move"):
+            feats.append(registry.get("feature_move", f.kind)(f, D))
+        else:
+            feats.append(replace(f, T=D @ f.T))
+    return replace(ent, solids=tuple(s.moved(D) for s in ent.solids), features=tuple(feats),
+                   meta=dict(ent.meta, displaced=D.tolist()))
+
+
 def _build_entity(name: str, spec: dict, ctx: BuildContext) -> Entity:
     if "generator" in spec:
-        unknown = set(spec) - {"generator", "params"}
+        unknown = set(spec) - {"generator", "params", "displace"}
         if unknown:
             raise LayoutError(f"entity {name!r}: unknown key(s) {sorted(unknown)}")
         ent = registry.get("generator", spec["generator"])(name, dict(spec.get("params") or {}), ctx)
         if ent.name != name:
             raise LayoutError(f"generator {spec['generator']} returned entity {ent.name!r} for {name!r}")
-        return ent
-    if "urdf" in spec:
-        return _urdf_entity(name, spec, ctx)
-    raise LayoutError(f"entity {name!r} needs a generator or a urdf")
+    elif "urdf" in spec:
+        ent = _urdf_entity(name, spec, ctx)
+    else:
+        raise LayoutError(f"entity {name!r} needs a generator or a urdf")
+    if spec.get("displace"):
+        ent = displace_entity(ent, displacement(spec["displace"]))
+    return ent
 
 
 def _placements(doc: dict, ctx: BuildContext) -> list:

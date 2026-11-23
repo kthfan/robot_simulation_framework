@@ -111,6 +111,24 @@ def jig_pose(slot: Slot) -> np.ndarray:
     return F.make_pose(np.column_stack([lat, -a, F.UP]), centre)
 
 
+def slot_at(slot: Slot, T_jig, tol: float = 1e-6) -> Slot:
+    """*slot* with its jig at *T_jig* (the inverse of :func:`jig_pose`): approach,
+    lateral offset, label-plane distance and height from a jig pose that is level
+    (+z up), as after moving a rack on the floor."""
+    T = np.asarray(T_jig, dtype=float)
+    if abs(float(T[2, 2]) - 1.0) > tol:
+        raise ValueError(f"{slot.key}: the jig is not level ({math.degrees(math.acos(min(1.0, T[2, 2]))):.3f} deg)")
+    a = -T[:3, 1].copy()
+    a[2] = 0.0
+    a /= np.linalg.norm(a)
+    lat = F.lateral_axis(a)
+    c = T[:3, 3]
+    face = float(c @ a) - A.JIG_Y_OFFSET
+    return dataclasses.replace(slot, approach=tuple(float(v) for v in a), lateral=float(c @ lat),
+                               label_plane_dist=face - A.LABEL_PROUD_OF_FACE,
+                               height=float(c[2]) - slot.plane_thickness / 2.0)
+
+
 def slot_attrs(slot: Slot) -> dict:
     d = dataclasses.asdict(slot)
     d["approach"] = [float(v) for v in slot.approach]

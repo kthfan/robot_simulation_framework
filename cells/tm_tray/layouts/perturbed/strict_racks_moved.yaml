@@ -1,0 +1,16 @@
+# P6 scenario: strict, with both racks standing a little off their layout
+# positions (as they would after being wheeled in): the "truth" a run meets.
+# The planner does not get this file; it gets the layout corrected from
+# AprilGrid reads (tools/locate_slots.py).
+schema: rsf.layout/1
+extends: ../strict.yaml
+name: strict_racks_moved
+description: >-
+  strict with the incoming rack 6 mm further, 4 mm sideways, 2 mm higher and
+  turned 0.6 deg, and the outgoing rack 5 mm closer, 5 mm sideways and turned
+  -0.5 deg (each about its own centre).
+entities:
+  incoming:
+    displace: {xyz: [0.006, -0.004, 0.002], rpy: [0.0, 0.0, 0.010472], about: [0.946, 0.0, 0.0]}
+  outgoing:
+    displace: {xyz: [0.005, 0.005, 0.0], rpy: [0.0, 0.0, -0.008727], about: [-0.946, 0.0, 0.0]}

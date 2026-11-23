@@ -167,3 +167,11 @@ def table(name: str, params: dict, ctx) -> Entity:
                 lateral=t.jig_x, approach=tuple(float(v) for v in t.approach),
                 label_plane_dist=t.label_plane_distance, plane_thickness=t.plane_thickness)
     return Entity(name, "table", (top,), (slot_feature(slot, name),), {"params": dataclasses.asdict(t)})
+
+
+@register("feature_move", "slot")
+def move_slot(feature: Feature, D) -> Feature:
+    """A slot moved with its rack (``displace``): the slot's parameters recomputed
+    from its moved jig pose, so every pose derived from them moves too."""
+    from .geometry import slot_at, slot_feature, slot_of
+    return slot_feature(slot_at(slot_of(feature), np.asarray(D, float) @ feature.T), feature.entity)
