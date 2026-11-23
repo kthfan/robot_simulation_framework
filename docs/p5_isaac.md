@@ -82,7 +82,7 @@ Isaac Sim 6.2.0 (pip, Python 3.12) on a Kaggle T4, headless, CPU PhysX at 1 kHz
 
 | check | result |
 |---|---|
-| app start (headless) | 22 s; RTX renderer unavailable (no Vulkan on Kaggle): physics only, no camera images |
+| app start (headless) | 22 s (physics only without Vulkan; with it, see *Rendering on Kaggle*) |
 | box on the ground (probe) | rests at z = 0.0500 m after 1 s |
 | compiled strict stage (720 prims) | loads; one articulation, 8 DOF and 9 bodies, names as authored; 1000 steps in 1.07 s |
 | `tests/test_isaac.py::test_cell_holds_still` | pass: arm held 2 s, trays seated, no contacts, tracking < 0.1 mm |
@@ -105,14 +105,50 @@ The first attempt simulated the cycle but the judge failed: it computed the plan
 flange with EAIK, which is not installed with Isaac. The judge now uses the URDF's FK
 (identical to 1e-15), and `sim_workflow --report` keeps the raw run before judging.
 
+## Rendering on Kaggle (Vulkan)
+
+Kaggle's container exposes the GPU for compute only (`NVIDIA_DRIVER_CAPABILITIES=compute,utility`):
+no Vulkan driver, no ICD, so Isaac's RTX renderer cannot start. `tools/isaac/vulkan_setup.sh`
+adds it, user space only (the kernel module is the host's):
+
+1. the Vulkan loader (`apt install libvulkan1 vulkan-tools`);
+2. the graphics libraries of the **running** driver version (580.178.04), extracted from
+   NVIDIA's own installer (`NVIDIA-Linux-x86_64-<ver>.run --extract-only`, every library the
+   container lacks; the mounted compute ones are kept), registered with `ldconfig`;
+3. the ICD manifest (`/etc/vulkan/icd.d/nvidia_icd.json`) and NVIDIA's **EGL vendor** for
+   glvnd (`/usr/share/glvnd/egl_vendor.d/10_nvidia.json`): the Vulkan driver finds its GPU
+   through EGL; without it glvnd falls back to Mesa and `vkCreateInstance` returns
+   `ERROR_INCOMPATIBLE_DRIVER` before the driver touches the GPU (seen with `strace`);
+4. `/dev/nvidia-modeset` (created; opening it is not permitted, and not needed).
+
+Result: `vulkaninfo` lists both T4s (Vulkan 1.4.312), and Isaac renders with RTX:
+
+![strict cell, Isaac Sim RTX on a Kaggle T4](images/isaac_strict_rtx.png)
+
+The first frame takes ~10 min (the RTX shaders compile for the T4); the prebuilt
+environment below ships them compiled.
+
+## Kaggle environment cache
+
+Installing Isaac Sim takes ~10 min per run (pip, ~25 GB venv). A prebuilt environment
+(`tools/isaac/kaggle_env_build.sh`, once, on a GPU kernel) installs it, renders one frame to
+compile the shaders, and stores the venv as the kernel's output; later runs mount it
+(`kaggle_run.sh run --env isaac62`) and restore it (`tools/isaac/kaggle_env_restore.sh`,
+which also sets up Vulkan).
+
+* The venv (~25 GB) is over Kaggle's 20 GB output limit: it is stored zstd-compressed
+  (~11 GB).
+* Kaggle's GPU image has no `zstd`, so the runner cannot unpack it itself: the runner's own
+  `env.tar` holds only the uv Python, and the restore script installs `zstd` and unpacks the
+  venv.
+
 ## Status
 
 * Done: compiler, Isaac cell, the cross-check above.
 * Next: the whole strict run (24 transfers, ~1000 s simulated, ~25 min on Kaggle) and
   as_built / recommended; sensitivity runs (priority 4, physical parameters) can use
   both simulators.
-* Camera images in Isaac need a Vulkan-capable host (Kaggle's T4 image has none); the
-  AprilGrid reads stay in MuJoCo for now.
+* Camera images in Isaac: possible on Kaggle with `tools/isaac/vulkan_setup.sh` (below).
 
 ### Compiler tests
 
