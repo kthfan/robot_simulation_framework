@@ -41,13 +41,84 @@ board frame → detector is consistent.
 These are ideal images (sharp, uniformly lit, no noise). They verify the
 geometry, not the reading under real conditions.
 
+## Locating the racks and correcting the run (strict, 2026-11-23)
+
+Code: `rsf.model.layout` (`displace`), `cells/tm_tray/plugin/tm_tray/geometry.py`
+(`slot_at`), `tools/locate_slots.py`. Tests: `tests/test_locate.py`.
+
+**The truth.** A layout entity can be displaced rigidly (`displace: {xyz, rpy,
+about}` or `{matrix}`): its solids and features move, and so does everything
+built on them (jigs, trays, labels). Features whose attributes encode their pose
+are rebuilt by a `feature_move` hook for their kind; for a tm_tray slot,
+`slot_at` recomputes approach, lateral offset, label-plane distance and height
+from the moved jig pose, so every pick and place pose moves with the rack
+(checked to 1e-12). The scenario
+`cells/tm_tray/layouts/perturbed/strict_racks_moved.yaml` stands both racks of
+strict where they would be after being wheeled in:
+
+| rack | displacement (about its own centre) | slots moved by |
+|---|---|---|
+| incoming | 6 mm further, 4 mm sideways, 2 mm higher, turned 0.6° | 6.8–10.3 mm, 0.6° |
+| outgoing | 5 mm closer, 5 mm sideways, turned −0.5° | 3.6–9.0 mm, 0.5° |
+
+**Reading.** The robot knows only the nominal layout and its teach points. For
+every slot of both racks, the cell as it stands is rendered at the slot's taught
+far read pose; the board the detector finds, against where the nominal layout
+puts it, gives the slot's correction (yaw and translation only: the racks
+stand on the floor). The near read is taken at the taught near pose moved by
+that correction (IK nearest the taught joints), and refines it.
+
+| read | worst error of the slot's corrected pose (36 slots) |
+|---|---|
+| far, at the taught pose | 0.13 mm / 0.09° |
+| near, at the corrected pose | 0.05 mm / 0.02° |
+
+**Correcting.** Each rack is rigid: its floor move (yaw, x, y, z) is fitted to
+the near reads of all its slots, and the corrected layout is the nominal one with
+each rack displaced as estimated (written by `locate_slots.py`).
+
+| rack | estimated | truth (same pivot) | worst jig error, all its slots |
+|---|---|---|---|
+| incoming | 0.6002°, (5.994, −4.200, 2.000) mm | 0.6000°, (6.001, −4.199, 2.000) mm | 0.008 mm / 0.0002° |
+| outgoing | −0.4995°, (5.010, 4.834, 0.000) mm | −0.5000°, (4.999, 4.834, 0.000) mm | 0.015 mm / 0.0005° |
+
+**The run.** The whole strict workflow (24 transfers), simulated in MuJoCo in the
+displaced cell:
+
+| plan | taught and planned in | result |
+|---|---|---|
+| the nominal plan | the nominal layout | **fails at the first pick**: incoming/L2/C0 is 10.3 mm / 0.6° off; inserting, the jaws hit the jig's columns (3.9 mm), the gripper body runs 15 mm into the jig, and the simulation diverges (0/24) |
+| the corrected plan | the located layout (workflow re-taught 26/26, CPU plan 1087.4 s, gate 0 problems) | **24/24 pass**: worst placement 0.39 mm / 0.02°, slip 0.40 mm, tracking 0.45 mm, carry tilt 15.0° — as in the undisplaced cell (0.43 mm, 0.44 mm, 0.44 mm) |
+
+```bash
+MUJOCO_GL=osmesa PYTHONPATH=src python tools/locate_slots.py \
+    --truth cells/tm_tray/layouts/perturbed/strict_racks_moved.yaml --nominal cells/tm_tray/layouts/strict.yaml \
+    --teach cells/tm_tray/teach/strict.json --racks incoming outgoing \
+    --out-layout reports/locate/strict_located.yaml --out reports/locate/strict_located.json
+PYTHONPATH=src python -m rsf teach reports/locate/strict_located.yaml --workflow cells/tm_tray/workflows/inspect_and_sort.yaml \
+    --out reports/locate/strict_located_inspect_and_sort
+PYTHONPATH=src python tools/plan_workflow.py assemble reports/locate/strict_located.yaml cells/tm_tray/workflows/inspect_and_sort.yaml \
+    --teach reports/locate/strict_located_inspect_and_sort.json --paths cpu --out reports/locate/strict_located_cpu.json
+PYTHONPATH=src python tools/sim_workflow.py cells/tm_tray/layouts/perturbed/strict_racks_moved.yaml \
+    cells/tm_tray/workflows/inspect_and_sort.yaml --plan reports/locate/strict_located_cpu.json --out reports/locate/sim.json
+```
+
+What this does not cover yet:
+
+* Ideal images (sharp, uniformly lit): the reads' accuracy under real
+  conditions is the next item (blur, noise, exposure, shadows, occlusion).
+* The racks are located once, before the run, as rigid bodies on a level floor.
+  A slot moved on its own (a jig re-seated, a bent shelf) or a rack not level
+  (roll, pitch: `slot_at` refuses a jig that is not level) is not modelled.
+* Reading during the run (each slot just before its pick or place, then
+  re-planning the moves that follow) is not done; neither is a perturbation of
+  the table.
+* as_built and recommended: not run (the user asked for strict first).
+
 ## Next
 
 * Realistic images: the detector's own degradations (`tools/agsim/render.py`:
   blur, noise, exposure, shadows, occlusion), lighting; detection rate and
-  pose error versus them.
-* Locating proper: perturb the slots (rack placement, levelling) in the
-  simulated cell, read, correct the slot poses, re-teach / re-plan, and judge
-  the transfer in simulation (the P6 milestone: still passes with the slot
-  perturbed). Both modes: before the run, and during it.
+  pose error versus them; then the run above with those reads.
+* Locating during the run, per slot; levelling (roll, pitch) of the racks.
 * The real images: compare with the original M4 dataset when available.

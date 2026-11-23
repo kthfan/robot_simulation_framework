@@ -269,6 +269,13 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 
 P0–P2 先做；P3 起每個階段開始前再細化 todo。
 
+**架子擾動後的定位與修正（strict，2026-11-23）**：layout entity 可 `displace`（剛體移動，slot 以 `slot_at` 由移動後的 jig 位姿重算），
+情境 `layouts/perturbed/strict_racks_moved.yaml`：incoming、outgoing 架子各偏 5–7 mm、0.5–0.6°（slot 偏 3.6–10.3 mm）。
+`tools/locate_slots.py`：每個 slot 在示教的遠讀位姿讀 AprilGrid → 修正 → 在修正後的近讀位姿再讀 → 每個架子擬合地面剛體移動 → 寫出修正後的 layout。
+36/36 slot 讀到；近讀誤差 ≤ 0.05 mm／0.02°；擬合後所有 jig 與真值差 ≤ 0.015 mm。未修正的原計畫在擾動後的 cell 第一次取料即撞 jig（0/24）；
+以修正後 layout 重新示教（26/26）、CPU 規劃（0 problems），在擾動後的 cell 模擬全流程 24/24 通過（最差放置 0.39 mm、滑移 0.40 mm）。
+目前為理想影像、執行前一次定位、架子水平；見 `docs/p6_locating.md`。
+
 **放寬攜帶限制（2026-11-23）**：攜帶 tilt 15° → 5°（使用者：15° 以下都可接受，暫定 5°）；tilt 動作重新調整為以 flange 為中心的純旋轉
 （flange 不位移，原本 52.4 mm，仍全程 ≥ 10 mm）。攜帶規則改為相對水平：板面傾角 ≤ 15°，且重力不得把 tray 往開口側拉
 （`motion.carry_tilt_reference: level`；cuRobo ToolPoseBound 取同時滿足兩條規則的最大錐）。手臂組態固定為 J3 +1／J5 −1
@@ -346,8 +353,7 @@ M3 碰撞判定移植、World→MuJoCo 編譯器。D29 夾爪 strict／as_built 
 ### 待辦（使用者 2026-11-22，尚未實作）
 - **AprilGrid 真實影像條件**：模糊、雜訊、曝光、陰影、遮擋、光照（detector 的 `tools/agsim/render.py` degradations）；
   偵測率與位姿誤差對這些條件的關係。
-- **slot 位置擾動後的定位與修正**：模擬中讓 incoming 或 outgoing 架子移動一個小 offset → AprilGrid 讀取 → 修正 slot pose →
-  重新示教／規劃 → 模擬 judge 仍通過（P6 驗收）。
+- ~~slot 位置擾動後的定位與修正~~：strict 完成（2026-11-23，見下方進度）；as_built／recommended、執行中逐 slot 讀取尚未做。
 - ~~放寬攜帶限制~~：完成（2026-11-23，見下方進度）。
 
 ### 仍待確認
