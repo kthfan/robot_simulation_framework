@@ -32,6 +32,11 @@ process:
   # (15 deg needed 52.4 mm: pivot [0.16, 0.18], retreat 0.08).
   tilt_motion: {pivot: [0.0, 0.0], retreat: 0.0, samples: 64, clearance: 0.010}
   jaw_operating_range: {min: 0.0210, max: 0.06085}   # assets/asset_spec.yaml
+  # One arm configuration for the whole run (elbow J3 +1, wrist J5 -1), the one every
+  # layout used until 2026-11-23. Left to `auto`, as_built with the 5 deg tilt picked
+  # J3 -1 (a little more slack), and a free move between two sequences then swung J2
+  # 168 deg round the pedestal: no CPU plan in 5 x 4000 + 20000 iterations.
+  continuity: {prefer: {branch: {joint_3: 1, joint_5: -1}}}
   # The fixed push plate (user 2026-11-12). Pick: insert stops `margin` before
   # the plate meets a tray placed `place_offset` shallow, then the arm pushes the
   # tray (jaws open) until it is `overtravel` past its seat and registered
