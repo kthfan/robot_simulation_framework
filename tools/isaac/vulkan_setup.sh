@@ -20,12 +20,12 @@ if ! ldconfig -p | grep -q libGLX_nvidia.so.0; then
     curl -fsSL -o drv.run "$u" && { echo "[vk] downloaded $u"; break; }
   done
   sh drv.run --extract-only --target x >/dev/null 2>&1 || echo "[vk] extract failed"
-  # graphics/RT user-space libraries of this driver version (compute ones are mounted already)
-  for f in x/libGLX_nvidia.so.$VER x/libnvidia-glcore.so.$VER x/libnvidia-glvkspirv.so.$VER \
-           x/libnvidia-gpucomp.so.$VER x/libnvidia-rtcore.so.$VER x/libnvoptix.so.$VER \
-           x/libEGL_nvidia.so.$VER x/libnvidia-eglcore.so.$VER x/libnvidia-glsi.so.$VER \
-           x/libnvidia-tls.so.$VER x/libnvidia-ngx.so.$VER; do
-    [ -f "$f" ] && cp "$f" "$DST/"
+  # every user-space library of this driver version that the container does not have
+  # (the compute ones are mounted already; never replace a mounted one)
+  for f in x/lib*.so.$VER; do
+    b=$(basename "$f")
+    ldconfig -p | grep -q "/$b\$\|${b%.so.$VER}.so" && [ -e "$(ldconfig -p | grep -m1 "${b%.so.$VER}.so" | awk '{print $NF}')" ] && continue
+    cp "$f" "$DST/"
   done
   cd "$DST"
   for f in *.so.$VER; do b=${f%.so.$VER}; ln -sf "$f" "$b.so.1"; ln -sf "$f" "$b.so.0"; ln -sf "$f" "$b.so"; done
