@@ -34,6 +34,13 @@ if ! ldconfig -p | grep -q libGLX_nvidia.so.0; then
 {"file_format_version": "1.0.1", "ICD": {"library_path": "$DST/libGLX_nvidia.so.0", "api_version": "${api:-1.3.0}"}}
 JSON
   mkdir -p /etc/vulkan/icd.d && cp "$DST/nvidia_icd.json" /etc/vulkan/icd.d/nvidia_icd.json
+  # the Vulkan driver finds its GPU through EGL (glvnd): register NVIDIA's EGL vendor
+  mkdir -p /usr/share/glvnd/egl_vendor.d /usr/share/egl/egl_external_platform.d
+  echo '{"file_format_version": "1.0.0", "ICD": {"library_path": "libEGL_nvidia.so.0"}}' \
+    > /usr/share/glvnd/egl_vendor.d/10_nvidia.json
+  for j in /tmp/nvdrv/x/*_nvidia_*.json; do [ -f "$j" ] && cp "$j" /usr/share/egl/egl_external_platform.d/; done
+  [ -f /tmp/nvdrv/x/nvidia_layers.json ] && mkdir -p /etc/vulkan/implicit_layer.d && \
+    sed "s#libGLX_nvidia.so.0#$DST/libGLX_nvidia.so.0#" /tmp/nvdrv/x/nvidia_layers.json > /etc/vulkan/implicit_layer.d/nvidia_layers.json
   echo "$DST" > /etc/ld.so.conf.d/zz-nvidia-vk.conf && ldconfig     # every process finds them
   export LD_LIBRARY_PATH="$DST${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   export VK_ICD_FILENAMES="$DST/nvidia_icd.json"
