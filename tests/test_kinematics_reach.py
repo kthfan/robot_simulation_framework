@@ -138,7 +138,8 @@ def test_pick_with_the_push_plate(worlds):
         for p, depth in (("insert", d["insert"]), ("push", d["push"])):
             assert np.allclose(mine[p][:3, 3] - ref["insert"][:3, 3], (depth - RS.insert_tip_depth()) * a, atol=1e-12)
         assert np.allclose(mine["lift"][:3, 3] - mine["push"][:3, 3], [0, 0, RS.LIFT_HEIGHT], atol=1e-12)
-        tilted = RS.carry_pose(s, 15.0)
+        tilt = world.process["carry_tilt_deg"]                                     # 5 deg since 2026-11-23
+        tilted = RS.carry_pose(s, tilt)
         assert np.allclose(mine["carry"][:3, :3], tilted[:3, :3], atol=1e-12)      # the carry tilt
         tm = SEQ.tilt_motion(world.process)
-        assert np.allclose(mine["carry"], tm.pose(ref["withdraw"], np.radians(15.0), 1.0), atol=1e-12)
+        assert np.allclose(mine["carry"], tm.pose(ref["withdraw"], np.radians(tilt), 1.0), atol=1e-12)

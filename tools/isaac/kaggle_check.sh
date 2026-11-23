@@ -19,7 +19,7 @@ PY
 timeout 900 python -m pytest -q -p no:cacheprovider tests/test_isaac.py --junitxml reports/isaac/test_isaac.xml || rc=1
 timeout 600 python tools/isaac/probe.py --usd reports/isaac/strict.usda --out reports/isaac/probe_strict.json || rc=1
 timeout ${ISAAC_SIM_TIMEOUT:-2400} python tools/sim_workflow.py cells/tm_tray/layouts/strict.yaml \
-    cells/tm_tray/workflows/inspect_and_sort.yaml --plan cells/tm_tray/plans/strict_cycle1_gpu.json.gz \
+    cells/tm_tray/workflows/inspect_and_sort.yaml --plan cells/tm_tray/plans/strict_cycle1.json.gz \
     --backend isaac --transfers ${ISAAC_TRANSFERS:-2} --usd reports/isaac/strict_run.usda \
     --report reports/isaac/sim_strict_report.npz --out reports/isaac/sim_strict.json || rc=1
 gzip -kf reports/isaac/strict.usda 2>/dev/null; rm -f reports/isaac/strict.usda reports/isaac/strict_run.usda

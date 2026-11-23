@@ -88,7 +88,8 @@ Isaac Sim 6.2.0 (pip, Python 3.12) on a Kaggle T4, headless, CPU PhysX at 1 kHz
 | `tests/test_isaac.py::test_cell_holds_still` | pass: arm held 2 s, trays seated, no contacts, tracking < 0.1 mm |
 | strict first cycle (2 transfers, 103.8 s simulated) | **2/2 pass**, 137.7 s wall |
 
-Same plan (`cells/tm_tray/plans/strict_cycle1_gpu.json.gz`), same judge, both simulators:
+Same plan (`cells/tm_tray/plans/strict_cycle1_gpu.json.gz`, the 15 deg tilt plan of 2026-11-19; replaced on
+2026-11-23 by `strict_cycle1.json.gz`, the 5 deg tilt), same judge, both simulators:
 
 | transfer | backend | seat | slip | track | carry tilt | contacts |
 |---|---|---|---|---|---|---|

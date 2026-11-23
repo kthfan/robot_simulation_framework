@@ -16,7 +16,7 @@ from rsf.sim import judge as J  # noqa: E402
 from rsf.sim.isaac_cell import IsaacCell  # noqa: E402
 
 CELL = Path(__file__).resolve().parents[1] / "cells" / "tm_tray"
-CYCLE1 = CELL / "plans" / "strict_cycle1_gpu.json.gz"
+CYCLE1 = CELL / "plans" / "strict_cycle1.json.gz"
 
 
 @pytest.fixture(scope="module")

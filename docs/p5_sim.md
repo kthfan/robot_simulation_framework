@@ -139,6 +139,49 @@ at the tray from its side, nearly level, so its tilt reads true. An earlier
 close-up looked along the arm's reach; a tray pointing along the line of
 sight looked upright although it lay on the plate.
 
+### 5 deg tilt-back, carries within 15 deg of level (2026-11-23)
+
+User 2026-11-23: any tilt up to 15 deg is acceptable, about 5 deg for now. Two
+changes:
+
+* **The tilt-back while carrying** (`process.carry_tilt_deg`): 15 → 5 deg. Its
+  motion (`tilt_motion`, re-tuned by `tune_tilt.py` over the three layouts, 64
+  samples, ≥ 10 mm to every obstacle) is now a pure turn about the flange: no
+  flange travel (15 deg needed 52.4 mm).
+* **The carry rule is measured from level** (`motion.carry_tilt_reference:
+  level`): during free carries the plate stays within `carry_max_tilt_deg` = 15
+  deg of level, and gravity never pulls the tray toward the open side (with the
+  tray's centre above the flange axis, that allows about 6 deg forward of level).
+  Until now the 15 deg were measured from the carry's start, which with the 15
+  deg tilt-back allowed up to 30 deg back. `start` keeps the old rule.
+  cuRobo's ToolPoseBound is the largest cone inside both rules
+  (`rsf.planning.plan.carry_bound`: 10.6 deg about a vertical tilted 4.4 deg
+  back); the CPU planner and the gate check both rules exactly; the judge
+  measures the simulated tray's tilt from level.
+
+All three layouts re-taught (74/74 slot sequences, 26/26 workflow sequences),
+planned on the CPU and simulated in MuJoCo:
+
+| layout | plan | gate | simulated | worst placement | worst slip | worst tracking | worst carry tilt (from level) |
+|---|---|---|---|---|---|---|---|
+| strict | 1041.7 s | 0 problems | **24/24 pass** | 0.43 mm / 0.02° | 0.44 mm | 0.44 mm | 14.8° |
+| as_built | 1063.3 s | 0 problems | **24/24 pass** | 0.33 mm / 0.01° | 0.33 mm | 0.42 mm | 14.9° |
+| recommended | 1091.7 s | 0 problems | **24/24 pass** | 0.48 mm / 0.01° | 0.50 mm | 0.42 mm | 14.9° |
+
+The run's arm configuration is now pinned for every layout
+(`process.continuity.prefer: {branch: {joint_3: 1, joint_5: -1}}`, the one all
+layouts used before). Left to `auto`, as_built with the 5 deg tilt chose J3 −1
+(slightly more slack at the slots), and one free move between two sequences then
+swung J2 by 168 deg around the pedestal: the CPU planner found no path in 5 × 4000
+and then 20 000 iterations.
+
+The free carries use the whole 15 deg (worst 14.8–14.9°): the CPU planner samples
+anywhere inside the rule. A smaller `carry_max_tilt_deg` keeps them flatter at the
+cost of harder planning.
+
+`cells/tm_tray/plans/strict_cycle1.json.gz` (the Isaac tests' plan, the first two
+transfers) is now cut from this strict plan: MuJoCo 2/2 (placement 0.23 / 0.26 mm).
+
 ## Not yet / limits
 
 * Physical parameters not measured: tray–jig and tray–plate friction (D30's

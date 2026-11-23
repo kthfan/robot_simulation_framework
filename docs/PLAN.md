@@ -269,6 +269,12 @@ workflow ──► TaskGraph ──► skill.expand ──► keyframes(候選, 
 
 P0–P2 先做；P3 起每個階段開始前再細化 todo。
 
+**放寬攜帶限制（2026-11-23）**：攜帶 tilt 15° → 5°（使用者：15° 以下都可接受，暫定 5°）；tilt 動作重新調整為以 flange 為中心的純旋轉
+（flange 不位移，原本 52.4 mm，仍全程 ≥ 10 mm）。攜帶規則改為相對水平：板面傾角 ≤ 15°，且重力不得把 tray 往開口側拉
+（`motion.carry_tilt_reference: level`；cuRobo ToolPoseBound 取同時滿足兩條規則的最大錐）。手臂組態固定為 J3 +1／J5 −1
+（as_built 自動選到 J3 −1 時有一段 free move 規劃不出來）。三個 layout 重新示教 74/74、26/26，CPU 規劃 0 problems，MuJoCo 全流程皆 24/24
+（最差放置 0.48 mm、滑移 0.50 mm、追蹤 0.44 mm、攜帶傾角 14.9°）。見 `docs/p5_sim.md`。
+
 **Isaac Sim adapter（2026-11-23）**：World → USD（`rsf.compile.usd`：UsdPhysics articulation 由 URDF 直接寫出、
 fixed joint 合併成剛體、凸包碰撞、與 MuJoCo 相同的質量／摩擦／伺服）＋ `rsf.sim.isaac_cell.IsaacCell`（omni.physx 步進、
 omni.physics.tensors 讀寫、同一 `ExecReport` 與 judge）；`tools/sim_workflow.py --backend isaac`。編譯器測試 8 項（FK 與 URDF < 1e-6、
@@ -342,8 +348,7 @@ M3 碰撞判定移植、World→MuJoCo 編譯器。D29 夾爪 strict／as_built 
   偵測率與位姿誤差對這些條件的關係。
 - **slot 位置擾動後的定位與修正**：模擬中讓 incoming 或 outgoing 架子移動一個小 offset → AprilGrid 讀取 → 修正 slot pose →
   重新示教／規劃 → 模擬 judge 仍通過（P6 驗收）。
-- **放寬攜帶限制**：傾角在 15° 以下都可接受。現行規則是「相對攜帶起點的重力方向 15° 錐，且重力不得把 tray 往開口側拉」，
-  實作時先確認基準（水平或攜帶起點）。
+- ~~放寬攜帶限制~~：完成（2026-11-23，見下方進度）。
 
 ### 仍待確認
 - cuRobo CPU 移植是否進行、範圍（見 `docs/curobo_cpu_port.md` §4），以及是否把 kthfan/curobo 加入此 session。
