@@ -162,6 +162,14 @@ bash kaggle_run.sh run --python 3.12 --slug kgt-env-isaac62 --timeout 100m \
 bash kaggle_run.sh run --env isaac62 --setup "bash tools/isaac/kaggle_env_restore.sh" --cmd "..."
 ```
 
+Vulkan is cached too (`nvidia-vk.tar.zst`, for the driver in `env.json`). A run on another
+driver reinstalls Vulkan for the running one (11 s, NVIDIA's installer), still renders, and
+marks the cache stale (`ISAAC_ENV_STALE`); `tools/isaac/kaggle_isaac.sh` then rebuilds the
+cache by itself. Tested 2026-11-23 with a simulated driver change
+(`ISAAC_ENV_ASSUME_CACHED_DRIVER=0.0`): detected, Vulkan reinstalled, RTX first frame 1.5 s,
+rebuild started. Agents use this through the `isaac-sim-kaggle` skill
+(`.claude/skills/isaac-sim-kaggle/SKILL.md`).
+
 Rebuild it when the Isaac version changes or Kaggle's driver changes (the shader cache is
 for this driver and GPU; `vulkan_setup.sh` always installs the libraries of the running
 driver). Do not `fetch` the env kernel: its output is the 10.7 GB archive.
