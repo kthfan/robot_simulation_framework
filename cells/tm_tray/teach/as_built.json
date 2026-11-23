@@ -20,6 +20,14 @@
     "min": 0.021,
     "max": 0.06085
    },
+   "continuity": {
+    "prefer": {
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     }
+    }
+   },
    "push_plate": {
     "geometry": "air_cylinder_plate",
     "margin": 0.002,
@@ -83,7 +91,7 @@
     0.0
    ]
   },
-  "seconds": 858.7
+  "seconds": 809.2
  },
  "ok": true,
  "sequences": [
