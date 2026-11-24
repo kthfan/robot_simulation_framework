@@ -239,6 +239,57 @@ Isaac's camera images, or for driving the real controller against the simulation
 it would mean an Isaac-side service (ZeroMQ or gRPC, or ROS 2 through Isaac's
 bridge) in place of the batch call.
 
+## Isaac Sim's own Python (standalone package, air-gapped)
+
+With the standalone Isaac Sim package there is no venv: its bundled interpreter,
+`python.sh` (Windows: `python.bat`), is the Python. This assumes every
+dependency is already installed in it:
+* the Isaac side: pyyaml, trimesh, pillow, pytest;
+* the main side, in addition: mujoco, coal, EAIK, motion_planner, urchin, the
+  detector.
+
+Replace `python` with it. `python.sh` sets its own `PYTHONPATH`, so the
+repository must not rely on it. The tools put `src` on the path themselves, and
+`tools/rsf_cli.py` stands in for `python -m rsf`.
+
+```bash
+ISAAC_PY=~/isaacsim/python.sh            # where the standalone package is
+export OMNI_KIT_ACCEPT_EULA=YES MUJOCO_GL=egl PYOPENGL_PLATFORM=egl
+cd robot_simulation_framework
+
+$ISAAC_PY -m pytest -q
+$ISAAC_PY tools/rsf_cli.py teach cells/tm_tray/layouts/strict.yaml \
+    --workflow cells/tm_tray/workflows/inspect_and_sort.yaml --out cells/tm_tray/teach/strict_inspect_and_sort
+$ISAAC_PY tools/plan_workflow.py assemble cells/tm_tray/layouts/strict.yaml cells/tm_tray/workflows/inspect_and_sort.yaml \
+    --teach cells/tm_tray/teach/strict_inspect_and_sort.json --paths cpu --out cells/tm_tray/plans/strict_inspect_and_sort_cpu.json
+$ISAAC_PY tools/sim_workflow.py cells/tm_tray/layouts/strict.yaml cells/tm_tray/workflows/inspect_and_sort.yaml \
+    --plan cells/tm_tray/plans/strict_inspect_and_sort_cpu.json --backend isaac --usd reports/isaac/strict.usda \
+    --out reports/isaac/sim_strict.json
+```
+
+Two computers: name the interpreter instead of a venv. The path is relative to
+the remote home, or absolute. In `--cmd`, `python` then runs it:
+
+```bash
+export RSF_ISAAC_HOST=user@gpu-box RSF_ISAAC_PYTHON=isaacsim/python.sh
+tools/isaac/remote_isaac.sh check            # prints the interpreter and where isaacsim comes from
+tools/isaac/remote_isaac.sh run --send cells/tm_tray/plans/strict_inspect_and_sort_cpu.json --collect reports/isaac \
+    --cmd "python tools/sim_workflow.py cells/tm_tray/layouts/strict.yaml cells/tm_tray/workflows/inspect_and_sort.yaml \
+           --plan cells/tm_tray/plans/strict_inspect_and_sort_cpu.json --backend isaac --out reports/isaac/sim_strict.json"
+```
+
+`remote_isaac.sh` only needs SSH and rsync between the two computers (no
+internet). The main computer can use any Python 3.10+ that has the main
+side's packages, or the same `python.sh` if Isaac Sim is installed there too.
+
+Tested with a stand-in `python.sh` (one that replaces `PYTHONPATH`, then runs a
+Python 3.12) through `remote_isaac.sh`, with no venv:
+* `tools/rsf_cli.py`, pytest and a MuJoCo transfer ran;
+* `check` found the interpreter;
+* `check` does not mistake the `~/isaacsim` folder for the package.
+
+Not tested with the real standalone package.
+
 ## What is Kaggle-only and not needed locally
 
 `tools/isaac/kaggle_*.sh`, `vulkan_setup.sh` and the `isaac-sim-kaggle` skill:

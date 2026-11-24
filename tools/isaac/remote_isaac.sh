@@ -13,7 +13,10 @@
 # Configuration (environment):
 #   RSF_ISAAC_HOST   SSH destination: user@host or a ~/.ssh/config alias (required)
 #   RSF_ISAAC_DIR    the repository on the GPU box (default: rsf; relative to the remote home)
-#   RSF_ISAAC_VENV   the Isaac venv on the GPU box (default: venvs/rsf-isaac)
+#   RSF_ISAAC_PYTHON Isaac Sim's own interpreter on the GPU box, e.g. isaacsim/python.sh (the
+#                    standalone package; relative to the remote home or absolute). When set, no
+#                    venv is activated and `python` in CMD runs it.
+#   RSF_ISAAC_VENV   otherwise, the pip-installed Isaac venv on the GPU box (default: venvs/rsf-isaac)
 #   RSF_ISAAC_SSH    the ssh command (default: ssh; e.g. "ssh -p 2222 -i ~/.ssh/gpu_key")
 #
 # What is synced: every file git tracks plus untracked files that are not ignored (code,
@@ -25,10 +28,20 @@ cd "$ROOT"
 HOST=${RSF_ISAAC_HOST:-}
 RDIR=${RSF_ISAAC_DIR:-rsf}
 RVENV=${RSF_ISAAC_VENV:-venvs/rsf-isaac}
+RPY=${RSF_ISAAC_PYTHON:-}
 SSH=${RSF_ISAAC_SSH:-ssh}
 say() { printf '[remote] %s\n' "$*" >&2; }
 [ -n "$HOST" ] || { say "set RSF_ISAAC_HOST (user@host or an ~/.ssh/config alias)"; exit 2; }
 command -v rsync >/dev/null || { say "rsync is needed here and on the GPU box"; exit 2; }
+
+py_env() {   # the remote shell prelude that makes `python` Isaac Sim's interpreter
+  if [ -n "$RPY" ]; then
+    # shellcheck disable=SC2016
+    printf '__py=%q; case "$__py" in /*) ;; *) __py="$HOME/$__py";; esac; [ -x "$__py" ] || { echo "no $__py"; exit 2; }; python() { "$__py" "$@"; }; export -f python; export __py; ' "$RPY"
+  else
+    printf 'source %q/bin/activate && ' "$RVENV"
+  fi
+}
 
 remote() {   # run a shell command on the GPU box (bash -lc, at the remote home)
   # shellcheck disable=SC2086
@@ -69,8 +82,8 @@ cmd=${1:-}; shift || true
 case "$cmd" in
   check)
     remote "(cd $(printf '%q' "$RDIR") 2>/dev/null && echo repo: \$(pwd) \$(cat .rsf_revision 2>/dev/null)) || echo 'repo: not synced yet';
-            source $(printf '%q' "$RVENV")/bin/activate && python -V &&
-            python -c 'import importlib.util as u; print(\"isaacsim:\", \"yes\" if u.find_spec(\"isaacsim\") else \"MISSING\")';
+            $(py_env) python -V &&
+            (cd / && python -c 'import importlib.util as u; s = u.find_spec(\"isaacsim\"); print(\"isaacsim:\", s.origin if s and s.origin else \"MISSING\")');
             nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader || echo 'no NVIDIA GPU visible'";;
   sync) sync_tree;;
   fetch) fetch "$@";;
@@ -89,8 +102,8 @@ case "$cmd" in
     [ ${#sends[@]} -eq 0 ] || send "${sends[@]}" || exit $?
     say "running on $HOST: $c"
     t=$(date +%s)
-    # the venv first: RSF_ISAAC_VENV may be relative to the remote home
-    remote "source $(printf '%q' "$RVENV")/bin/activate && cd $(printf '%q' "$RDIR") &&
+    # the interpreter first: RSF_ISAAC_PYTHON / RSF_ISAAC_VENV may be relative to the remote home
+    remote "$(py_env) cd $(printf '%q' "$RDIR") &&
             export OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src && $c"
     rc=$?
     say "exit $rc after $(( $(date +%s) - t )) s"
