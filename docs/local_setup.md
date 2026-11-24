@@ -171,6 +171,74 @@ python tools/plan_workflow.py assemble $L $WF --teach cells/tm_tray/teach/strict
     --paths results/strict_full_paths.json --fallback cpu --out cells/tm_tray/plans/strict_inspect_and_sort_gpu.json
 ```
 
+## Two computers: Isaac Sim on a GPU box, the rest elsewhere
+
+The Isaac step is a batch replay: a planned trajectory in, a report out. So the
+work splits cleanly by files, the way Kaggle is used, with SSH as the transport.
+
+| | main computer | GPU box |
+|---|---|---|
+| does | teach, plan (CPU, or cuRobo), MuJoCo, locating (MuJoCo images + detector), analysis | `sim_workflow.py --backend isaac`, RTX images, Isaac tests |
+| needs | the full venv (`tools/setup_local.sh`, `SKIP_ISAAC=1` if it has no Isaac) | Linux, NVIDIA RTX GPU, the Isaac venv only (`ISAAC_ONLY=1`: Isaac Sim + this repository's core; no EAIK, coal, MuJoCo, detector) |
+| sends | the repository's files (code, layouts, assets, teach tables) and the plan | the reports (`.json`, `.npz`, `.usda`, images) |
+
+`tools/isaac/remote_isaac.sh` does the round trip over SSH with rsync:
+1. sync this checkout's files (tracked, plus untracked files that are not
+   ignored, with a REVISION file naming the commit);
+2. send the git-ignored inputs you name (the plan);
+3. run the command in the Isaac venv at the remote repository root;
+4. bring back what you name, even when the command fails.
+
+It needs `rsync` on both computers and key-based SSH from the main computer.
+
+One-time setup:
+
+```bash
+# on the main computer: SSH key login to the GPU box (an ~/.ssh/config alias keeps it short)
+ssh-copy-id user@gpu-box
+export RSF_ISAAC_HOST=user@gpu-box          # also: RSF_ISAAC_DIR (default rsf), RSF_ISAAC_VENV (default venvs/rsf-isaac)
+tools/isaac/remote_isaac.sh sync            # the repository -> ~/rsf on the GPU box
+
+# on the GPU box (needs python3.12, python3.12-venv, rsync): the Isaac venv
+ISAAC_ONLY=1 bash ~/rsf/tools/setup_local.sh ~/venvs/rsf-isaac
+
+# on the main computer: SSH, the remote venv, isaacsim, the GPU
+tools/isaac/remote_isaac.sh check
+```
+
+Each run (plan here, simulate there):
+
+```bash
+L=cells/tm_tray/layouts/strict.yaml
+WF=cells/tm_tray/workflows/inspect_and_sort.yaml
+python tools/plan_workflow.py assemble $L $WF --teach cells/tm_tray/teach/strict_inspect_and_sort.json \
+    --paths cpu --out cells/tm_tray/plans/strict_inspect_and_sort_cpu.json
+tools/isaac/remote_isaac.sh run --send cells/tm_tray/plans/strict_inspect_and_sort_cpu.json --collect reports/isaac \
+    --cmd "python tools/sim_workflow.py $L $WF --plan cells/tm_tray/plans/strict_inspect_and_sort_cpu.json \
+           --backend isaac --usd reports/isaac/strict.usda --report reports/isaac/run.npz --out reports/isaac/sim_strict.json"
+```
+
+The report (`reports/isaac/sim_strict.json`, the raw run in `run.npz`) is then
+here, to compare with MuJoCo's. Images work the same way: `--cmd "python
+tools/isaac/render_probe.py --usd reports/isaac/strict.usda --png
+reports/isaac/strict.png"`, `--collect reports/isaac`.
+
+Tested here with a stand-in for ssh that runs the remote side locally:
+sync (214 files), send the plan, run one transfer (MuJoCo, as no Isaac is
+installed here), fetch the report; and `ISAAC_ONLY=1` (the replay and judge
+modules load without EAIK, coal or MuJoCo). Not tested over a real network.
+
+To watch Isaac Sim on the GPU box from the main computer, Isaac Sim streams its
+window (`isaacsim isaacsim.exp.full.streaming --no-window` on the GPU box, NVIDIA's
+WebRTC streaming client here). That is for looking only: the replay itself stays
+a batch job.
+
+A live coupling, with the two computers exchanging state every step, is not
+needed for anything done so far. It would be for locating during a run with
+Isaac's camera images, or for driving the real controller against the simulation;
+it would mean an Isaac-side service (ZeroMQ or gRPC, or ROS 2 through Isaac's
+bridge) in place of the batch call.
+
 ## What is Kaggle-only and not needed locally
 
 `tools/isaac/kaggle_*.sh`, `vulkan_setup.sh` and the `isaac-sim-kaggle` skill:

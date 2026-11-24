@@ -10,6 +10,9 @@
 #   DETECTOR_DIR=...          kthfan/aprilgriddetector checkout (default: ../kthfan/aprilgriddetector,
 #                             cloned if missing; needs Rust: https://rustup.rs)
 #   SKIP_ISAAC=1              skip PyTorch + Isaac Sim (tests the rest only; MuJoCo/CPU work)
+#   ISAAC_ONLY=1              the GPU box of a two-computer setup: PyTorch, Isaac Sim and this
+#                             repository's core only (no EAIK, coal, MuJoCo, detector: the Isaac
+#                             replay and the judge do not need them; tools/isaac/remote_isaac.sh)
 #
 # Never install usd-core or opencv-python(-headless) into this venv: Isaac Sim brings its
 # own pxr (usd-exchange) and cv2 (opencv-python-headless-noffmpeg), and pins numpy and mujoco.
@@ -24,7 +27,9 @@ say() { printf '\n== %s\n' "$*"; }
 say "checks"
 command -v python3.12 >/dev/null || { echo "python3.12 not found (Ubuntu: sudo apt install python3.12 python3.12-venv python3.12-dev)"; exit 1; }
 ldd --version | head -1
-command -v g++ >/dev/null || { echo "g++ not found (EAIK builds C++17): sudo apt install build-essential"; exit 1; }
+if [ "${ISAAC_ONLY:-0}" != 1 ]; then
+  command -v g++ >/dev/null || { echo "g++ not found (EAIK builds C++17): sudo apt install build-essential"; exit 1; }
+fi
 command -v git >/dev/null || { echo "git not found"; exit 1; }
 if [ "${SKIP_ISAAC:-0}" != 1 ]; then
   nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader || { echo "no NVIDIA GPU visible"; exit 1; }
@@ -44,6 +49,13 @@ fi
 
 if [ "${SKIP_ISAAC:-0}" = 1 ]; then
   pip install -q opencv-python-headless       # with Isaac Sim, its own OpenCV provides cv2
+fi
+
+if [ "${ISAAC_ONLY:-0}" = 1 ]; then
+  say "this repository (editable), core only"
+  pip install -e "$ROOT[mesh]" pillow pytest
+  say "done (ISAAC_ONLY). Next: run the work from the other computer with tools/isaac/remote_isaac.sh"
+  exit 0
 fi
 
 say "this repository (editable) and its dependencies"
