@@ -206,7 +206,20 @@ ISAAC_ONLY=1 bash ~/rsf/tools/setup_local.sh ~/venvs/rsf-isaac
 tools/isaac/remote_isaac.sh check
 ```
 
-Each run (plan here, simulate there):
+Each run: plan here, simulate there. Full plans are git-ignored
+(`cells/*/plans/*.json`), so a plan exists only on the computer that made it:
+make it first, then `--send` it.
+
+The round trip can be tried first without planning, using the first strict
+cycle, which is in git (two transfers, about a minute in Isaac):
+
+```bash
+tools/isaac/remote_isaac.sh run --collect reports/isaac --cmd "python tools/sim_workflow.py \
+    cells/tm_tray/layouts/strict.yaml cells/tm_tray/workflows/inspect_and_sort.yaml \
+    --plan cells/tm_tray/plans/strict_cycle1.json.gz --backend isaac --transfers 2 --out reports/isaac/cycle1.json"
+```
+
+The full run:
 
 ```bash
 L=cells/tm_tray/layouts/strict.yaml

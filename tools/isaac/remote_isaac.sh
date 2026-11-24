@@ -63,7 +63,6 @@ sync_tree() {
 send() {
   local p
   for p in "$@"; do
-    [ -e "$p" ] || { say "--send $p: not found"; return 2; }
     rsync -az -R -e "$SSH" "./$p" "$HOST:$RDIR/" || return 3
     say "sent $p"
   done
@@ -98,6 +97,19 @@ case "$cmd" in
       esac
     done
     [ -n "$c" ] || { say "--cmd is required"; exit 2; }
+    for p in ${sends[@]+"${sends[@]}"}; do       # before anything is copied
+      if [ ! -e "$p" ]; then
+        say "--send $p: no such file here"
+        if git check-ignore -q "$p"; then
+          say "  it is git-ignored, so not in the repository: make it on this computer first"
+          case "$p" in
+            cells/*/plans/*) say "  (a plan: tools/plan_workflow.py assemble ... --out $p; docs/local_setup.md;"
+                             say "   to try the round trip now: cells/tm_tray/plans/strict_cycle1.json.gz, in git, needs no --send)";;
+          esac
+        fi
+        exit 2
+      fi
+    done
     sync_tree || exit 3
     [ ${#sends[@]} -eq 0 ] || send "${sends[@]}" || exit $?
     say "running on $HOST: $c"
