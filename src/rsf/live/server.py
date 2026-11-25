@@ -200,9 +200,10 @@ class LiveServer:
             req.send_header("Cache-Control", "no-cache")
             req.send_header("Connection", "close")
             req.end_headers()
-            # Browsers show a part only once the next part starts, so the current frame
-            # goes out twice on connect, and again every second while no new one comes
-            # (the last frame of a finished run included).
+            # Browsers show a part only once the next part starts (Chrome: measured), so a
+            # new frame goes out again 60 ms later unless a newer one came: no frame waits
+            # for the next (a still scene, a camera moved while paused). The latest frame
+            # is also repeated every second while idle, and twice on connect.
             req.wfile.write(b"--rsfframe\r\n")
 
             def part(seq, jpeg, meta):
@@ -210,21 +211,23 @@ class LiveServer:
                         f"X-Frame-Seq: {seq}\r\nX-Sim-Time: {meta.get('t', '')}\r\n\r\n")
                 req.wfile.write(head.encode() + jpeg + b"\r\n--rsfframe\r\n")
                 req.wfile.flush()
-            seq, last = 0, 0.0
+            seq, last, fresh = 0, 0.0, False
             if s.jpeg is not None:
                 seq, jpeg, meta = s.seq, s.jpeg, dict(s.frame_meta)
                 part(seq, jpeg, meta)
                 part(seq, jpeg, meta)
             while True:
-                got = s.wait(seq, timeout=1.0)
+                got = s.wait(seq, timeout=0.06 if fresh else 1.0)
                 if got is None:
                     if hub.closed:
                         return
                     if s.jpeg is not None:
                         part(s.seq, s.jpeg, dict(s.frame_meta))
+                    fresh = False
                     continue
                 seq, jpeg, meta = got
                 part(seq, jpeg, meta)
+                fresh = True
                 if min_dt:
                     time.sleep(max(0.0, min_dt - (time.time() - last)))
                     last = time.time()

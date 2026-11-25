@@ -357,7 +357,8 @@ M3 碰撞判定移植、World→MuJoCo 編譯器。D29 夾爪 strict／as_built 
 - ~~放寬攜帶限制~~：完成（2026-11-23，見下方進度）。
 - **實時檢視（P7，2026-11-25）**：模擬端渲染（Isaac RTX）、HTTP API + 瀏覽器檢視器、可在另一台主機看；
   第一版 MJPEG 完成（`docs/live_view.md`）；Isaac Sim 5.0 渲染以 `render_mode=play` 驗證（2026-11-25）。
-  已加：暫停/單步/調速/停止、Python debug console（token、預設關閉、不限 localhost、可選 HTTPS）、`--debugpy`。
+  已加：暫停/單步/調速/停止、Python debug console（token、預設關閉、不限 localhost、可選 HTTPS）、`--debugpy`；
+  可移動視角（共用相機、不需 token；鍵盤 WASD/TG、滑鼠拖曳轉向、雙擊 FPS mouse look、平移、滾輪、Ctrl+滾輪 FOV）。
   之後：WebRTC、錄影等。
 
 ### 仍待確認

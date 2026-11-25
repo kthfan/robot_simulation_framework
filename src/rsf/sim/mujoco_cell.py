@@ -153,6 +153,13 @@ class MujocoCell:
         r.update_scene(dv, cam)
         return r.render()
 
+    def move_view(self, name: str, eye, target, fov_deg=None) -> None:
+        """Move the view *name*'s camera (its size stays)."""
+        from dataclasses import replace as _r
+        v = self._views[name]
+        self._views[name] = _r(v, eye=tuple(map(float, eye)), target=tuple(map(float, target)),
+                               fov_deg=float(v.fov_deg if fov_deg is None else fov_deg))
+
     def close_views(self) -> None:
         for r in getattr(self, "_renderers", {}).values():
             r.close()

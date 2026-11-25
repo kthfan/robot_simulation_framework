@@ -130,3 +130,20 @@ def overview(world, name: str = "overview", direction=(1.0, -1.0, 0.6), **kw) ->
     dist = r / math.sin(math.radians(0.5 * v.fov_deg * min(1.0, v.width / v.height)))
     v.eye = tuple(float(x) for x in c + dist * d)
     return v
+
+
+def view_angles(eye, target) -> tuple:
+    """``(yaw, pitch)`` in degrees of the direction eye -> target: yaw about the world z
+    from +x (counter-clockwise), pitch up from the horizontal."""
+    d = np.asarray(target, float) - np.asarray(eye, float)
+    n = float(np.linalg.norm(d))
+    if n < 1e-12:
+        raise ValueError("eye and target coincide")
+    d /= n
+    return math.degrees(math.atan2(d[1], d[0])), math.degrees(math.asin(max(-1.0, min(1.0, d[2]))))
+
+
+def view_forward(yaw: float, pitch: float) -> np.ndarray:
+    """The unit direction of *yaw*, *pitch* (degrees, :func:`view_angles`)."""
+    y, p = math.radians(yaw), math.radians(pitch)
+    return np.array([math.cos(p) * math.cos(y), math.cos(p) * math.sin(y), math.sin(p)])

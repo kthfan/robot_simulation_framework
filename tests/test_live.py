@@ -356,3 +356,95 @@ def test_unchanged_frames_are_counted():
         time.sleep(0.002)
     assert hub.status["unchanged_frames"] == hub.status["frames"] - 1 >= 5
     cap.finish()
+
+
+# ── cameras moved from the viewer (shared, no token) ───────────────────────
+def test_view_angles_round_trip():
+    from rsf.sim.common import view_angles, view_forward
+    for eye, target in [((0, 0, 0), (1, 0, 0)), ((1, 2, 3), (0, 3, 2)), ((2.4, -2.1, 2.5), (0, 0.28, 1.06))]:
+        y, p = view_angles(eye, target)
+        d = np.subtract(target, eye)
+        assert view_forward(y, p) == pytest.approx(d / np.linalg.norm(d))
+    assert view_angles((0, 0, 0), (0, 1, 0)) == pytest.approx((90.0, 0.0))
+
+
+class _MovableCell(_FakeCell):
+    def __init__(self):
+        super().__init__()
+        self.moves = []
+
+    def move_view(self, name, eye, target, fov_deg=None):
+        self.moves.append((name, eye, target, fov_deg))
+        from dataclasses import replace
+        self.views[name] = replace(self.views[name], eye=eye, target=target, fov_deg=fov_deg)
+
+
+def test_camera_api_moves_the_view_on_the_simulation_thread(served):
+    from rsf.live import views
+    hub, srv, c = served
+    cell = _MovableCell()
+    cap = LiveCapture(hub, cell, [View("v", (2, 0, 1), (0, 0, 1), width=32, height=24)], fps=1.0, fps_interactive=50.0)
+    views.register(srv, cap)
+    assert c.info()["features"]["camera"] == {"views": ["v"]}
+    p = c._json("/api/v1/views")["v"]
+    assert p["yaw"] == pytest.approx(180.0) and p["pitch"] == pytest.approx(0.0) and p["eye"] == [2, 0, 1]
+    code, r = _post(c, "/api/v1/views/v/pose", {"eye": [1, 1, 2], "yaw": 90, "pitch": -30, "fov_deg": 60})   # no token
+    assert code == 200 and r["target"] == pytest.approx([1, 1 + np.cos(np.radians(30)), 2 - 0.5])
+    assert cell.moves == []                                   # not on the HTTP thread
+    cap.warmup()
+    n = cap.frames
+    cap(0.0)
+    assert cell.moves[-1][0] == "v" and cell.moves[-1][3] == 60.0 and cap.frames == n + 1
+    assert hub.status["views"]["v"]["yaw"] == pytest.approx(90.0) and hub.status["views"]["v"]["pitch"] == pytest.approx(-30.0)
+    # partial: only the yaw changes; the eye stays
+    _post(c, "/api/v1/views/v/pose", {"yaw": 0})
+    time.sleep(0.03)                                          # (frames at most fps_interactive)
+    cap.idle()                                                # paused / after the run: a move draws at once
+    assert cell.moves[-1][1] == (1.0, 1.0, 2.0) and cell.moves[-1][2] == pytest.approx((1 + np.cos(np.radians(30)), 1, 1.5))
+    assert cap.frames == n + 2
+    time.sleep(0.03)
+    cap.idle()
+    assert cap.frames == n + 2                                # nothing moved: no frame while still
+    assert _post(c, "/api/v1/views/v/reset", {})[0] == 200
+    cap.idle()
+    assert cell.moves[-1][1:3] == ((2.0, 0.0, 1.0), (0.0, 0.0, 1.0))
+    for bad in ({"eye": [0, 0]}, {"eye": [0, 0, "x"]}, {"fov_deg": float("nan")}, {"eye": [1e6, 0, 0]}):
+        assert _post(c, "/api/v1/views/v/pose", bad)[0] == 400, bad
+    assert _post(c, "/api/v1/views/nope/pose", {"yaw": 1})[0] == 404
+    p = c._json("/api/v1/views")["v"]
+    assert _post(c, "/api/v1/views/v/pose", {"pitch": 120})[1]["target"][2] < p["eye"][2] + 1.0001   # clamped
+    cap.finish()
+    cap.close()
+
+
+def test_frames_speed_up_while_a_camera_moves():
+    cell = _MovableCell()
+    cap = LiveCapture(Hub(), cell, [View("v", (2, 0, 1), (0, 0, 1), width=32, height=24)], fps=2.0,
+                      fps_interactive=40.0)
+    w = time.time()
+    while time.time() - w < 0.5:
+        cap(time.time() - w)
+        time.sleep(0.005)
+    still = cap.frames
+    cap.request_view("v", yaw=10)
+    w = time.time()
+    while time.time() - w < 0.5:
+        cap(time.time() - w)
+        time.sleep(0.005)
+    assert still <= 2 and cap.frames - still >= 10
+    cap.close()
+
+
+@pytest.mark.skipif(not _renders(), reason="no OpenGL context (set MUJOCO_GL)")
+def test_mujoco_view_moves():
+    from rsf.model.layout import load_world
+    from rsf.sim.mujoco_cell import MujocoCell
+    world = load_world(CELL / "layouts" / "strict.yaml")
+    cell = MujocoCell(world)
+    v = overview(world, width=160, height=90)
+    cell.add_view(v)
+    a = cell.render("overview").copy()
+    cell.move_view("overview", (0.0, -3.0, 1.5), (0.0, 0.0, 1.0), 60.0)
+    b = cell.render("overview")
+    assert (np.abs(a.astype(int) - b.astype(int)).max(axis=2) > 10).mean() > 0.2
+    cell.close_views()

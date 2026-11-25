@@ -44,8 +44,10 @@ async function init() {
     b.onclick = () => show(n);
     nav.appendChild(b);
   }
-  if (names.length) show(params.get("stream") && names.includes(params.get("stream")) ? params.get("stream") : names[0]);
   setupGated(info.features || {});
+  if ((info.features || {}).camera) Camera.init($("frame"));
+  else $("camera").hidden = true;
+  if (names.length) show(params.get("stream") && names.includes(params.get("stream")) ? params.get("stream") : names[0]);
   listen();
 }
 
@@ -119,6 +121,7 @@ function show(name) {
   Viewer.stream = name;
   for (const b of $("streams").children) b.classList.toggle("on", b.textContent === name);
   Viewer.transports[Viewer.transport].attach(img, name);
+  if (typeof Camera !== "undefined" && $("camera") && !$("camera").hidden) Camera.attach(name).catch(() => {});
 }
 
 function setState(s) {
@@ -181,7 +184,11 @@ function addEvent(kind, e) {
 
 function listen() {
   const es = new EventSource(`/api/v1/stream?since=${Viewer.events}`);
-  es.addEventListener("status", (m) => renderStatus(JSON.parse(m.data)));
+  es.addEventListener("status", (m) => {
+    const snap = JSON.parse(m.data);
+    renderStatus(snap);
+    if (typeof Camera !== "undefined") Camera.onStatus((snap.status || {}).views);
+  });
   es.addEventListener("event", (m) => { const e = JSON.parse(m.data); Viewer.events = e.seq; addEvent(e.kind, e); });
   es.onerror = () => { if (!["done", "failed", "stopped", "interrupted"].includes($("state").textContent)) setState("disconnected"); };
 }

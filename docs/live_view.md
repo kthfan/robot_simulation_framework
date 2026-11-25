@@ -38,6 +38,7 @@ A run left on the GPU box by older versions (the port then reads *in use*):
 | `--live [HOST:]PORT` | off | serve the live view (host 127.0.0.1 unless given) |
 | `--live-view SPEC` | `overview` | a view: `overview` (the whole cell) or JSON `{"name", "eye", "target", "fov_deg", "width", "height"}` (m, deg, px); repeatable |
 | `--live-fps` | 5 | rendered frames per **wall-clock** second, all views together |
+| `--live-fps-interactive` | 20 | frames per second while a viewer moves a camera (and 1 s after) |
 | `--live-size W H` | 960 540 | size of views without their own |
 | `--live-pace X` | 0 | no faster than X × real time (0: as fast as it runs; MuJoCo runs faster than real time) |
 | `--live-hold S` | 0 | keep serving S s after the run (-1: until Ctrl-C) |
@@ -99,8 +100,11 @@ and names the mode to use: `--set render_mode='"step"'` on `sim_workflow.py`.
 
 Rendering does not change the run: MuJoCo gives bit-identical results with and
 without it (`tests/test_live.py`). In Isaac Sim 5.0 an app update rounds PhysX's float32
-state by at most an ULP (6e-8 rad, in every mode, pictures or not; `live_probe.py`):
-far below anything the judge measures; the checks allow 1e-6 rad. In Isaac the app update that renders does not
+state by an ULP (6e-8 rad, in every mode, pictures or not; `live_probe.py`), which like
+any perturbation grows a little along the run (6e-6 rad, ~6 µm at the flange after
+10 s): far below what the judge measures (tenths of mm). The checks bound the flange's
+difference at 0.05 mm; for a whole run, compare the reports of a run with and without
+`--live`. In Isaac the app update that renders does not
 step physics (`/app/player/playSimulations` off during it, as Isaac's own
 `SimulationContext.render`); `tests/test_isaac.py::test_live_view_renders_and_leaves_the_run`
 checks that and that the pictures show the arm move. **That test has to run on a GPU**
@@ -112,6 +116,46 @@ OMNI_KIT_ACCEPT_EULA=YES python -m pytest tests/test_isaac.py -k live_view -v
 ```
 
 Isaac Sim 5.0 (standalone, Python 3.11) and 6.2 (pip, Python 3.12) are both meant to work.
+
+## Moving the camera
+
+Every view's camera can be moved from the viewer. The camera is shared (one picture per
+view: everyone sees it where the last viewer put it) and needs no token (it does not
+touch the simulation). Click the picture first: keys go to it, not to the page.
+
+![camera controls and their help (?)](images/live_view_camera.png)
+
+| input | moves |
+|---|---|
+| W / S, A / D | forward / back, left / right: along the floor (the heading); *fly along the view* follows the view's pitch |
+| T / G | up / down (world vertical) |
+| Shift / Alt (held) | × 4 / × 0.25 |
+| [ / ] | speed down / up (also the *speed* slider, 0.05–5 m/s) |
+| drag (left button) | look around: right turns right, up looks up |
+| double-click | mouse look as in a first-person game (Pointer Lock: the pointer hides, moving the mouse turns the view, WASD walks); Esc ends it |
+| drag (right or middle button, Shift + left) | pan: the scene follows the pointer |
+| wheel | forward / back along the view |
+| Ctrl + wheel, trackpad pinch | zoom (field of view, 5–120°) |
+| R | reset the view (as the run started it) |
+| ? | help |
+
+*look* sets the mouse sensitivity, *invert Y* flips up and down; speed, sensitivity and
+these choices are kept by the browser. *Copy as --live-view* puts the current camera on
+the clipboard as an option for `sim_workflow.py` (a view to start from next time).
+
+How it works: the page computes the camera's pose from the input (keys every animation
+frame, so the speed does not depend on the frame rate) and sends it, absolute, at most
+~30 times a second (`POST /api/v1/views/<view>/pose`); the simulation applies it before
+its next frame, and draws at `--live-fps-interactive` while a camera moves (also when
+paused, when the run is over during `--live-hold`: the scene stands still, the camera
+moves). Every viewer follows the camera through the status (`views`). What you see lags
+the input by a frame and the network: about 0.1 s on a LAN at 20 frames/s. Moving
+cameras costs rendering only while it happens (MuJoCo without a GPU here: 16 frames/s,
+39 % of the time; Isaac RTX: ~9 ms per 640×360 frame).
+
+Browsers show an MJPEG frame only when the next one starts (Chrome: measured), so the
+server sends a new frame again 60 ms later unless a newer one came: a single frame (a
+camera moved while paused) shows within ~0.1 s instead of waiting.
 
 ## Control and the debug console
 
@@ -162,6 +206,9 @@ address bar). Programs send it as `Authorization: Bearer <token>`.
 | `GET /api/v1/stream` | Server-Sent Events: `status` snapshots (≤ `max_hz`, default 10) and `event` |
 | `GET /api/v1/video/<view>/mjpeg` | MJPEG (`?fps=` caps it for one viewer); headers `X-Frame-Seq`, `X-Sim-Time` per frame |
 | `GET /api/v1/video/<view>/frame.jpg` | the latest frame |
+| `GET /api/v1/views` | every view's camera: `eye`, `target`, `yaw`, `pitch` (deg), `fov_deg` |
+| `POST /api/v1/views/<view>/pose` | `{"eye": [x, y, z], "yaw": deg, "pitch": deg, "fov_deg": deg}` or `"target"`; missing parts stay |
+| `POST /api/v1/views/<view>/reset` | the view as the run started it |
 | `POST /api/v1/control` (token) | `{"action": "pause" \| "resume" \| "step" \| "pace" \| "stop", "dt": s, "value": x}` |
 | `POST /api/v1/debug/exec` (token) | `{"code": "...", "wait": 10}`: the job (`state`, `ok`, `value`, `output`, `error`, `t`) |
 | `GET /api/v1/debug/job/<id>`, `GET /api/v1/debug/log` (token) | a job still running; every job so far |

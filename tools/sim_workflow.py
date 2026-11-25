@@ -87,6 +87,7 @@ def start_live(a, world, wf, cell, traj, t_end):
     import numpy as np
 
     from rsf.live import control, debug
+    from rsf.live import views as live_views
     from rsf.live.capture import LiveCapture
     from rsf.live.hub import Hub
     from rsf.live.server import LiveServer, parse_address
@@ -121,7 +122,9 @@ def start_live(a, world, wf, cell, traj, t_end):
         console = debug.DebugConsole(hub)
         debug.register(server, console)
     cap = LiveCapture(hub, cell, views, fps=a.live_fps, pace=a.live_pace, segments=traj.get("segments", ()),
-                      t_end=t_stop, quality=a.live_quality, controller=ctl, console=console)
+                      t_end=t_stop, quality=a.live_quality, controller=ctl, console=console,
+                      fps_interactive=a.live_fps_interactive)
+    live_views.register(server, cap)
     if console is not None:
         console.ns.update(cell=cell, world=world, workflow=wf, traj=traj, hub=hub, capture=cap, np=np,
                           pause=lambda: ctl.command("pause"), resume=lambda: ctl.command("resume"),
@@ -166,11 +169,11 @@ def stop_live(a, server, cap, state="done", hold=True, **result):
         end = time.time() + (a.live_hold if a.live_hold > 0 else 1e12)
         try:
             while time.time() < end:
-                if cap.console is not None:      # debug code still runs, on this (the simulation) thread
-                    cap.console.pump()
-                time.sleep(0.05)
+                cap.idle()                       # debug code, camera moves: on this (the simulation) thread
+                time.sleep(0.02)
         except KeyboardInterrupt:
             pass
+    cap.close()
     server.close()
     print("[live] closed", flush=True)
 
@@ -191,6 +194,8 @@ def main(argv=None) -> int:
     lv.add_argument("--live-view", action="append", metavar="SPEC",
                     help="a view: 'overview' (default) or JSON {name, eye, target, fov_deg, width, height}; repeatable")
     lv.add_argument("--live-fps", type=float, default=5.0, help="rendered frames per wall-clock second (default 5)")
+    lv.add_argument("--live-fps-interactive", type=float, default=20.0,
+                    help="frames per second while a viewer moves a camera (default 20)")
     lv.add_argument("--live-size", type=int, nargs=2, metavar=("W", "H"), default=(960, 540))
     lv.add_argument("--live-pace", type=float, default=0.0,
                     help="no faster than this x real time (0: as fast as it runs)")

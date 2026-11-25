@@ -22,7 +22,24 @@ main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; pa
                   border-radius: 6px; padding: 4px 10px; cursor: pointer; }
 #streams button.on { border-color: var(--run); color: var(--run); }
 #frame { position: relative; background: #000; border-radius: 6px; overflow: hidden; }
-#img { display: block; width: 100%; height: auto; }
+#img { display: block; width: 100%; height: auto; user-select: none; -webkit-user-drag: none; }
+#frame { cursor: grab; outline: none; }
+#frame:focus { box-shadow: 0 0 0 2px var(--run); }
+#frame.locked { cursor: none; box-shadow: 0 0 0 2px var(--ok); }
+#hint { position: absolute; left: 8px; bottom: 8px; padding: 2px 8px; border-radius: 4px; font-size: 12px;
+        background: rgba(0, 0, 0, .55); color: #e6e8eb; pointer-events: none; opacity: 0; transition: opacity .2s; }
+#frame:hover #hint { opacity: 1; }
+#frame:focus #hint { opacity: 0; }
+#help { position: absolute; right: 8px; top: 8px; max-width: calc(100% - 16px); padding: 10px 12px; border-radius: 6px;
+        background: rgba(17, 20, 24, .92); color: #e6e8eb; font-size: 12px; cursor: default; }
+#help[hidden] { display: none; }
+#help h3 { margin: 0 0 6px; font-size: 13px; }
+#help td { padding: 1px 10px 1px 0; vertical-align: top; }
+#help td:first-child { white-space: nowrap; color: #8b949e; }
+#camera[hidden] { display: none; }
+#camera { display: flex; gap: 6px 12px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+#camera input[type=range] { width: 110px; vertical-align: middle; }
+#campose { flex-basis: 100%; font-size: 12px; font-variant-numeric: tabular-nums; }
 #nosignal { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #8b949e; }
 aside { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px; min-width: 0; }
 aside h3 { margin: 14px 0 6px; font-size: 13px; color: var(--muted); font-weight: 600; }

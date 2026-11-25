@@ -10,7 +10,8 @@ rendered every 0.5 s. Per mode: whether the pictures are blank, how much of the 
 changes (``changed_pct``: pixels differing by more than 10 levels between first and last
 frame; ``unchanged``: frames equal to the one before), how far USD (what the renderer
 draws) lags PhysX at the end (``usd_lag_m``), seconds per render, and whether rendering
-changed the run (more than 1e-6 rad, or the spread of two runs without it). PNGs of the
+changed the run (the flange by more than 0.05 mm), and whether moving the camera
+changes the picture (``camera_move_changed_pct``). PNGs of the
 first and last frame next to the report. The mode to use is the first with ``ok``: pass it as
 ``--set render_mode='"MODE"'`` to tools/sim_workflow.py (or make it the default).
 """
@@ -68,6 +69,20 @@ def one(mode: str, out_dir: Path) -> dict:
         r["usd_lag_m"] = round(cell.render_lag(), 5)          # at the end of the rendered run
     except Exception as e:  # noqa: BLE001
         r["usd_lag_m"] = repr(e)
+    try:                                                      # a viewer moves the camera (rsf.live.views)
+        before = cell.render("overview").copy()
+        cell.move_view("overview", (0.0, -3.0, 1.6), (0.0, 0.3, 0.9), 60.0)
+        after = None
+        for _ in range(3):                                    # the renderer may hand back the last frame once
+            after = cell.render("overview")
+            cell.move_view("overview", (0.0, -3.0, 1.6), (0.0, 0.3, 0.9), 60.0)
+        dd = np.abs(after.astype(int) - before.astype(int)).max(axis=2)
+        r["camera_move_changed_pct"] = round(100.0 * float((dd > 10).mean()), 2)
+        if after is not None:
+            from PIL import Image
+            Image.fromarray(after).save(out_dir / f"live_probe_{mode}_moved.png")
+    except Exception as e:  # noqa: BLE001
+        r["camera_move_changed_pct"] = repr(e)
     c = cell.run(traj, t_end=T_END)
     imgs = [f for _, f in frames if f is not None]
     r["frames"] = len(frames)
@@ -77,9 +92,12 @@ def one(mode: str, out_dir: Path) -> dict:
     spread = float(np.abs(a.q - c.q).max())
     r["q_spread_without_render_rad"] = spread
     r["q_change_with_render_rad"] = float(np.abs(a.q - b.q).max())
-    # PhysX is float32: an app update may round the state by an ULP (6e-8 rad at 0.5 rad,
-    # Isaac Sim 5.0); more than 1e-6 rad (1 um at 1 m) would be rendering changing the run
-    r["run_unchanged"] = r["q_change_with_render_rad"] <= max(1e-6, 2.0 * spread)
+    r["flange_change_with_render_mm"] = round(1000.0 * float(np.abs(a.flange[:, :3, 3] - b.flange[:, :3, 3]).max()), 5)
+    # PhysX is float32 and an app update rounds its state (Isaac Sim 5.0: an ULP, 6e-8 rad, in
+    # every render mode, pictures or not); like any perturbation it grows a little along the run
+    # (6e-6 rad, ~6 um, after 10 s). What matters is the flange against the judge's measures
+    # (tenths of mm): 0.05 mm is the bound.
+    r["run_unchanged"] = r["flange_change_with_render_mm"] <= 0.05
     if imgs:
         first, last = imgs[0], imgs[-1]
         r["mean_first"], r["mean_last"] = round(float(first.mean()), 1), round(float(last.mean()), 1)
@@ -96,8 +114,9 @@ def one(mode: str, out_dir: Path) -> dict:
         except Exception as e:  # noqa: BLE001
             r["png_error"] = repr(e)
     lag = r.get("usd_lag_m")
+    cm = r.get("camera_move_changed_pct")
     r["ok"] = bool(imgs and r["blank_frames"] == 0 and r.get("changed_pct", 0) > 1.0 and r["run_unchanged"]
-                   and (not isinstance(lag, float) or lag < 0.005))
+                   and (not isinstance(lag, float) or lag < 0.005) and isinstance(cm, float) and cm > 10.0)
     r["t_total"] = round(time.time() - t0, 1)
     return r
 

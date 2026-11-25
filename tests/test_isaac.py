@@ -77,10 +77,15 @@ def test_live_view_renders_and_leaves_the_run(setup):
     last = cell.render("overview")
     cap.finish()
     c = cell.run(traj)
-    # an app update may round PhysX's float32 state by an ULP (6e-8 rad, Isaac Sim 5.0): allow 1e-6 rad
-    tol = max(1e-6, 2.0 * float(np.abs(a.q - c.q).max()))
-    assert float(np.abs(a.q - b.q).max()) <= tol
+    # app updates round PhysX's float32 state (an ULP, Isaac Sim 5.0): the flange within 0.05 mm
+    assert float(np.abs(a.flange[:, :3, 3] - b.flange[:, :3, 3]).max()) <= max(5e-5, 2.0 * float(
+        np.abs(a.flange[:, :3, 3] - c.flange[:, :3, 3]).max()))
     assert first[0] is not None and first[0].shape == (270, 480, 3) and first[0].std() > 5
     d = np.abs(last.astype(int) - first[0].astype(int)).max(axis=2)
     assert (d > 10).mean() > 0.002                 # the arm moved in the picture
     assert hub.streams["overview"].seq >= 2
+    cell.move_view("overview", (0.0, -3.0, 1.6), (0.0, 0.3, 0.9), 60.0)      # a viewer moves the camera
+    for _ in range(3):
+        moved = cell.render("overview")
+        cell.move_view("overview", (0.0, -3.0, 1.6), (0.0, 0.3, 0.9), 60.0)
+    assert (np.abs(moved.astype(int) - last.astype(int)).max(axis=2) > 10).mean() > 0.1

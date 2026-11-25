@@ -15,8 +15,10 @@ or without it (tests/test_live.py, tests/test_isaac.py).
 from __future__ import annotations
 
 import bisect
+import math
 import threading
 import time
+from dataclasses import replace
 from typing import Iterable, Optional
 
 from rsf.live.hub import Hub, encode_jpeg
@@ -61,11 +63,17 @@ class _Encoder(threading.Thread):
 class LiveCapture:
     def __init__(self, hub: Hub, cell, views: Iterable, fps: float = 5.0, pace: float = 0.0,
                  segments: Iterable = (), t_end: Optional[float] = None, quality: int = 80,
-                 status_hz: float = 10.0, controller=None, console=None):
+                 status_hz: float = 10.0, controller=None, console=None, fps_interactive: float = 20.0):
         self.hub, self.cell = hub, cell
         self.ctl, self.console = controller, console      # rsf.live.control / rsf.live.debug (optional)
         self.views = list(views)
         self.fps, self.pace = float(fps), float(pace)
+        self.fps_interactive = max(float(fps_interactive), self.fps)   # while a viewer moves a camera
+        self.home = {v.name: v for v in self.views}          # the views as given (reset)
+        self._moves: dict = {}                               # view -> pending (eye, target, fov) from viewers
+        self._moves_lock = threading.Lock()
+        self._interact = -1e9                                # wall time of the last camera move
+        self._dirty = False                                  # a camera moved: draw at once
         self.segments = sorted((s for s in segments if "t0" in s), key=lambda s: s["t0"])
         self._t0s = [s["t0"] for s in self.segments]
         self.t_end = t_end
@@ -85,6 +93,64 @@ class LiveCapture:
         for v in self.views:
             cell.add_view(v)
             hub.stream(v.name, width=v.width, height=v.height, fov_deg=v.fov_deg, eye=v.eye, target=v.target)
+        hub.update(views={v.name: self.view_pose(v.name) for v in self.views})
+
+    # ── cameras (moved by viewers: rsf.live.views) ─────────────────────────
+    def view_pose(self, name: str) -> dict:
+        from rsf.sim.common import view_angles
+        v = next(x for x in self.views if x.name == name)
+        yaw, pitch = view_angles(v.eye, v.target)
+        return {"name": name, "eye": [round(x, 5) for x in v.eye], "target": [round(x, 5) for x in v.target],
+                "yaw": round(yaw, 4), "pitch": round(pitch, 4), "fov_deg": round(v.fov_deg, 3),
+                "width": v.width, "height": v.height}
+
+    def request_view(self, name: str, eye=None, target=None, yaw=None, pitch=None, fov_deg=None) -> dict:
+        """Move a view's camera (any thread): applied on the simulation thread before the
+        next frame. *eye* (m) with *target*, or with *yaw*/*pitch* (degrees); missing
+        parts stay. Returns the pose asked for."""
+        from rsf.sim.common import view_angles, view_forward
+        if name not in self.home:
+            raise KeyError(name)
+        with self._moves_lock:
+            cur = next(x for x in self.views if x.name == name)
+            e0, t0, f0 = self._moves.get(name, (cur.eye, cur.target, cur.fov_deg))
+            eye = e0 if eye is None else _vec3(eye, "eye")
+            if target is not None:
+                target = _vec3(target, "target")
+            else:
+                y0, p0 = view_angles(e0, t0)
+                y = y0 if yaw is None else _num(yaw, "yaw")
+                p = max(-89.9, min(89.9, p0 if pitch is None else _num(pitch, "pitch")))
+                target = tuple(float(a + b) for a, b in zip(eye, view_forward(y, p)))
+            fov = f0 if fov_deg is None else max(5.0, min(120.0, _num(fov_deg, "fov_deg")))
+            if max(abs(a - b) for a, b in zip(eye, target)) < 1e-9:
+                raise ValueError("eye and target coincide")
+            self._moves[name] = (tuple(eye), tuple(target), float(fov))
+            self._interact = time.time()
+        return {"name": name, "eye": list(eye), "target": list(target), "fov_deg": fov}
+
+    def reset_view(self, name: str) -> dict:
+        h = self.home[name]
+        return self.request_view(name, eye=h.eye, target=h.target, fov_deg=h.fov_deg)
+
+    def _apply_moves(self) -> None:
+        if not self._moves:
+            return
+        with self._moves_lock:
+            moves, self._moves = self._moves, {}
+        for name, (eye, target, fov) in moves.items():
+            self.cell.move_view(name, eye, target, fov)
+            i = next(k for k, x in enumerate(self.views) if x.name == name)
+            self.views[i] = replace(self.views[i], eye=eye, target=target, fov_deg=fov)
+            self.hub.stream(name, eye=eye, target=target, fov_deg=fov)
+        self._dirty = True
+        self.hub.update(views={v.name: self.view_pose(v.name) for v in self.views})
+
+    def _frame_due(self, now: float) -> bool:
+        if self._dirty:
+            return now - self._last_frame >= 1.0 / self.fps_interactive
+        rate = self.fps_interactive if now - self._interact < 1.0 else self.fps
+        return now - self._last_frame >= 1.0 / rate
 
     # ── frames ─────────────────────────────────────────────────────────────
     def render_all(self, t: Optional[float]) -> None:
@@ -100,6 +166,7 @@ class LiveCapture:
                 self._last_sig[v.name] = sig
             if img is not None:
                 self.enc.submit(v.name, img, t=None if t is None else round(float(t), 3))
+        self._dirty = False
         self.render_s += time.time() - w
         self.frames += 1
 
@@ -136,7 +203,8 @@ class LiveCapture:
             self._seg = name
             if seg:
                 self.hub.event("segment", name=name, segment_kind=seg.get("kind"), t0=seg["t0"], t1=seg.get("t1"))
-        if now - self._last_frame >= 1.0 / self.fps:
+        self._apply_moves()
+        if self._frame_due(now):
             self._last_frame = now
             self.render_all(t)
         if now - self._last_status >= self.status_dt:
@@ -154,24 +222,44 @@ class LiveCapture:
             self._pace0 = (time.time(), t)        # pacing restarts after a pause
 
     def idle(self, t=None) -> None:
-        """While the simulation waits (paused, or the run is over): run debug code, keep
-        the views coming."""
+        """While the simulation waits (paused, or the run is over): run debug code, and
+        draw when a camera moved (the scene itself stands still)."""
         if self.console is not None:
             self.console.pump(t)
+        self._apply_moves()
         now = time.time()
-        if now - self._last_frame >= 1.0 / self.fps:
+        if self._dirty and self._frame_due(now):
             self._last_frame = now
             self.render_all(t)
 
     def finish(self, state: str = "done", **result) -> None:
-        """The run is over: last frame, final status and a ``done`` (or other *state*) event."""
+        """The run is over: last frame, final status and a ``done`` (or other *state*) event.
+        The views stay (cameras can still move, :meth:`idle`) until :meth:`close`."""
         try:
             self.render_all(None)
         except Exception:  # noqa: BLE001  (a closing app may not render)
             pass
+        self.hub.update(state=state, blank_frames=self.blank, **result)
+        self.hub.event(state, **result)
+
+    def close(self) -> None:
         self.enc.flush_and_stop()
         close = getattr(self.cell, "close_views", None)
         if close:
             close()
-        self.hub.update(state=state, blank_frames=self.blank, **result)
-        self.hub.event(state, **result)
+
+
+def _num(x, what: str) -> float:
+    v = float(x)
+    if not math.isfinite(v):
+        raise ValueError(f"{what}: not a finite number")
+    return v
+
+
+def _vec3(x, what: str) -> tuple:
+    if not isinstance(x, (list, tuple)) or len(x) != 3:
+        raise ValueError(f"{what}: three numbers")
+    v = tuple(_num(a, what) for a in x)
+    if max(abs(a) for a in v) > 1000.0:
+        raise ValueError(f"{what}: beyond 1 km")
+    return v

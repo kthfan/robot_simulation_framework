@@ -140,6 +140,7 @@ class IsaacCell:
         self._prim_name = U.prim_name
         self._started = False
         self._views, self._annot = {}, {}            # rendered views (add_view / render)
+        self._cam_ops = {}                            # view -> (USD camera, its transform op)
         self._k = 0                                   # physics step (a render per step at most)
         self._rendered_k = None
 
@@ -188,18 +189,33 @@ class IsaacCell:
             UsdLux.DistantLight.Define(st, f"{root}/sun").CreateIntensityAttr(2500.0)
         cam = UsdGeom.Camera.Define(st, f"{root}/{self._prim_name(v.name)}")
         ha = 20.955                                    # mm, USD's default aperture
-        va = ha * v.height / v.width
         cam.CreateHorizontalApertureAttr(ha)
-        cam.CreateVerticalApertureAttr(va)
-        cam.CreateFocalLengthAttr(va / (2.0 * math.tan(math.radians(v.fov_deg) / 2.0)))
+        cam.CreateVerticalApertureAttr(ha * v.height / v.width)
         cam.CreateClippingRangeAttr(Gf.Vec2f(0.01, 100.0))
         xf = UsdGeom.Xformable(cam)
         xf.ClearXformOpOrder()
-        xf.AddTransformOp().Set(Gf.Matrix4d(*camera_pose(v.eye, v.target).T.ravel().tolist()))
+        self._cam_ops[v.name] = (cam, xf.AddTransformOp())
+        self._pose_camera(v)
         rp = rep.create.render_product(str(cam.GetPath()), (int(v.width), int(v.height)))
         ann = rep.AnnotatorRegistry.get_annotator("rgb")
         ann.attach([rp])
         self._annot[v.name] = ann
+
+    def _pose_camera(self, v) -> None:
+        from pxr import Gf
+        cam, op = self._cam_ops[v.name]
+        va = 20.955 * v.height / v.width
+        cam.GetFocalLengthAttr().Set(va / (2.0 * math.tan(math.radians(v.fov_deg) / 2.0)))
+        op.Set(Gf.Matrix4d(*camera_pose(v.eye, v.target).T.ravel().tolist()))
+
+    def move_view(self, name: str, eye, target, fov_deg=None) -> None:
+        """Move the view *name*'s camera (a USD camera: not physics); the next render draws it."""
+        v = self._views[name]
+        v = self._views[name] = replace(v, eye=tuple(map(float, eye)), target=tuple(map(float, target)),
+                                        fov_deg=float(v.fov_deg if fov_deg is None else fov_deg))
+        if name in self._cam_ops:
+            self._pose_camera(v)
+        self._rendered_k = None                        # draw again even if physics has not stepped
 
     def render(self, name: str):
         """The view *name* of the current state, ``(h, w, 3)`` uint8 RGB (``None`` while the
