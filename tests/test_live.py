@@ -341,3 +341,18 @@ def test_tls(tmp_path):
         assert errors == []
     finally:
         srv.close()
+
+
+def test_unchanged_frames_are_counted():
+    """A picture that never changes while the run goes on shows in the status."""
+    class Still(_FakeCell):
+        def render(self, name):
+            return np.full((24, 32, 3), 100, np.uint8)
+    hub = Hub()
+    cap = LiveCapture(hub, Still(), [View("v", (1, 0, 1), (0, 0, 0), width=32, height=24)], fps=1000.0,
+                      status_hz=1000.0)
+    for t in np.arange(0.0, 0.2, 0.02):
+        cap(float(t))
+        time.sleep(0.002)
+    assert hub.status["unchanged_frames"] == hub.status["frames"] - 1 >= 5
+    cap.finish()

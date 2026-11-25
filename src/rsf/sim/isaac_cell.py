@@ -54,6 +54,9 @@ class IsaacParams(SimParams):
     #: (app updates, timeline stopped). The app loop never steps physics in any of them
     #: (``/app/player/playSimulations`` off): ``run`` steps it. tools/isaac/live_probe.py compares them.
     render_mode: str = "play"
+    #: before a render, write the bodies' poses from PhysX to USD (``update_transformations``),
+    #: as Isaac's own physics step does when it steps PhysX directly: the renderer reads them there
+    render_sync: bool = True
 
 
 _APP = None
@@ -206,6 +209,8 @@ class IsaacCell:
             self._start()
         if self._rendered_k != self._k:
             self._timeline_for_render()
+            if self.p.render_sync:
+                self.sync_render()
             mode = self.p.render_mode
             for _ in range(max(1, int(self.p.render_updates))):
                 if mode == "step":
@@ -224,6 +229,28 @@ class IsaacCell:
         if img.ndim != 3 or img.size == 0:
             return None
         return img[..., :3].astype(np.uint8, copy=False)
+
+    def sync_render(self) -> None:
+        """PhysX's current body poses -> USD (what the renderer draws)."""
+        try:
+            self.physx.update_transformations(False, True, False, False)
+        except TypeError:                              # older signature
+            self.physx.update_transformations(False, True)
+
+    def render_lag(self, link: Optional[str] = None) -> float:
+        """How far (m) the USD pose of *link*'s body (default: the flange's) is from PhysX's:
+        about 0 when the renderer can see the run (with ``render_sync``)."""
+        import omni.usd
+        from pxr import Usd, UsdGeom
+        body, _ = self.links[link or self.flange]
+        name = self._prim_name(body)
+        st = omni.usd.get_context().get_stage()
+        prim = st.GetPrimAtPath(f"{self.robot_path}/{name}")
+        if not prim:
+            prim = next(p for p in Usd.PrimRange(st.GetPrimAtPath(self.robot_path)) if p.GetName() == name)
+        usd = np.array(UsdGeom.Xformable(prim).ComputeLocalToWorldTransform(Usd.TimeCode.Default())).T[:3, 3]
+        phys = np.asarray(self.art.get_link_transforms()[0][self.link_names.index(name)][:3], float)
+        return float(np.linalg.norm(usd - phys))
 
     def _timeline_for_render(self) -> None:
         if self.p.render_mode not in ("play", "step", "update"):

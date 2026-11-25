@@ -75,6 +75,8 @@ class LiveCapture:
         self.render_s = 0.0                      # wall time spent rendering
         self.frames = 0
         self.blank = 0                           # frames with nothing in them (all dark): a renderer problem
+        self.unchanged = 0                       # frames the same as the view's previous one (while running)
+        self._last_sig: dict = {}
         self._seg = None
         self._wall0 = self._sim0 = None
         self._pace0 = None                       # (wall, sim) pacing counts from: restarts on resume / new pace
@@ -91,6 +93,11 @@ class LiveCapture:
             img = self.cell.render(v.name)
             if img is None or int(img[::8, ::8].max()) < 8:
                 self.blank += 1
+            if img is not None and t is not None:
+                sig = img[::4, ::4].tobytes()
+                if self._last_sig.get(v.name) == sig:
+                    self.unchanged += 1
+                self._last_sig[v.name] = sig
             if img is not None:
                 self.enc.submit(v.name, img, t=None if t is None else round(float(t), 3))
         self.render_s += time.time() - w
@@ -139,7 +146,8 @@ class LiveCapture:
                             rtf=round((t - self._sim0) / wall, 3) if wall > 0 else None,
                             segment=name, segment_kind=seg.get("kind") if seg else None,
                             render_share=round(self.render_s / wall, 3) if wall > 0 else None,
-                            frames=self.frames, blank_frames=self.blank, dropped=self.enc.dropped)
+                            frames=self.frames, blank_frames=self.blank, unchanged_frames=self.unchanged,
+                            dropped=self.enc.dropped)
         if self.console is not None:
             self.console.pump(t)
         if self.ctl is not None and self.ctl.gate(t, lambda: self.idle(t)):

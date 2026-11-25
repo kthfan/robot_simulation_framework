@@ -80,9 +80,13 @@ steps). `IsaacParams.render_mode`:
 | `step` | `rep.orchestrator.step(rt_subframes=1, delta_time=0)` | Isaac Sim 5.0: works, 44 ms |
 | `update` | an app update, the timeline stopped | Isaac Sim 5.0: **no pictures** (Replicator captures only while the timeline plays) |
 
-In all of them the app loop never steps physics (`/app/player/playSimulations` is off
+Before each render the bodies' poses go from PhysX to USD (`render_sync`, PhysX's
+`update_transformations`, as Isaac's own physics step does when it steps PhysX directly):
+the renderer draws USD, which stepping PhysX alone does not update. In all of them the app loop never steps physics (`/app/player/playSimulations` is off
 from the start; `run` steps it). Black pictures (the viewer counts *blank frames*)
-mean the mode does not suit this Isaac Sim. Find the one that does, on the GPU computer:
+mean the mode does not suit this Isaac Sim; a picture that never changes while the run goes
+on (*unchanged frames* close to *frames*) means the renderer does not get the poses
+(`cell.render_lag()` in the console: USD vs PhysX, m). Find the one that does, on the GPU computer:
 
 ```bash
 python tools/isaac/live_probe.py            # or: ~/isaacsim/python.sh tools/isaac/live_probe.py

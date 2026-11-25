@@ -140,6 +140,7 @@ function renderStatus(snap) {
     ["render share", s.render_share !== undefined && s.render_share !== null ? `${fmt(100 * s.render_share, 0)} %` : "–"],
     ["wall", s.wall_s !== undefined ? `${fmt(s.wall_s, 0)} s` : "–"],
     ["paused", s.paused ? (s.step_until ? `stepping to ${fmt(s.step_until, 2)} s` : "yes") : "no"],
+    ["unchanged frames", s.frames ? `${s.unchanged_frames ?? 0} / ${s.frames}` : "–"],
     ["blank frames", s.blank_frames ? `${s.blank_frames} (renderer: see docs/live_view.md)` : "0"],
   ];
   const dl = $("status");

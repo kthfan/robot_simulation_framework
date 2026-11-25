@@ -1,14 +1,17 @@
 """Which way of rendering the live views works with this Isaac Sim, and what it costs.
 
-    python tools/isaac/live_probe.py [--modes play,step,update] [--out reports/isaac/live_probe.json]
+    python tools/isaac/live_probe.py [--modes play,play-nosync,step] [--out reports/isaac/live_probe.json]
     (Isaac Sim's standalone Python: ~/isaacsim/python.sh tools/isaac/live_probe.py)
 
-Each mode (``IsaacParams.render_mode``) runs in its own process (an Isaac app per mode):
-a 2 s move of joints 1-2 replayed three times on the strict cell, the second time with
-the overview view rendered every 0.1 s. Per mode: whether the pictures are blank,
-whether they show the arm move, seconds per render, and whether rendering changed
-the run (more than 1e-6 rad, or the spread of two runs without it). PNGs of the first and last
-frame next to the report. The mode to use is the first with ``ok``: pass it as
+Each mode (``IsaacParams.render_mode``; ``-nosync``: without ``render_sync``) runs in its
+own process (an Isaac app per mode): the first 10 s of the strict plan (the arm goes from
+home to the incoming rack) replayed three times, the second time with the overview view
+rendered every 0.5 s. Per mode: whether the pictures are blank, how much of the picture
+changes (``changed_pct``: pixels differing by more than 10 levels between first and last
+frame; ``unchanged``: frames equal to the one before), how far USD (what the renderer
+draws) lags PhysX at the end (``usd_lag_m``), seconds per render, and whether rendering
+changed the run (more than 1e-6 rad, or the spread of two runs without it). PNGs of the
+first and last frame next to the report. The mode to use is the first with ``ok``: pass it as
 ``--set render_mode='"MODE"'`` to tools/sim_workflow.py (or make it the default).
 """
 from __future__ import annotations
@@ -28,6 +31,8 @@ os.environ.setdefault("OMNI_KIT_ACCEPT_EULA", "YES")
 
 
 def one(mode: str, out_dir: Path) -> dict:
+    import gzip
+
     import numpy as np
 
     from rsf.model.layout import load_world
@@ -39,27 +44,31 @@ def one(mode: str, out_dir: Path) -> dict:
     world = load_world(ROOT / "cells/tm_tray/layouts/strict.yaml")
     wf = Workflow.from_file(ROOT / "cells/tm_tray/workflows/inspect_and_sort.yaml")
     occ = wf.initial_occupancy(world, wf.resolve_sets(world))
-    cell = IsaacCell(world, occ, IsaacParams(render_mode=mode))
+    rmode, _, flag = mode.partition("-")
+    cell = IsaacCell(world, occ, IsaacParams(render_mode=rmode, render_sync=flag != "nosync"))
     r["t_app"] = round(time.time() - t0, 1)
     cell.add_view(overview(world, width=640, height=360))
-    names = [f"joint_{i}" for i in range(1, 7)] + ["left_gripper_joint", "right_gripper_joint"]
-    q0, q1 = [0.0] * 6 + [0.0577] * 2, [0.6, -0.3] + [0.0] * 4 + [0.0577] * 2
-    traj = {"joint_names": names, "t": [0.0, 2.0], "q": [q0, q1], "qd": [[0.0] * 8] * 2}
+    traj = json.loads(gzip.decompress((ROOT / "cells/tm_tray/plans/strict_cycle1.json.gz").read_bytes()))
+    T_END = 10.0
     w = time.time()
     warm = cell.render("overview")                    # starts the cell, first frame (shaders)
     r["t_first_frame"] = round(time.time() - w, 1)
     r["first_frame"] = None if warm is None else {"shape": list(warm.shape), "max": int(warm.max())}
-    a = cell.run(traj)
+    a = cell.run(traj, t_end=T_END)
     frames, times = [], []
 
     def hook(t, *_):
-        if t >= 0 and (not frames or t - frames[-1][0] >= 0.1 - 1e-9):
+        if t >= 0 and (not frames or t - frames[-1][0] >= 0.5 - 1e-9):
             s = time.time()
             img = cell.render("overview")
             times.append(time.time() - s)
             frames.append((t, None if img is None else img.copy()))
-    b = cell.run(traj, on_sample=hook)
-    c = cell.run(traj)
+    b = cell.run(traj, t_end=T_END, on_sample=hook)
+    try:
+        r["usd_lag_m"] = round(cell.render_lag(), 5)          # at the end of the rendered run
+    except Exception as e:  # noqa: BLE001
+        r["usd_lag_m"] = repr(e)
+    c = cell.run(traj, t_end=T_END)
     imgs = [f for _, f in frames if f is not None]
     r["frames"] = len(frames)
     r["none_frames"] = sum(f is None for _, f in frames)
@@ -74,7 +83,10 @@ def one(mode: str, out_dir: Path) -> dict:
     if imgs:
         first, last = imgs[0], imgs[-1]
         r["mean_first"], r["mean_last"] = round(float(first.mean()), 1), round(float(last.mean()), 1)
-        r["moved"] = round(float(np.abs(last.astype(int) - first.astype(int)).mean()), 2)
+        d = np.abs(last.astype(int) - first.astype(int)).max(axis=2)
+        r["moved"] = round(float(d.mean()), 2)
+        r["changed_pct"] = round(100.0 * float((d > 10).mean()), 2)
+        r["unchanged"] = sum(np.array_equal(x, y) for x, y in zip(imgs, imgs[1:]))
         try:
             from PIL import Image
             for tag, img in (("first", first), ("last", last)):
@@ -83,14 +95,16 @@ def one(mode: str, out_dir: Path) -> dict:
                 r[f"png_{tag}"] = str(p)
         except Exception as e:  # noqa: BLE001
             r["png_error"] = repr(e)
-    r["ok"] = bool(imgs and r["blank_frames"] == 0 and r.get("moved", 0) > 0.5 and r["run_unchanged"])
+    lag = r.get("usd_lag_m")
+    r["ok"] = bool(imgs and r["blank_frames"] == 0 and r.get("changed_pct", 0) > 1.0 and r["run_unchanged"]
+                   and (not isinstance(lag, float) or lag < 0.005))
     r["t_total"] = round(time.time() - t0, 1)
     return r
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--modes", default="play,step,update")
+    ap.add_argument("--modes", default="play,play-nosync,step")
     ap.add_argument("--out", default="reports/isaac/live_probe.json")
     ap.add_argument("--one", help=argparse.SUPPRESS)
     a = ap.parse_args()

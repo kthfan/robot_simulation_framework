@@ -73,6 +73,7 @@ def test_live_view_renders_and_leaves_the_run(setup):
         if first[0] is None and t >= 0.0:
             first[0] = cell.render("overview")
     b = cell.run(traj, on_sample=hook)
+    assert cell.render_lag() < 0.005               # what the renderer draws is where PhysX has the arm
     last = cell.render("overview")
     cap.finish()
     c = cell.run(traj)
@@ -80,5 +81,6 @@ def test_live_view_renders_and_leaves_the_run(setup):
     tol = max(1e-6, 2.0 * float(np.abs(a.q - c.q).max()))
     assert float(np.abs(a.q - b.q).max()) <= tol
     assert first[0] is not None and first[0].shape == (270, 480, 3) and first[0].std() > 5
-    assert np.abs(last.astype(int) - first[0].astype(int)).mean() > 0.5      # the arm moved in the picture
+    d = np.abs(last.astype(int) - first[0].astype(int)).max(axis=2)
+    assert (d > 10).mean() > 0.002                 # the arm moved in the picture
     assert hub.streams["overview"].seq >= 2
