@@ -124,6 +124,30 @@ def test_capture_frames_segments_and_status():
     assert [e["kind"] for e in hub.events][:2] == ["warmup", "run_start"]
 
 
+def test_encoder_thread_stops():
+    """The encoder is a Thread: its own fields must not shadow Thread's (Python 3.11 calls
+    ``self._stop()`` in ``join``)."""
+    from rsf.live.capture import _Encoder
+    e = _Encoder(Hub(), 80)
+    assert not isinstance(getattr(e, "_stop", None), bool)
+    e.start()
+    e.flush_and_stop()
+    assert not e.is_alive()
+
+
+def test_blank_frames_are_counted():
+    hub = Hub()
+
+    class Dark(_FakeCell):
+        def render(self, name):
+            return np.zeros((24, 32, 3), np.uint8)
+    cap = LiveCapture(hub, Dark(), [View("v", (1, 0, 1), (0, 0, 0), width=32, height=24)], fps=1000.0)
+    cap.warmup()
+    cap(0.0)
+    cap.finish()
+    assert hub.status["blank_frames"] == 3              # warmup, the sample, the last frame
+
+
 def test_capture_paces_to_real_time():
     hub = Hub()
     cap = LiveCapture(hub, _FakeCell(), [], pace=1.0)

@@ -55,16 +55,44 @@ bounded; the status shows it (`render share`). JPEG encoding runs on another thr
   and `--live-size` trade picture for speed. With a cold shader cache the first frame
   takes minutes: it is rendered before the run starts (`warmup` event), not in it.
 
+### Isaac: which render mode (`render_mode`)
+
+How the views are drawn without stepping physics differs between Isaac Sim versions
+(Replicator fills its annotators while the timeline plays, or when its orchestrator
+steps). `IsaacParams.render_mode`:
+
+| mode | how | |
+|---|---|---|
+| `play` (default) | the timeline plays; an app update renders | as Isaac's own `SimulationContext` |
+| `step` | `rep.orchestrator.step(rt_subframes=1, delta_time=0)` | |
+| `update` | an app update, the timeline stopped | |
+
+In all of them the app loop never steps physics (`/app/player/playSimulations` is off
+from the start; `run` steps it). Black pictures (the viewer counts *blank frames*)
+mean the mode does not suit this Isaac Sim. Find the one that does, on the GPU computer:
+
+```bash
+python tools/isaac/live_probe.py            # or: ~/isaacsim/python.sh tools/isaac/live_probe.py
+```
+
+It tries each mode in its own Isaac app (about a minute each), writes
+`reports/isaac/live_probe.json` (blank frames, whether the arm moves in the picture,
+seconds per render, whether the run changed) and PNGs of the first and last frame,
+and names the mode to use: `--set render_mode='"step"'` on `sim_workflow.py`.
+
 Rendering does not change the run: MuJoCo gives bit-identical results with and
 without it (`tests/test_live.py`). In Isaac the app update that renders does not
 step physics (`/app/player/playSimulations` off during it, as Isaac's own
 `SimulationContext.render`); `tests/test_isaac.py::test_live_view_renders_and_leaves_the_run`
 checks that and that the pictures show the arm move. **That test has to run on a GPU**
-(not yet run: no GPU here):
+(not yet run: no GPU here). With Isaac Sim's own Python (the standalone package's
+`python.sh`; the test is skipped by a Python without `isaacsim`):
 
 ```bash
 OMNI_KIT_ACCEPT_EULA=YES python -m pytest tests/test_isaac.py -k live_view -v
 ```
+
+Isaac Sim 5.0 (standalone, Python 3.11) and 6.2 (pip, Python 3.12) are both meant to work.
 
 ## API (`rsf.live`, `/api/v1`)
 

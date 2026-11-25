@@ -73,11 +73,13 @@ function renderStatus(snap) {
     ["frames/s", fmt(st.fps, 1)],
     ["render share", s.render_share !== undefined && s.render_share !== null ? `${fmt(100 * s.render_share, 0)} %` : "–"],
     ["wall", s.wall_s !== undefined ? `${fmt(s.wall_s, 0)} s` : "–"],
+    ["blank frames", s.blank_frames ? `${s.blank_frames} (renderer: see docs/live_view.md)` : "0"],
   ];
   const dl = $("status");
   dl.replaceChildren(...rows.flatMap(([k, v]) => {
     const dt = document.createElement("dt"); dt.textContent = k;
     const dd = document.createElement("dd"); dd.textContent = v;
+    if (k === "blank frames" && v !== "0") dd.className = "fail";
     return [dt, dd];
   }));
   if (s.transfers) renderResult(s);

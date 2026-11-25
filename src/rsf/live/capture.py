@@ -30,7 +30,7 @@ class _Encoder(threading.Thread):
         self.hub, self.quality = hub, quality
         self._slot: dict = {}
         self._cv = threading.Condition()
-        self._stop = False
+        self._halt = False        # (not _stop: threading.Thread has a _stop method)
         self.dropped = 0
 
     def submit(self, name: str, rgb, **meta):
@@ -43,9 +43,9 @@ class _Encoder(threading.Thread):
     def run(self):
         while True:
             with self._cv:
-                while not self._slot and not self._stop:
+                while not self._slot and not self._halt:
                     self._cv.wait()
-                if not self._slot and self._stop:
+                if not self._slot and self._halt:
                     return
                 work, self._slot = self._slot, {}
             for name, (rgb, meta) in work.items():
@@ -53,7 +53,7 @@ class _Encoder(threading.Thread):
 
     def flush_and_stop(self, timeout: float = 5.0):
         with self._cv:
-            self._stop = True
+            self._halt = True
             self._cv.notify()
         self.join(timeout)
 
@@ -73,6 +73,7 @@ class LiveCapture:
         self.enc.start()
         self.render_s = 0.0                      # wall time spent rendering
         self.frames = 0
+        self.blank = 0                           # frames with nothing in them (all dark): a renderer problem
         self._seg = None
         self._wall0 = self._sim0 = None
         self._last_frame = self._last_status = -1e9
@@ -85,6 +86,8 @@ class LiveCapture:
         w = time.time()
         for v in self.views:
             img = self.cell.render(v.name)
+            if img is None or int(img[::8, ::8].max()) < 8:
+                self.blank += 1
             if img is not None:
                 self.enc.submit(v.name, img, t=None if t is None else round(float(t), 3))
         self.render_s += time.time() - w
@@ -130,7 +133,7 @@ class LiveCapture:
                             rtf=round((t - self._sim0) / wall, 3) if wall > 0 else None,
                             segment=name, segment_kind=seg.get("kind") if seg else None,
                             render_share=round(self.render_s / wall, 3) if wall > 0 else None,
-                            frames=self.frames, dropped=self.enc.dropped)
+                            frames=self.frames, blank_frames=self.blank, dropped=self.enc.dropped)
 
     def finish(self, state: str = "done", **result) -> None:
         """The run is over: last frame, final status and a ``done`` (or other *state*) event."""
@@ -142,5 +145,5 @@ class LiveCapture:
         close = getattr(self.cell, "close_views", None)
         if close:
             close()
-        self.hub.update(state=state, **result)
+        self.hub.update(state=state, blank_frames=self.blank, **result)
         self.hub.event(state, **result)

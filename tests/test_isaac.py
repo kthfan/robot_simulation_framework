@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-pytest.importorskip("isaacsim")
+pytest.importorskip("isaacsim", reason="needs Isaac Sim's Python: the Isaac venv, or python.sh of the standalone package")
 
 from rsf.model.layout import load_world  # noqa: E402
 from rsf.model.workflow import Workflow  # noqa: E402

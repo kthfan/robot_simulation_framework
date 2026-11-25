@@ -49,6 +49,11 @@ class IsaacParams(SimParams):
     max_joint_velocity: float = 1.0e6  #: deg/s or m/s: PhysX joint speed limit (off)
     headless: bool = True
     render_updates: int = 1            #: app updates per rendered frame of the views (RTX converges over more)
+    #: how views are rendered: "play" (the timeline plays, app updates render; Replicator
+    #: captures while the timeline plays), "step" (``rep.orchestrator.step``), "update"
+    #: (app updates, timeline stopped). The app loop never steps physics in any of them
+    #: (``/app/player/playSimulations`` off): ``run`` steps it. tools/isaac/live_probe.py compares them.
+    render_mode: str = "play"
 
 
 _APP = None
@@ -145,9 +150,13 @@ class IsaacCell:
         import omni.usd
         ctx = omni.usd.get_context()
         ctx.open_stage(str(self.usd_path))
+        import carb.settings
+        carb.settings.get_settings().set_bool("/app/player/playSimulations", False)   # run() steps physics
         _APP.update()
         for v in self._views.values():                # cameras and lights before physics starts
             self._make_view(v)
+        if self._views:
+            self._timeline_for_render()
         self.physx, self.sim_if, self.view = start_physics(ctx, self.p.timestep)
         self.art = self.view.create_articulation_view(self.robot_path)
         meta = self.art.shared_metatype
@@ -191,27 +200,39 @@ class IsaacCell:
 
     def render(self, name: str):
         """The view *name* of the current state, ``(h, w, 3)`` uint8 RGB (``None`` while the
-        renderer has nothing yet). One app update renders every view; physics does not
-        step in it (``/app/player/playSimulations`` off, as Isaac's ``SimulationContext.render``)."""
+        renderer has nothing yet). One render (``render_mode``) draws every view; physics
+        does not step in it (``/app/player/playSimulations`` is off from the start)."""
         if not self._started:
             self._start()
         if self._rendered_k != self._k:
-            import carb.settings
-            s = carb.settings.get_settings()
-            key = "/app/player/playSimulations"
-            was = s.get(key)
-            s.set_bool(key, False)
-            try:
-                for _ in range(max(1, int(self.p.render_updates))):
+            self._timeline_for_render()
+            mode = self.p.render_mode
+            for _ in range(max(1, int(self.p.render_updates))):
+                if mode == "step":
+                    import omni.replicator.core as rep
+                    try:
+                        rep.orchestrator.step(rt_subframes=1, delta_time=0.0, pause_timeline=True)
+                    except TypeError:                  # older Replicator signatures
+                        rep.orchestrator.step()
+                else:
                     _APP.update()
-            finally:
-                if was is not None:
-                    s.set_bool(key, bool(was))
             self._rendered_k = self._k
-        img = np.asarray(self._annot[name].get_data())
+        img = self._annot[name].get_data()
+        if isinstance(img, dict):                      # some Replicator versions wrap it
+            img = img.get("data")
+        img = np.asarray(img)
         if img.ndim != 3 or img.size == 0:
             return None
         return img[..., :3].astype(np.uint8, copy=False)
+
+    def _timeline_for_render(self) -> None:
+        if self.p.render_mode not in ("play", "step", "update"):
+            raise ValueError(f"render_mode {self.p.render_mode!r}: play, step or update")
+        if self.p.render_mode == "play":
+            import omni.timeline
+            tl = omni.timeline.get_timeline_interface()
+            if not tl.is_playing():
+                tl.play()
 
     def _path_name(self, i: int):
         from pxr import PhysicsSchemaTools
