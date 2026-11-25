@@ -11,6 +11,7 @@ judge reads, and the reference a joint servo follows.
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -89,3 +90,43 @@ def T_of(pos, mat) -> np.ndarray:
     T[:3, :3] = np.asarray(mat).reshape(3, 3)
     T[:3, 3] = pos
     return T
+
+
+@dataclass
+class View:
+    """A camera a backend renders (``cell.add_view`` / ``cell.render``): from *eye*
+    toward *target* (world, m), *up* the world z, *fov_deg* vertical, *width* x *height* px."""
+    name: str
+    eye: tuple
+    target: tuple
+    fov_deg: float = 45.0
+    width: int = 960
+    height: int = 540
+
+    @classmethod
+    def from_spec(cls, spec, world=None) -> "View":
+        """A view from a dict (the fields above), or a preset name (``overview``)."""
+        if isinstance(spec, str):
+            if spec != "overview":
+                raise ValueError(f"unknown view preset {spec!r} (overview, or a dict)")
+            return overview(world)
+        spec = dict(spec)
+        if "name" not in spec or "eye" not in spec or "target" not in spec:
+            raise ValueError("a view needs name, eye and target")
+        return cls(**{**spec, "eye": tuple(map(float, spec["eye"])), "target": tuple(map(float, spec["target"]))})
+
+
+def overview(world, name: str = "overview", direction=(1.0, -1.0, 0.6), **kw) -> View:
+    """The whole cell: the robot base and every feature in view, seen from *direction*."""
+    pts = [np.asarray(world.robot.base, float)[:3, 3]] + [np.asarray(f.T, float)[:3, 3] for f in world.features()]
+    pts = np.array(pts)
+    lo, hi = pts.min(axis=0), pts.max(axis=0)
+    hi[2] = max(hi[2], lo[2] + 1.0)                     # the arm reaches above the features
+    c = 0.5 * (lo + hi)
+    r = 0.5 * float(np.linalg.norm(hi - lo)) + 0.15
+    v = View(name, (0.0, 0.0, 0.0), tuple(float(x) for x in c), **kw)
+    d = np.asarray(direction, float)
+    d /= np.linalg.norm(d)
+    dist = r / math.sin(math.radians(0.5 * v.fov_deg * min(1.0, v.width / v.height)))
+    v.eye = tuple(float(x) for x in c + dist * d)
+    return v

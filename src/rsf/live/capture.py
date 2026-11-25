@@ -1,0 +1,143 @@
+"""From a running cell to the hub: a callable for the cells' ``on_sample`` hook.
+
+    cap = LiveCapture(hub, cell, [View.from_spec("overview", world)], fps=5, segments=traj["segments"])
+    cap.warmup()                       # first frame before the run (RTX compiles shaders here)
+    rep = cell.run(traj, on_sample=cap)
+    cap.finish(ok=...)
+
+Rendering happens on the simulation thread (the renderers need it: Isaac's app loop,
+MuJoCo's GL context), at most *fps* times per wall-clock second, every view in one
+go; JPEG encoding happens on a worker thread, so a frame costs the simulation only
+its render. The cell must offer ``add_view(view)`` and ``render(name) -> (h, w, 3)
+uint8 RGB or None``. Rendering only reads the simulation: the run is the same with
+or without it (tests/test_live.py, tests/test_isaac.py).
+"""
+from __future__ import annotations
+
+import bisect
+import threading
+import time
+from typing import Iterable, Optional
+
+from rsf.live.hub import Hub, encode_jpeg
+
+
+class _Encoder(threading.Thread):
+    """The latest image of each stream -> JPEG -> the hub (older images are dropped)."""
+
+    def __init__(self, hub: Hub, quality: int):
+        super().__init__(name="rsf-live-jpeg", daemon=True)
+        self.hub, self.quality = hub, quality
+        self._slot: dict = {}
+        self._cv = threading.Condition()
+        self._stop = False
+        self.dropped = 0
+
+    def submit(self, name: str, rgb, **meta):
+        with self._cv:
+            if name in self._slot:
+                self.dropped += 1
+            self._slot[name] = (rgb, meta)
+            self._cv.notify()
+
+    def run(self):
+        while True:
+            with self._cv:
+                while not self._slot and not self._stop:
+                    self._cv.wait()
+                if not self._slot and self._stop:
+                    return
+                work, self._slot = self._slot, {}
+            for name, (rgb, meta) in work.items():
+                self.hub.streams[name].publish(encode_jpeg(rgb, self.quality), **meta)
+
+    def flush_and_stop(self, timeout: float = 5.0):
+        with self._cv:
+            self._stop = True
+            self._cv.notify()
+        self.join(timeout)
+
+
+class LiveCapture:
+    def __init__(self, hub: Hub, cell, views: Iterable, fps: float = 5.0, pace: float = 0.0,
+                 segments: Iterable = (), t_end: Optional[float] = None, quality: int = 80,
+                 status_hz: float = 10.0):
+        self.hub, self.cell = hub, cell
+        self.views = list(views)
+        self.fps, self.pace = float(fps), float(pace)
+        self.segments = sorted((s for s in segments if "t0" in s), key=lambda s: s["t0"])
+        self._t0s = [s["t0"] for s in self.segments]
+        self.t_end = t_end
+        self.status_dt = 1.0 / status_hz
+        self.enc = _Encoder(hub, quality)
+        self.enc.start()
+        self.render_s = 0.0                      # wall time spent rendering
+        self.frames = 0
+        self._seg = None
+        self._wall0 = self._sim0 = None
+        self._last_frame = self._last_status = -1e9
+        for v in self.views:
+            cell.add_view(v)
+            hub.stream(v.name, width=v.width, height=v.height, fov_deg=v.fov_deg, eye=v.eye, target=v.target)
+
+    # ── frames ─────────────────────────────────────────────────────────────
+    def render_all(self, t: Optional[float]) -> None:
+        w = time.time()
+        for v in self.views:
+            img = self.cell.render(v.name)
+            if img is not None:
+                self.enc.submit(v.name, img, t=None if t is None else round(float(t), 3))
+        self.render_s += time.time() - w
+        self.frames += 1
+
+    def warmup(self) -> None:
+        """One frame of every view before the run (the scene as it starts)."""
+        self.hub.update(state="warmup")
+        w = time.time()
+        self.render_all(None)
+        self.hub.event("warmup", wall_s=round(time.time() - w, 2))
+        self.hub.update(state="ready")
+
+    # ── the hook ───────────────────────────────────────────────────────────
+    def segment_at(self, t: float):
+        i = bisect.bisect_right(self._t0s, t) - 1
+        return self.segments[i] if 0 <= i < len(self.segments) and t <= self.segments[i].get("t1", t) else None
+
+    def __call__(self, t, *args) -> None:
+        now = time.time()
+        if self._wall0 is None:
+            self._wall0, self._sim0 = now, t
+            self.hub.update(state="running", t_start_wall=now)
+            self.hub.event("run_start", t=float(t))
+        if self.pace > 0:                         # no faster than pace x real time
+            ahead = self._wall0 + (t - self._sim0) / self.pace - now
+            if ahead > 0:
+                time.sleep(ahead)
+                now = time.time()
+        seg = self.segment_at(t)
+        name = seg["name"] if seg else None
+        if name != self._seg:
+            self._seg = name
+            if seg:
+                self.hub.event("segment", name=name, kind=seg.get("kind"), t0=seg["t0"], t1=seg.get("t1"))
+        if now - self._last_frame >= 1.0 / self.fps:
+            self._last_frame = now
+            self.render_all(t)
+        if now - self._last_status >= self.status_dt:
+            self._last_status = now
+            wall = now - self._wall0
+            self.hub.update(t=round(float(t), 3), t_end=self.t_end, wall_s=round(wall, 2),
+                            rtf=round((t - self._sim0) / wall, 3) if wall > 0 else None,
+                            segment=name, segment_kind=seg.get("kind") if seg else None,
+                            render_share=round(self.render_s / wall, 3) if wall > 0 else None,
+                            frames=self.frames, dropped=self.enc.dropped)
+
+    def finish(self, state: str = "done", **result) -> None:
+        """The run is over: last frame, final status and a ``done`` (or other *state*) event."""
+        try:
+            self.render_all(None)
+        except Exception:  # noqa: BLE001  (a closing app may not render)
+            pass
+        self.enc.flush_and_stop()
+        self.hub.update(state=state, **result)
+        self.hub.event(state, **result)
