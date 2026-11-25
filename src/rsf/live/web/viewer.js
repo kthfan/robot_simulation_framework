@@ -28,6 +28,7 @@ async function init() {
   const params = new URLSearchParams(location.search);
   const info = await (await fetch("/api/v1/info")).json();
   const i = info.info || {};
+  Viewer.info = i;
   $("run").textContent = [i.backend, i.layout, i.plan].filter(Boolean).join(" · ");
   const names = Object.keys(info.streams);
   const want = params.get("transport");
@@ -44,7 +45,72 @@ async function init() {
     nav.appendChild(b);
   }
   if (names.length) show(params.get("stream") && names.includes(params.get("stream")) ? params.get("stream") : names[0]);
+  setupGated(info.features || {});
   listen();
+}
+
+// ── control and console (only when the run enabled them; both need the token) ──
+function token() { return $("token").value.trim(); }
+
+async function post(path, body) {
+  const r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json",
+    "Authorization": `Bearer ${token()}` }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+  return j;
+}
+
+function setupGated(features) {
+  if (!features.control && !features.debug) return;
+  $("auth").hidden = false;
+  const m = location.hash.match(/token=([^&]+)/);
+  let saved = null;
+  try { saved = sessionStorage.getItem("rsf-live-token"); } catch (e) { /* storage blocked */ }
+  $("token").value = m ? decodeURIComponent(m[1]) : (saved || "");
+  if (m) history.replaceState(null, "", location.pathname + location.search);    // keep it out of the address bar
+  $("token").addEventListener("change", () => { try { sessionStorage.setItem("rsf-live-token", token()); } catch (e) { /* */ } });
+  try { if (token()) sessionStorage.setItem("rsf-live-token", token()); } catch (e) { /* */ }
+  if (features.control) {
+    $("controls").hidden = false;
+    const pace = String(Viewer.info.pace ?? 0), sel = $("pace");
+    if (![...sel.options].some((o) => o.value === pace)) sel.add(new Option(`${pace}×`, pace));
+    sel.value = pace;
+    for (const b of $("controls").querySelectorAll("button")) {
+      b.onclick = async () => {
+        const body = { action: b.dataset.act };
+        if (b.dataset.dt) body.dt = Number(b.dataset.dt);
+        if (body.action === "stop" && !confirm("Stop the run? It ends without judging.")) return;
+        try { await post("/api/v1/control", body); $("ctlmsg").textContent = ""; }
+        catch (e) { $("ctlmsg").textContent = e.message; }
+      };
+    }
+    $("pace").onchange = () => post("/api/v1/control", { action: "pace", value: Number($("pace").value) })
+      .catch((e) => { $("ctlmsg").textContent = e.message; });
+  }
+  if (features.debug) {
+    $("console").hidden = false;
+    const run = async () => {
+      const code = $("code").value;
+      if (!code.trim()) return;
+      $("runmsg").textContent = "running…";
+      try {
+        let j = await post("/api/v1/debug/exec", { code, wait: 10 });
+        while (j.state !== "done") {             // queued behind a long step: poll
+          await new Promise((r) => setTimeout(r, 500));
+          const r = await fetch(`/api/v1/debug/job/${j.id}`, { headers: { "Authorization": `Bearer ${token()}` } });
+          j = await r.json();
+        }
+        const parts = [`>>> ${code}`];
+        if (j.output) parts.push(j.output.replace(/\n$/, ""));
+        if (j.value !== null && j.value !== undefined) parts.push(j.value);
+        if (j.error) parts.push(j.error);
+        $("out").textContent = parts.join("\n") + "\n" + $("out").textContent;
+        $("runmsg").textContent = `${j.ok ? "ok" : "error"} (${j.seconds} s, t=${j.t ?? "–"})`;
+      } catch (e) { $("runmsg").textContent = e.message; }
+    };
+    $("run").onclick = run;
+    $("code").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(); } });
+  }
 }
 
 function show(name) {
@@ -63,7 +129,7 @@ function setState(s) {
 
 function renderStatus(snap) {
   const s = snap.status || {};
-  setState(s.state || "?");
+  setState(s.paused && s.state === "running" ? "paused" : (s.state || "?"));
   const st = (snap.streams || {})[Viewer.stream] || {};
   const rows = [
     ["sim time", s.t !== undefined ? `${fmt(s.t)} s` + (s.t_end ? ` / ${fmt(s.t_end)} s` : "") : "–"],
@@ -73,6 +139,7 @@ function renderStatus(snap) {
     ["frames/s", fmt(st.fps, 1)],
     ["render share", s.render_share !== undefined && s.render_share !== null ? `${fmt(100 * s.render_share, 0)} %` : "–"],
     ["wall", s.wall_s !== undefined ? `${fmt(s.wall_s, 0)} s` : "–"],
+    ["paused", s.paused ? (s.step_until ? `stepping to ${fmt(s.step_until, 2)} s` : "yes") : "no"],
     ["blank frames", s.blank_frames ? `${s.blank_frames} (renderer: see docs/live_view.md)` : "0"],
   ];
   const dl = $("status");
@@ -115,7 +182,7 @@ function listen() {
   const es = new EventSource(`/api/v1/stream?since=${Viewer.events}`);
   es.addEventListener("status", (m) => renderStatus(JSON.parse(m.data)));
   es.addEventListener("event", (m) => { const e = JSON.parse(m.data); Viewer.events = e.seq; addEvent(e.kind, e); });
-  es.onerror = () => { if (!["done", "failed"].includes($("state").textContent)) setState("disconnected"); };
+  es.onerror = () => { if (!["done", "failed", "stopped"].includes($("state").textContent)) setState("disconnected"); };
 }
 
 init().catch((e) => { setState("error"); $("run").textContent = String(e); });

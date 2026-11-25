@@ -205,3 +205,124 @@ def test_mujoco_views_leave_the_run_unchanged():
     assert shots[0].shape == (180, 320, 3) and shots[0].std() > 10
     assert np.abs(shots[-1].astype(int) - shots[0].astype(int)).mean() > 0.5        # the arm moved
     assert hub.streams["overview"].seq > 10
+
+
+# ── control and the debug console ──────────────────────────────────────────
+def _post(c, path, body, token=None):
+    import urllib.error
+    import urllib.request
+    req = urllib.request.Request(c.url + path, json.dumps(body).encode(), {"Content-Type": "application/json"})
+    if token:
+        req.add_header("Authorization", f"Bearer {token}")
+    try:
+        with c._open(req, timeout=10) as r:
+            return r.status, json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        return e.code, json.loads(e.read())
+
+
+def test_gated_routes_need_the_token():
+    from rsf.live import control, debug
+    hub = Hub()
+    srv = LiveServer(hub, "127.0.0.1", 0, token="s3cret").start()
+    try:
+        c = LiveClient(srv.url)
+        assert _post(c, "/api/v1/control", {"action": "pause"})[0] == 404        # not enabled on this run
+        ctl, con = control.Controller(hub), debug.DebugConsole(hub)
+        control.register(srv, ctl)
+        debug.register(srv, con)
+        assert set(c.info()["features"]) == {"control", "debug"}
+        assert _post(c, "/api/v1/control", {"action": "pause"})[0] == 401
+        assert _post(c, "/api/v1/control", {"action": "pause"}, "wrong")[0] == 401
+        assert _post(c, "/api/v1/debug/exec", {"code": "1"}, "wrong")[0] == 401
+        assert _post(c, "/api/v1/control", {"action": "pause"}, "s3cret") == (200, {"paused": True, "until": None,
+                                                                                   "pace": None, "stop": False})
+        assert _post(c, "/api/v1/control", {"action": "jump"}, "s3cret")[0] == 400
+        threading.Thread(target=lambda: (time.sleep(0.2), con.pump(1.5)), daemon=True).start()
+        code, j = _post(c, "/api/v1/debug/exec", {"code": "x = 6 * 7\nprint('hi')\nx + t", "wait": 5}, "s3cret")
+        assert code == 200 and j["state"] == "done" and j["ok"] and j["value"] == "43.5" and j["output"] == "hi\n"
+        assert [e["kind"] for e in hub.events][-1] == "debug" and con.log[0]["code"].startswith("x = 6")
+    finally:
+        srv.close()
+    srv2 = LiveServer(Hub(), "127.0.0.1", 0).start()                       # no token: gated routes are off
+    try:
+        @srv2.route("POST", r"/api/v1/x", auth=True)
+        def x(req, m):
+            req.send_json({})
+        assert _post(LiveClient(srv2.url), "/api/v1/x", {}, "anything")[0] == 403
+    finally:
+        srv2.close()
+
+
+def test_debug_console_errors_and_exits_do_not_escape():
+    from rsf.live.debug import DebugConsole
+    con = DebugConsole(Hub(), {"k": 2})
+    jobs = [con.submit(c) for c in ("k * 3", "1 / 0", "raise SystemExit(5)", "print('o', end='')")]
+    assert con.pump(0.0) == 4
+    r = [con.jobs[j["id"]] for j in jobs]
+    assert r[0]["value"] == "6" and r[0]["ok"]
+    assert not r[1]["ok"] and "ZeroDivisionError" in r[1]["error"]
+    assert not r[2]["ok"] and "SystemExit" in r[2]["error"]
+    assert r[3]["ok"] and r[3]["output"] == "o" and r[3]["value"] is None
+
+
+def test_pause_step_resume_stop_hold_the_run():
+    """A paused run waits between samples (debug code still runs), a step runs dt and
+    pauses again, stop ends the run."""
+    from rsf.live.control import Controller, RunStopped
+    from rsf.live.debug import DebugConsole
+    hub = Hub()
+    ctl = Controller(hub)
+    con = DebugConsole(hub)
+    cap = LiveCapture(hub, _FakeCell(), [View("v", (1, 0, 1), (0, 0, 0), width=32, height=24)], fps=50.0,
+                      controller=ctl, console=con)
+    seen = []
+    ctl.command("pause")
+
+    def driver():
+        time.sleep(0.2)
+        assert seen == [0.0]                       # held at the first sample
+        j = con.submit("t")
+        assert con.wait(j["id"], 2.0)["value"] == "0.0"       # code runs while paused
+        ctl.command("step", dt=0.1)
+        time.sleep(0.2)
+        assert seen[-1] == pytest.approx(0.1)       # stepped 0.1 s, then held
+        ctl.command("resume")
+        time.sleep(0.1)
+        ctl.command("stop")
+    th = threading.Thread(target=driver)
+    th.start()
+    with pytest.raises(RunStopped):
+        for k in range(100000):
+            t = round(k * 0.02, 6)
+            seen.append(t)
+            cap(t)
+            time.sleep(0.001)
+    th.join()
+    assert seen[-1] > 0.1 and ctl.paused_s > 0.15
+    assert [e["kind"] for e in hub.events if e["kind"] in ("paused", "control")][:3] == ["control", "paused", "control"]
+    cap.finish("stopped")
+
+
+def test_tls(tmp_path):
+    """--live-cert/--live-key: the same API over HTTPS."""
+    import shutil
+    import ssl
+    import subprocess
+    import urllib.request
+    if not shutil.which("openssl"):
+        pytest.skip("no openssl")
+    cert, key = tmp_path / "c.pem", tmp_path / "k.pem"
+    subprocess.run(["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1", "-subj", "/CN=localhost",
+                    "-keyout", str(key), "-out", str(cert)], check=True, capture_output=True)
+    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    ctx.load_cert_chain(cert, key)
+    srv = LiveServer(Hub(), "127.0.0.1", 0, ssl_context=ctx).start()
+    try:
+        assert srv.url.startswith("https://")
+        cctx = ssl.create_default_context(cafile=str(cert))
+        op = urllib.request.build_opener(urllib.request.ProxyHandler({}), urllib.request.HTTPSHandler(context=cctx))
+        with op.open(srv.url + "api/v1/info", timeout=10) as r:
+            assert json.loads(r.read())["api"] == "rsf.live/1"
+    finally:
+        srv.close()

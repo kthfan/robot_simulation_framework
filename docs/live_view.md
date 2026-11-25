@@ -35,6 +35,11 @@ computer only (127.0.0.1). From another computer, either:
 | `--live-hold S` | 0 | keep serving S s after the run (-1: until Ctrl-C) |
 | `--live-quality` | 80 | JPEG quality |
 
+| `--live-control` | off | pause / resume / step / pace / stop from the viewer (token) |
+| `--live-debug` | off | a Python console in the running simulation (token; implies `--live-control`) |
+| `--live-cert F --live-key F` | | serve HTTPS (PEM certificate and key) |
+| `--debugpy [HOST:]PORT` | off | listen for a debugger (VS Code *Remote Attach*; host 127.0.0.1 unless given); `--debugpy-wait` waits for it |
+
 Example of a second view, from above the table:
 `--live-view '{"name": "top", "eye": [0.0, 0.3, 3.0], "target": [0.0, 0.3, 0.8], "fov_deg": 40}'`.
 
@@ -63,9 +68,9 @@ steps). `IsaacParams.render_mode`:
 
 | mode | how | |
 |---|---|---|
-| `play` (default) | the timeline plays; an app update renders | as Isaac's own `SimulationContext` |
-| `step` | `rep.orchestrator.step(rt_subframes=1, delta_time=0)` | |
-| `update` | an app update, the timeline stopped | |
+| `play` (default) | the timeline plays; an app update renders | as Isaac's own `SimulationContext`; Isaac Sim 5.0: works, 7.5 ms per 640×360 frame |
+| `step` | `rep.orchestrator.step(rt_subframes=1, delta_time=0)` | Isaac Sim 5.0: works, 44 ms |
+| `update` | an app update, the timeline stopped | Isaac Sim 5.0: **no pictures** (Replicator captures only while the timeline plays) |
 
 In all of them the app loop never steps physics (`/app/player/playSimulations` is off
 from the start; `run` steps it). Black pictures (the viewer counts *blank frames*)
@@ -81,7 +86,9 @@ seconds per render, whether the run changed) and PNGs of the first and last fram
 and names the mode to use: `--set render_mode='"step"'` on `sim_workflow.py`.
 
 Rendering does not change the run: MuJoCo gives bit-identical results with and
-without it (`tests/test_live.py`). In Isaac the app update that renders does not
+without it (`tests/test_live.py`). In Isaac Sim 5.0 an app update rounds PhysX's float32
+state by at most an ULP (6e-8 rad, in every mode, pictures or not; `live_probe.py`):
+far below anything the judge measures; the checks allow 1e-6 rad. In Isaac the app update that renders does not
 step physics (`/app/player/playSimulations` off during it, as Isaac's own
 `SimulationContext.render`); `tests/test_isaac.py::test_live_view_renders_and_leaves_the_run`
 checks that and that the pictures show the arm move. **That test has to run on a GPU**
@@ -94,6 +101,44 @@ OMNI_KIT_ACCEPT_EULA=YES python -m pytest tests/test_isaac.py -k live_view -v
 
 Isaac Sim 5.0 (standalone, Python 3.11) and 6.2 (pip, Python 3.12) are both meant to work.
 
+## Control and the debug console
+
+`--live-control` adds Pause, Resume, Step (0.1 s, 1 s), a pace choice and Stop to the
+viewer; `--live-debug` adds a Python console. Both need a token: printed where the run
+starts (or set with `RSF_LIVE_TOKEN`), entered in the viewer or passed in its address
+(`http://host:8765/#token=...`; the page keeps it for the tab and removes it from the
+address bar). Programs send it as `Authorization: Bearer <token>`.
+
+* **Pause / step** hold the simulation between two samples (0.02 s): nothing in the
+  run changes (the first strict transfer paused, stepped and resumed gives the same
+  report). Frames keep coming while paused. *Stop* ends the run without judging
+  (`state: stopped`, exit code 3).
+* **The console** runs code in the simulation process, on the simulation thread, at
+  the next sample or while paused (Isaac Sim and MuJoCo can only be called there).
+  At hand: `cell`, `world`, `workflow`, `traj`, `hub`, `capture`, `np`, `t` (the
+  sample's time), `pause()`, `step(dt)`, `resume()`; names you define stay for the
+  next call. The last expression's value comes back (like a REPL), with the output.
+  E.g. the joints in degrees: `np.round(np.degrees(cell.d.qpos[:6]), 2)` (MuJoCo) or
+  `cell.art.get_dof_positions()` (Isaac). It also runs while `--live-hold` keeps the
+  server after the run.
+* **What it means:** the console is full access to the computer as the user running
+  the simulation (files, network, processes), for anyone with the token. It is off
+  unless asked for; every call is logged (event `debug`, with the code, and the run's
+  report: `meta.live_debug`, `tainted: true`: code may have changed the run, so its
+  verdict is not an acceptance result). Code that never returns holds the simulation:
+  nothing can interrupt it from outside; end the process.
+* **Network:** the token protects the routes, but over plain HTTP it can be read on
+  the network: on a network you do not trust, use an SSH tunnel (`--view`) or HTTPS
+  (`--live-cert`/`--live-key`, e.g. `openssl req -x509 -newkey rsa:2048 -nodes -days 365
+  -subj /CN=gpu-box -keyout key.pem -out cert.pem`). Without the token header a page
+  from another site cannot call these routes (a custom header needs a CORS preflight,
+  which the server does not grant).
+* **`--debugpy`** is a real debugger (breakpoints, stepping through code) for VS Code.
+  It has no password at all: it listens on 127.0.0.1 unless told otherwise, reach it
+  through an SSH tunnel (`ssh -L 5678:127.0.0.1:5678 gpu-box`). A breakpoint on the
+  simulation thread stops the simulation and the frames (the viewer keeps its status).
+  Needs `pip install debugpy` in the simulator's Python.
+
 ## API (`rsf.live`, `/api/v1`)
 
 | endpoint | |
@@ -105,6 +150,12 @@ Isaac Sim 5.0 (standalone, Python 3.11) and 6.2 (pip, Python 3.12) are both mean
 | `GET /api/v1/stream` | Server-Sent Events: `status` snapshots (≤ `max_hz`, default 10) and `event` |
 | `GET /api/v1/video/<view>/mjpeg` | MJPEG (`?fps=` caps it for one viewer); headers `X-Frame-Seq`, `X-Sim-Time` per frame |
 | `GET /api/v1/video/<view>/frame.jpg` | the latest frame |
+| `POST /api/v1/control` (token) | `{"action": "pause" \| "resume" \| "step" \| "pace" \| "stop", "dt": s, "value": x}` |
+| `POST /api/v1/debug/exec` (token) | `{"code": "...", "wait": 10}`: the job (`state`, `ok`, `value`, `output`, `error`, `t`) |
+| `GET /api/v1/debug/job/<id>`, `GET /api/v1/debug/log` (token) | a job still running; every job so far |
+
+`/api/v1/info` lists the run's `features` (`control`, `debug`). Without them the
+routes do not exist (404); with a wrong token, 401.
 
 From Python (standard library only):
 
@@ -137,5 +188,7 @@ cell (Isaac / MuJoCo) ── add_view(View) / render(name) ──► LiveCapture
   server lists its transports in `/api/v1/info`; the viewer has a matching table
   (`Viewer.transports` in `viewer.js`). WebRTC's media is UDP: it needs the two computers
   to reach each other directly (not through the SSH tunnel).
-* **Endpoints** (control, recording, plots, a debug console) are routes added with
-  `LiveServer.route`; the hub carries any status field and any event kind.
+* **Endpoints** are routes added with `LiveServer.route` (`auth=True` for the token);
+  the hub carries any status field and any event kind. Control (`rsf.live.control`) and
+  the console (`rsf.live.debug`) are built that way: a module with a `register(server, ...)`
+  and a hook the capture calls on the simulation thread.

@@ -13,7 +13,8 @@ header { display: flex; gap: 12px; align-items: center; padding: 8px 16px; borde
 .pill { padding: 2px 10px; border-radius: 10px; border: 1px solid var(--line); }
 .pill.running { color: var(--run); border-color: var(--run); }
 .pill.done { color: var(--ok); border-color: var(--ok); }
-.pill.failed, .pill.error, .pill.disconnected { color: var(--fail); border-color: var(--fail); }
+.pill.paused { color: var(--text); border-style: dashed; }
+.pill.failed, .pill.error, .pill.stopped, .pill.disconnected { color: var(--fail); border-color: var(--fail); }
 main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; padding: 16px; }
 @media (max-width: 800px) { main { grid-template-columns: minmax(0, 1fr); } }
 #streams { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
@@ -31,3 +32,15 @@ dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 #events { margin: 0; padding-left: 0; list-style: none; max-height: 40vh; overflow: auto; font-size: 12px; }
 #events li { padding: 2px 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
 .ok { color: var(--ok); } .fail { color: var(--fail); }
+#controls, #auth, #console { margin-top: 10px; }
+#controls { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+#controls[hidden], #auth[hidden], #console[hidden] { display: none; }
+button, select, input, textarea { font: inherit; color: var(--text); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 6px; }
+button { padding: 4px 10px; cursor: pointer; }
+button.danger { color: var(--fail); border-color: var(--fail); }
+#console h3 { margin: 14px 0 6px; font-size: 13px; font-weight: 600; }
+textarea { width: 100%; padding: 8px; font-family: ui-monospace, monospace; font-size: 13px; }
+.row { display: flex; gap: 10px; align-items: center; margin: 6px 0; }
+pre#out { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px;
+  max-height: 40vh; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; margin: 0; }

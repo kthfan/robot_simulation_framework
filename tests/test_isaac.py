@@ -76,7 +76,8 @@ def test_live_view_renders_and_leaves_the_run(setup):
     last = cell.render("overview")
     cap.finish()
     c = cell.run(traj)
-    tol = max(1e-9, 2.0 * float(np.abs(a.q - c.q).max()))          # run-to-run spread without rendering
+    # an app update may round PhysX's float32 state by an ULP (6e-8 rad, Isaac Sim 5.0): allow 1e-6 rad
+    tol = max(1e-6, 2.0 * float(np.abs(a.q - c.q).max()))
     assert float(np.abs(a.q - b.q).max()) <= tol
     assert first[0] is not None and first[0].shape == (270, 480, 3) and first[0].std() > 5
     assert np.abs(last.astype(int) - first[0].astype(int)).mean() > 0.5      # the arm moved in the picture

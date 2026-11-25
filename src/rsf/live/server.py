@@ -12,10 +12,13 @@
 ========================================  ====================================================
 
 Further endpoints are added with :meth:`LiveServer.route` (a regex on the path, a
-handler taking the request handler and the match), so features need no change here.
+handler taking the request handler and the match), so features need no change here;
+``auth=True`` routes need the server's token (``Authorization: Bearer <token>``), and
+answer 403 when the server has none (the feature is off). ``ssl_context`` serves HTTPS.
 """
 from __future__ import annotations
 
+import hmac
 import json
 import mimetypes
 import re
@@ -39,10 +42,13 @@ def parse_address(spec, default_host: str = "127.0.0.1") -> tuple:
 
 
 class LiveServer:
-    def __init__(self, hub: Hub, host: str = "127.0.0.1", port: int = 8765):
+    def __init__(self, hub: Hub, host: str = "127.0.0.1", port: int = 8765, token: str = None,
+                 ssl_context=None):
         self.hub = hub
-        self.routes: list = []                    # (method, compiled regex, handler)
+        self.routes: list = []                    # (method, compiled regex, handler, auth)
         self.transports = ["mjpeg", "jpeg"]
+        self.features: dict = {}                  # name -> description, listed in /api/v1/info
+        self.token = token
         self._add_defaults()
         server = self
 
@@ -50,6 +56,9 @@ class LiveServer:
             live = server
         self.httpd = ThreadingHTTPServer((host, port), Handler)
         self.httpd.daemon_threads = True
+        self.tls = ssl_context is not None
+        if ssl_context is not None:
+            self.httpd.socket = ssl_context.wrap_socket(self.httpd.socket, server_side=True)
         self._thread = None
 
     @property
@@ -59,16 +68,23 @@ class LiveServer:
     @property
     def url(self) -> str:
         h, p = self.address
-        return f"http://{'localhost' if h in ('127.0.0.1', '0.0.0.0', '::') else h}:{p}/"
+        return f"{'https' if self.tls else 'http'}://{'localhost' if h in ('127.0.0.1', '0.0.0.0', '::') else h}:{p}/"
 
-    def route(self, method: str, pattern: str):
+    def route(self, method: str, pattern: str, auth: bool = False):
         """Decorator: ``handler(req, match)`` for *method* on paths matching *pattern*
         (anchored). ``req`` is the :class:`http.server.BaseHTTPRequestHandler` with
-        ``send_json``, ``send_bytes``, ``query`` and ``body`` helpers."""
+        ``send_json``, ``send_bytes``, ``query``, ``body`` and ``json_body()`` helpers.
+        *auth*: only with the token."""
         def deco(fn):
-            self.routes.append((method.upper(), re.compile(pattern + r"\Z"), fn))
+            self.routes.append((method.upper(), re.compile(pattern + r"\Z"), fn, auth))
             return fn
         return deco
+
+    def authorized(self, req) -> bool:
+        if not self.token:
+            return False
+        h = req.headers.get("Authorization", "")
+        return h.startswith("Bearer ") and hmac.compare_digest(h[7:].strip().encode(), self.token.encode())
 
     def start(self) -> "LiveServer":
         self._thread = threading.Thread(target=self.httpd.serve_forever, name="rsf-live", daemon=True)
@@ -96,7 +112,7 @@ class LiveServer:
         def info(req, m):
             snap = hub.snapshot()
             req.send_json({"api": API, "info": hub.info, "streams": snap["streams"], "transports": self.transports,
-                           "status": snap["status"]})
+                           "features": self.features, "status": snap["status"]})
 
         @self.route("GET", r"/api/v1/status")
         def status(req, m):
@@ -192,9 +208,13 @@ class _Handler(BaseHTTPRequestHandler):
         self.query = {k: v[-1] for k, v in parse_qs(u.query).items()}
         n = int(self.headers.get("Content-Length") or 0)
         self.body = self.rfile.read(n) if n else b""
-        for meth, rx, fn in self.live.routes:
+        for meth, rx, fn, auth in self.live.routes:
             m = rx.match(u.path)
             if m and meth == method:
+                if auth and not self.live.authorized(self):
+                    return self.send_json({"error": "this needs the token (Authorization: Bearer ...)"
+                                           if self.live.token else "not enabled on this run"},
+                                          401 if self.live.token else 403)
                 try:
                     return fn(self, m)
                 except (BrokenPipeError, ConnectionResetError):
@@ -216,6 +236,9 @@ class _Handler(BaseHTTPRequestHandler):
             self.send_header(k, str(v))
         self.end_headers()
         self.wfile.write(data)
+
+    def json_body(self) -> dict:
+        return json.loads(self.body or b"{}")
 
     def send_json(self, obj, code: int = 200):
         self.send_bytes(json.dumps(obj, default=float).encode(), "application/json", code=code)

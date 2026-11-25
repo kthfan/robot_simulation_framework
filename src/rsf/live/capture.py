@@ -61,8 +61,9 @@ class _Encoder(threading.Thread):
 class LiveCapture:
     def __init__(self, hub: Hub, cell, views: Iterable, fps: float = 5.0, pace: float = 0.0,
                  segments: Iterable = (), t_end: Optional[float] = None, quality: int = 80,
-                 status_hz: float = 10.0):
+                 status_hz: float = 10.0, controller=None, console=None):
         self.hub, self.cell = hub, cell
+        self.ctl, self.console = controller, console      # rsf.live.control / rsf.live.debug (optional)
         self.views = list(views)
         self.fps, self.pace = float(fps), float(pace)
         self.segments = sorted((s for s in segments if "t0" in s), key=lambda s: s["t0"])
@@ -76,6 +77,8 @@ class LiveCapture:
         self.blank = 0                           # frames with nothing in them (all dark): a renderer problem
         self._seg = None
         self._wall0 = self._sim0 = None
+        self._pace0 = None                       # (wall, sim) pacing counts from: restarts on resume / new pace
+        self._pace_v = None
         self._last_frame = self._last_status = -1e9
         for v in self.views:
             cell.add_view(v)
@@ -112,8 +115,11 @@ class LiveCapture:
             self._wall0, self._sim0 = now, t
             self.hub.update(state="running", t_start_wall=now)
             self.hub.event("run_start", t=float(t))
-        if self.pace > 0:                         # no faster than pace x real time
-            ahead = self._wall0 + (t - self._sim0) / self.pace - now
+        pace = self.ctl.pace if self.ctl is not None and self.ctl.pace is not None else self.pace
+        if self._pace0 is None or pace != self._pace_v:
+            self._pace0, self._pace_v = (now, t), pace
+        if pace > 0:                              # no faster than pace x real time
+            ahead = self._pace0[0] + (t - self._pace0[1]) / pace - now
             if ahead > 0:
                 time.sleep(ahead)
                 now = time.time()
@@ -128,12 +134,26 @@ class LiveCapture:
             self.render_all(t)
         if now - self._last_status >= self.status_dt:
             self._last_status = now
-            wall = now - self._wall0
-            self.hub.update(t=round(float(t), 3), t_end=self.t_end, wall_s=round(wall, 2),
+            wall = now - self._wall0 - (self.ctl.paused_s if self.ctl is not None else 0.0)
+            self.hub.update(t=round(float(t), 3), t_end=self.t_end, wall_s=round(now - self._wall0, 2),
                             rtf=round((t - self._sim0) / wall, 3) if wall > 0 else None,
                             segment=name, segment_kind=seg.get("kind") if seg else None,
                             render_share=round(self.render_s / wall, 3) if wall > 0 else None,
                             frames=self.frames, blank_frames=self.blank, dropped=self.enc.dropped)
+        if self.console is not None:
+            self.console.pump(t)
+        if self.ctl is not None and self.ctl.gate(t, lambda: self.idle(t)):
+            self._pace0 = (time.time(), t)        # pacing restarts after a pause
+
+    def idle(self, t=None) -> None:
+        """While the simulation waits (paused, or the run is over): run debug code, keep
+        the views coming."""
+        if self.console is not None:
+            self.console.pump(t)
+        now = time.time()
+        if now - self._last_frame >= 1.0 / self.fps:
+            self._last_frame = now
+            self.render_all(t)
 
     def finish(self, state: str = "done", **result) -> None:
         """The run is over: last frame, final status and a ``done`` (or other *state*) event."""

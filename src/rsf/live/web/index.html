@@ -16,6 +16,27 @@
   <section id="video">
     <nav id="streams"></nav>
     <div id="frame"><img id="img" alt="live view"><div id="nosignal">waiting for frames…</div></div>
+    <div id="controls" hidden>
+      <button data-act="pause">Pause</button>
+      <button data-act="resume">Resume</button>
+      <button data-act="step" data-dt="0.1">Step 0.1 s</button>
+      <button data-act="step" data-dt="1">Step 1 s</button>
+      <label>pace <select id="pace">
+        <option value="0">as fast as it runs</option><option value="1">1× real time</option>
+        <option value="0.5">0.5×</option><option value="0.25">0.25×</option></select></label>
+      <button data-act="stop" class="danger">Stop run</button>
+      <span id="ctlmsg" class="muted"></span>
+    </div>
+    <div id="auth" hidden>
+      <label>token <input id="token" type="password" autocomplete="off" spellcheck="false"></label>
+      <span class="muted">needed for control and the console (it was printed where the run started)</span>
+    </div>
+    <div id="console" hidden>
+      <h3>Python console <span class="muted">(runs in the simulation, between physics steps; Ctrl+Enter)</span></h3>
+      <textarea id="code" rows="5" spellcheck="false" placeholder="cell, world, traj, hub, np, t; pause(), step(0.1), resume()"></textarea>
+      <div class="row"><button id="run">Run</button><span id="runmsg" class="muted"></span></div>
+      <pre id="out"></pre>
+    </div>
   </section>
   <aside>
     <dl id="status"></dl>

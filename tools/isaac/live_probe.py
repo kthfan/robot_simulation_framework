@@ -7,7 +7,7 @@ Each mode (``IsaacParams.render_mode``) runs in its own process (an Isaac app pe
 a 2 s move of joints 1-2 replayed three times on the strict cell, the second time with
 the overview view rendered every 0.1 s. Per mode: whether the pictures are blank,
 whether they show the arm move, seconds per render, and whether rendering changed
-the run (against the spread of the two runs without it). PNGs of the first and last
+the run (more than 1e-6 rad, or the spread of two runs without it). PNGs of the first and last
 frame next to the report. The mode to use is the first with ``ok``: pass it as
 ``--set render_mode='"MODE"'`` to tools/sim_workflow.py (or make it the default).
 """
@@ -68,7 +68,9 @@ def one(mode: str, out_dir: Path) -> dict:
     spread = float(np.abs(a.q - c.q).max())
     r["q_spread_without_render_rad"] = spread
     r["q_change_with_render_rad"] = float(np.abs(a.q - b.q).max())
-    r["run_unchanged"] = r["q_change_with_render_rad"] <= max(1e-9, 2.0 * spread)
+    # PhysX is float32: an app update may round the state by an ULP (6e-8 rad at 0.5 rad,
+    # Isaac Sim 5.0); more than 1e-6 rad (1 um at 1 m) would be rendering changing the run
+    r["run_unchanged"] = r["q_change_with_render_rad"] <= max(1e-6, 2.0 * spread)
     if imgs:
         first, last = imgs[0], imgs[-1]
         r["mean_first"], r["mean_last"] = round(float(first.mean()), 1), round(float(last.mean()), 1)
