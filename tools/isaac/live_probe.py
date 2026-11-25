@@ -1,6 +1,6 @@
 """Which way of rendering the live views works with this Isaac Sim, and what it costs.
 
-    python tools/isaac/live_probe.py [--modes play,play-nosync,step] [--out reports/isaac/live_probe.json]
+    python tools/isaac/live_probe.py [--modes step,play,play-nosync] [--out reports/isaac/live_probe.json]
     (Isaac Sim's standalone Python: ~/isaacsim/python.sh tools/isaac/live_probe.py)
 
 Each mode (``IsaacParams.render_mode``; ``-nosync``: without ``render_sync``) runs in its
@@ -11,7 +11,8 @@ changes (``changed_pct``: pixels differing by more than 10 levels between first 
 frame; ``unchanged``: frames equal to the one before), how far USD (what the renderer
 draws) lags PhysX at the end (``usd_lag_m``), seconds per render, and whether rendering
 changed the run (the flange by more than 0.05 mm), and whether moving the camera
-changes the picture (``camera_move_changed_pct``). PNGs of the
+changes the picture, after how many renders (``camera_lag_renders``: 1 for a synchronous
+renderer; "play" hands back older frames, ``render_settle`` must cover it). PNGs of the
 first and last frame next to the report. The mode to use is the first with ``ok``: pass it as
 ``--set render_mode='"MODE"'`` to tools/sim_workflow.py (or make it the default).
 """
@@ -46,7 +47,7 @@ def one(mode: str, out_dir: Path) -> dict:
     wf = Workflow.from_file(ROOT / "cells/tm_tray/workflows/inspect_and_sort.yaml")
     occ = wf.initial_occupancy(world, wf.resolve_sets(world))
     rmode, _, flag = mode.partition("-")
-    cell = IsaacCell(world, occ, IsaacParams(render_mode=rmode, render_sync=flag != "nosync"))
+    cell = IsaacCell(world, occ, IsaacParams(render_mode=rmode, render_sync=flag != "nosync", render_settle=4))
     r["t_app"] = round(time.time() - t0, 1)
     cell.add_view(overview(world, width=640, height=360))
     traj = json.loads(gzip.decompress((ROOT / "cells/tm_tray/plans/strict_cycle1.json.gz").read_bytes()))
@@ -71,16 +72,19 @@ def one(mode: str, out_dir: Path) -> dict:
         r["usd_lag_m"] = repr(e)
     try:                                                      # a viewer moves the camera (rsf.live.views)
         before = cell.render("overview").copy()
-        cell.move_view("overview", (0.0, -3.0, 1.6), (0.0, 0.3, 0.9), 60.0)
-        after = None
-        for _ in range(3):                                    # the renderer may hand back the last frame once
-            after = cell.render("overview")
+        r["camera_lag_renders"] = None
+        after = before
+        for i in range(1, 13):                                # renders until the picture shows the move
             cell.move_view("overview", (0.0, -3.0, 1.6), (0.0, 0.3, 0.9), 60.0)
+            after = cell.render("overview")
+            if (np.abs(after.astype(int) - before.astype(int)).max(axis=2) > 10).mean() > 0.10:
+                r["camera_lag_renders"] = i
+                break
         dd = np.abs(after.astype(int) - before.astype(int)).max(axis=2)
         r["camera_move_changed_pct"] = round(100.0 * float((dd > 10).mean()), 2)
-        if after is not None:
-            from PIL import Image
-            Image.fromarray(after).save(out_dir / f"live_probe_{mode}_moved.png")
+        r["render_latency_assumed"] = cell.render_latency
+        from PIL import Image
+        Image.fromarray(after).save(out_dir / f"live_probe_{mode}_moved.png")
     except Exception as e:  # noqa: BLE001
         r["camera_move_changed_pct"] = repr(e)
     c = cell.run(traj, t_end=T_END)
@@ -114,16 +118,17 @@ def one(mode: str, out_dir: Path) -> dict:
         except Exception as e:  # noqa: BLE001
             r["png_error"] = repr(e)
     lag = r.get("usd_lag_m")
-    cm = r.get("camera_move_changed_pct")
+    cl = r.get("camera_lag_renders")
     r["ok"] = bool(imgs and r["blank_frames"] == 0 and r.get("changed_pct", 0) > 1.0 and r["run_unchanged"]
-                   and (not isinstance(lag, float) or lag < 0.005) and isinstance(cm, float) and cm > 10.0)
+                   and (not isinstance(lag, float) or lag < 0.005)
+                   and cl is not None and cl <= r.get("render_latency_assumed", 0) + 1)
     r["t_total"] = round(time.time() - t0, 1)
     return r
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--modes", default="play,play-nosync,step")
+    ap.add_argument("--modes", default="step,play")
     ap.add_argument("--out", default="reports/isaac/live_probe.json")
     ap.add_argument("--one", help=argparse.SUPPRESS)
     a = ap.parse_args()

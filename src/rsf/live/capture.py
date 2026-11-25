@@ -63,9 +63,12 @@ class _Encoder(threading.Thread):
 class LiveCapture:
     def __init__(self, hub: Hub, cell, views: Iterable, fps: float = 5.0, pace: float = 0.0,
                  segments: Iterable = (), t_end: Optional[float] = None, quality: int = 80,
-                 status_hz: float = 10.0, controller=None, console=None, fps_interactive: float = 20.0):
+                 status_hz: float = 10.0, controller=None, console=None, fps_interactive: float = 20.0,
+                 recorder=None):
         self.hub, self.cell = hub, cell
         self.ctl, self.console = controller, console      # rsf.live.control / rsf.live.debug (optional)
+        self.recorder = recorder                           # rsf.live.record (optional)
+        self._settle = 0                                   # renders still owed to a renderer that lags
         self.views = list(views)
         self.fps, self.pace = float(fps), float(pace)
         self.fps_interactive = max(float(fps_interactive), self.fps)   # while a viewer moves a camera
@@ -153,10 +156,12 @@ class LiveCapture:
         return now - self._last_frame >= 1.0 / rate
 
     # ── frames ─────────────────────────────────────────────────────────────
-    def render_all(self, t: Optional[float]) -> None:
+    def render_all(self, t: Optional[float]) -> dict:
+        """Render every view; the images by view name (``None`` where nothing came)."""
         w = time.time()
+        out = {}
         for v in self.views:
-            img = self.cell.render(v.name)
+            img = out[v.name] = self.cell.render(v.name)
             if img is None or int(img[::8, ::8].max()) < 8:
                 self.blank += 1
             if img is not None and t is not None:
@@ -166,9 +171,12 @@ class LiveCapture:
                 self._last_sig[v.name] = sig
             if img is not None:
                 self.enc.submit(v.name, img, t=None if t is None else round(float(t), 3))
+        if self._dirty:                          # a renderer that hands back older frames needs more
+            self._settle = int(getattr(self.cell, "render_latency", 0))
         self._dirty = False
         self.render_s += time.time() - w
         self.frames += 1
+        return out
 
     def warmup(self) -> None:
         """One frame of every view before the run (the scene as it starts)."""
@@ -204,9 +212,12 @@ class LiveCapture:
             if seg:
                 self.hub.event("segment", name=name, segment_kind=seg.get("kind"), t0=seg["t0"], t1=seg.get("t1"))
         self._apply_moves()
-        if self._frame_due(now):
+        rec = self.recorder.due(t) if self.recorder is not None else ()
+        if rec or self._frame_due(now):
             self._last_frame = now
-            self.render_all(t)
+            imgs = self.render_all(t)
+            if rec:
+                self.recorder.feed(t, imgs)
         if now - self._last_status >= self.status_dt:
             self._last_status = now
             wall = now - self._wall0 - (self.ctl.paused_s if self.ctl is not None else 0.0)
@@ -228,9 +239,12 @@ class LiveCapture:
             self.console.pump(t)
         self._apply_moves()
         now = time.time()
-        if self._dirty and self._frame_due(now):
+        if (self._dirty or self._settle > 0) and now - self._last_frame >= 1.0 / self.fps_interactive:
+            settling = not self._dirty
             self._last_frame = now
             self.render_all(t)
+            if settling:
+                self._settle -= 1
 
     def finish(self, state: str = "done", **result) -> None:
         """The run is over: last frame, final status and a ``done`` (or other *state*) event.
@@ -239,10 +253,14 @@ class LiveCapture:
             self.render_all(None)
         except Exception:  # noqa: BLE001  (a closing app may not render)
             pass
+        if self.recorder is not None:            # the run is over: what was recorded is kept
+            self.recorder.stop_all(save=True)
         self.hub.update(state=state, blank_frames=self.blank, **result)
         self.hub.event(state, **result)
 
     def close(self) -> None:
+        if self.recorder is not None:
+            self.recorder.stop_all(save=True)
         self.enc.flush_and_stop()
         close = getattr(self.cell, "close_views", None)
         if close:

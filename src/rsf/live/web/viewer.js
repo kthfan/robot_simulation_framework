@@ -47,8 +47,65 @@ async function init() {
   setupGated(info.features || {});
   if ((info.features || {}).camera) Camera.init($("frame"));
   else $("camera").hidden = true;
+  if ((info.features || {}).record) setupRecord(info.features.record);
   if (names.length) show(params.get("stream") && names.includes(params.get("stream")) ? params.get("stream") : names[0]);
   listen();
+}
+
+// ── recording (MP4 on the server; follows simulated time, so a paused run records nothing) ──
+function setupRecord(feat) {
+  $("record").hidden = false;
+  if (!feat.available) {
+    $("recstart").disabled = true;
+    $("recstate").textContent = "recording off: no ffmpeg on the server";
+    return;
+  }
+  const act = async (what, body) => {
+    const r = await fetch(`/api/v1/record/${what}`, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ view: Viewer.stream, ...body }) });
+    const j = await r.json();
+    if (!r.ok) $("recstate").textContent = j.error || `HTTP ${r.status}`;
+    if (what !== "start") refreshRecordings();
+    return j;
+  };
+  $("recstart").onclick = () => act("start", { fps: Number($("recfps").value) });
+  $("recsave").onclick = () => act("stop", {});
+  $("recdiscard").onclick = () => { if (confirm("Discard this recording?")) act("discard", {}); };
+  refreshRecordings();
+}
+
+async function refreshRecordings() {
+  const r = await (await fetch("/api/v1/record")).json();
+  const box = $("reclist");
+  box.replaceChildren();
+  if (!r.saved.length) { box.textContent = `saved to ${r.dir} on the server (${r.codec})`; return; }
+  box.append(`saved in ${r.dir}: `);
+  r.saved.slice().reverse().forEach((s, i) => {
+    if (i) box.append(" · ");
+    const a = document.createElement("a");
+    a.href = `/api/v1/recordings/${encodeURIComponent(s.file)}`;
+    a.textContent = s.file;
+    a.title = `${s.frames} frames, ${s.seconds} s, simulated ${fmt(s.t_start, 1)}–${fmt(s.t_end, 1)} s`;
+    box.append(a, ` (${s.seconds} s)`);
+  });
+}
+
+function renderRecording(s) {
+  if ($("record").hidden) return;
+  const rec = (s.recording || {})[Viewer.stream];
+  const on = !!rec;
+  $("recstart").hidden = on;
+  $("recsave").hidden = !on;
+  $("recdiscard").hidden = !on;
+  $("recfps").disabled = on;
+  const st = $("recstate");
+  st.classList.toggle("on", on);
+  if (on) {
+    const why = s.paused ? " · paused with the run" : (["done", "failed", "stopped", "interrupted"].includes(s.state) ? " · the run is over" : "");
+    st.textContent = `● REC ${fmt(rec.seconds, 1)} s video · ${rec.frames} frames · simulated ${fmt(rec.t_start, 1)}–${fmt(rec.t_end, 1)} s${why}`;
+  } else if (st.classList.contains("on") || st.textContent.startsWith("●")) {
+    st.textContent = "";
+  }
 }
 
 // ── control and console (only when the run enabled them; both need the token) ──
@@ -154,6 +211,7 @@ function renderStatus(snap) {
     return [dt, dd];
   }));
   if (s.transfers) renderResult(s);
+  renderRecording(s);
 }
 
 function renderResult(s) {
@@ -189,7 +247,12 @@ function listen() {
     renderStatus(snap);
     if (typeof Camera !== "undefined") Camera.onStatus((snap.status || {}).views);
   });
-  es.addEventListener("event", (m) => { const e = JSON.parse(m.data); Viewer.events = e.seq; addEvent(e.kind, e); });
+  es.addEventListener("event", (m) => {
+    const e = JSON.parse(m.data);
+    Viewer.events = e.seq;
+    addEvent(e.kind, e);
+    if (e.kind === "record_saved" || e.kind === "record_discarded") refreshRecordings();
+  });
   es.onerror = () => { if (!["done", "failed", "stopped", "interrupted"].includes($("state").textContent)) setState("disconnected"); };
 }
 

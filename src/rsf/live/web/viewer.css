@@ -61,3 +61,10 @@ textarea { width: 100%; padding: 8px; font-family: ui-monospace, monospace; font
 .row { display: flex; gap: 10px; align-items: center; margin: 6px 0; }
 pre#out { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px;
   max-height: 40vh; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; margin: 0; }
+#record { display: flex; gap: 6px 12px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+#record[hidden] { display: none; }
+#record [hidden] { display: none; }
+button.rec { color: var(--fail); border-color: var(--fail); }
+#recstate.on { color: var(--fail); font-weight: 600; }
+#reclist { flex-basis: 100%; font-size: 12px; }
+#reclist a { color: var(--run); }

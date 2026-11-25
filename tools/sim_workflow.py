@@ -87,6 +87,7 @@ def start_live(a, world, wf, cell, traj, t_end):
     import numpy as np
 
     from rsf.live import control, debug
+    from rsf.live import record as live_record
     from rsf.live import views as live_views
     from rsf.live.capture import LiveCapture
     from rsf.live.hub import Hub
@@ -121,16 +122,21 @@ def start_live(a, world, wf, cell, traj, t_end):
     if a.live_debug:
         console = debug.DebugConsole(hub)
         debug.register(server, console)
+    recorder = live_record.Recorder(hub, a.live_record_dir, meta={
+        "layout": a.layout, "workflow": a.workflow, "plan": a.plan, "backend": a.backend})
     cap = LiveCapture(hub, cell, views, fps=a.live_fps, pace=a.live_pace, segments=traj.get("segments", ()),
                       t_end=t_stop, quality=a.live_quality, controller=ctl, console=console,
-                      fps_interactive=a.live_fps_interactive)
+                      fps_interactive=a.live_fps_interactive, recorder=recorder)
     live_views.register(server, cap)
+    live_record.register(server, recorder, cap)
     if console is not None:
         console.ns.update(cell=cell, world=world, workflow=wf, traj=traj, hub=hub, capture=cap, np=np,
                           pause=lambda: ctl.command("pause"), resume=lambda: ctl.command("resume"),
                           step=lambda dt=0.1: ctl.command("step", dt=dt))
     server.start()
     print(f"[live] {server.url}  (views: {', '.join(v.name for v in views)}; bound to {host}:{server.address[1]})",
+          flush=True)
+    print(f"[live] recordings: {recorder.dir.resolve()} ({'ffmpeg ' + recorder.codec[1] if recorder.available else 'off: no ffmpeg'})",
           flush=True)
     if token:
         what = "control and a Python console" if a.live_debug else "control"
@@ -202,6 +208,8 @@ def main(argv=None) -> int:
     lv.add_argument("--live-hold", type=float, default=0.0,
                     help="seconds to keep serving after the run (-1: until Ctrl-C)")
     lv.add_argument("--live-quality", type=int, default=80, help="JPEG quality")
+    lv.add_argument("--live-record-dir", default="reports/live",
+                    help="where recordings (MP4, from the viewer's Record) are saved (default reports/live)")
     lv.add_argument("--live-control", action="store_true", help="pause / step / pace / stop from the viewer (token)")
     lv.add_argument("--live-debug", action="store_true",
                     help="a Python console in the running simulation (token; implies --live-control)")

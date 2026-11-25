@@ -49,11 +49,15 @@ class IsaacParams(SimParams):
     max_joint_velocity: float = 1.0e6  #: deg/s or m/s: PhysX joint speed limit (off)
     headless: bool = True
     render_updates: int = 1            #: app updates per rendered frame of the views (RTX converges over more)
-    #: how views are rendered: "play" (the timeline plays, app updates render; Replicator
-    #: captures while the timeline plays), "step" (``rep.orchestrator.step``), "update"
+    #: how views are rendered: "step" (``rep.orchestrator.step``: waits for the frame; Isaac Sim 5.0:
+    #: 45 ms per 640x360), "play" (the timeline plays, app updates render; Replicator captures while
+    #: the timeline plays; 9 ms, but frames come a few renders late), "update"
     #: (app updates, timeline stopped). The app loop never steps physics in any of them
     #: (``/app/player/playSimulations`` off): ``run`` steps it. tools/isaac/live_probe.py compares them.
-    render_mode: str = "play"
+    render_mode: str = "step"
+    #: "play" hands back frames a few renders late (RTX renders asynchronously): renders owed
+    #: after a camera move so the last pose shows (tools/isaac/live_probe.py measures it)
+    render_settle: int = 4
     #: before a render, write the bodies' poses from PhysX to USD (``update_transformations``),
     #: as Isaac's own physics step does when it steps PhysX directly: the renderer reads them there
     render_sync: bool = True
@@ -245,6 +249,11 @@ class IsaacCell:
         if img.ndim != 3 or img.size == 0:
             return None
         return img[..., :3].astype(np.uint8, copy=False)
+
+    @property
+    def render_latency(self) -> int:
+        """Renders a picture lags behind (0: synchronous)."""
+        return int(self.p.render_settle) if self.p.render_mode == "play" else 0
 
     def sync_render(self) -> None:
         """PhysX's current body poses -> USD (what the renderer draws)."""

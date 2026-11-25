@@ -44,6 +44,7 @@ A run left on the GPU box by older versions (the port then reads *in use*):
 | `--live-hold S` | 0 | keep serving S s after the run (-1: until Ctrl-C) |
 | `--live-quality` | 80 | JPEG quality |
 
+| `--live-record-dir` | `reports/live` | where recordings are saved (on the computer that simulates) |
 | `--live-control` | off | pause / resume / step / pace / stop from the viewer (token) |
 | `--live-debug` | off | a Python console in the running simulation (token; implies `--live-control`) |
 | `--live-cert F --live-key F` | | serve HTTPS (PEM certificate and key) |
@@ -77,8 +78,8 @@ steps). `IsaacParams.render_mode`:
 
 | mode | how | |
 |---|---|---|
-| `play` (default) | the timeline plays; an app update renders | as Isaac's own `SimulationContext`; Isaac Sim 5.0: works, 7.5 ms per 640×360 frame (`live_probe.py`: `use: play`) |
-| `step` | `rep.orchestrator.step(rt_subframes=1, delta_time=0)` | Isaac Sim 5.0: works, 44 ms |
+| `step` (default) | `rep.orchestrator.step(rt_subframes=1, delta_time=0)`: waits for the frame | Isaac Sim 5.0: works, 45 ms per 640×360 frame; the only mode whose pictures are never late (`live_probe.py`: `use: step`) |
+| `play` | the timeline plays; an app update renders | as Isaac's own `SimulationContext`; Isaac Sim 5.0: 9 ms, but RTX hands back frames several renders late (a camera move did not show within 3 renders): `render_settle` (4) renders follow a camera move |
 | `update` | an app update, the timeline stopped | Isaac Sim 5.0: **no pictures** (Replicator captures only while the timeline plays) |
 
 Before each render the bodies' poses go from PhysX to USD (`render_sync`, PhysX's
@@ -156,6 +157,28 @@ cameras costs rendering only while it happens (MuJoCo without a GPU here: 16 fra
 Browsers show an MJPEG frame only when the next one starts (Chrome: measured), so the
 server sends a new frame again 60 ms later unless a newer one came: a single frame (a
 camera moved while paused) shows within ~0.1 s instead of waiting.
+
+## Recording (MP4, on the server)
+
+*● Record* records the shown view; *■ Stop and save* writes it as MP4 to
+`--live-record-dir` on the simulating computer (the page lists the files; each also
+downloads from `/api/v1/recordings/<file>`), *Discard* drops it. No token (it does not
+touch the simulation).
+
+* The video follows **simulated time**: a frame every 1/fps simulated seconds (10, 20 or
+  30), so it plays the run at its real speed whatever the simulation's speed. It
+  records nothing while the run is paused (*Pause* in the viewer pauses the recording
+  with it; the page shows *paused with the run*), nor after the run ends.
+* What it records is the view as everyone sees it: a camera moved while recording moves
+  in the video.
+* Beside each `<view>_<date>-<time>.mp4` a `.json`: view, fps, frames, the simulated time
+  span, layout, workflow, plan. A recording still open when the run ends (or is stopped,
+  Ctrl-C) is saved then.
+* Encoding: ffmpeg (`RSF_FFMPEG`, else `ffmpeg` on the PATH, else the `imageio-ffmpeg`
+  package's), H.264 (libx264) when it has it, else MPEG-4; frames go through a pipe from
+  a thread. Without ffmpeg the Record button says so.
+* Cost: a render per frame (Isaac `step`: 45 ms per 640×360, so 20 fps about doubles the
+  run while recording) and the encoding (a CPU core at 960×540, 20 fps).
 
 ## Control and the debug console
 

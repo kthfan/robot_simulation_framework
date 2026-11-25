@@ -243,7 +243,9 @@ tools/isaac/remote_isaac.sh run --send cells/tm_tray/plans/strict_inspect_and_so
 ```
 
 The report (`reports/isaac/sim_strict.json`, the raw run in `run.npz`) is then
-here, to compare with MuJoCo's. Images work the same way: `--cmd "python
+here, to compare with MuJoCo's. To watch it, control it and record it (`docs/live_view.md`):
+add `--view 8765` to `remote_isaac.sh run`, `--collect reports/live` (the recordings) and
+`--live 8765 --live-control --live-hold 300` to the command. Images work the same way: `--cmd "python
 tools/isaac/render_probe.py --usd reports/isaac/strict.usda --png
 reports/isaac/strict.png"`, `--collect reports/isaac`.
 

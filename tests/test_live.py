@@ -448,3 +448,104 @@ def test_mujoco_view_moves():
     b = cell.render("overview")
     assert (np.abs(a.astype(int) - b.astype(int)).max(axis=2) > 10).mean() > 0.2
     cell.close_views()
+
+
+# ── recording (MP4 on the server) ──────────────────────────────────────────
+def _ffprobe(path):
+    import shutil
+    import subprocess
+    exe = shutil.which("ffprobe")
+    if not exe:
+        return None
+    out = subprocess.run([exe, "-v", "error", "-select_streams", "v:0", "-count_frames", "-show_entries",
+                          "stream=codec_name,width,height,nb_read_frames,r_frame_rate", "-of", "json", str(path)],
+                         capture_output=True, text=True, check=True).stdout
+    return json.loads(out)["streams"][0]
+
+
+def test_recording_follows_simulated_time_and_pauses_with_the_run(tmp_path, served):
+    """Frames every 1/fps simulated seconds; a paused run adds none; saved as MP4 with a JSON."""
+    from rsf.live import record
+    from rsf.live.control import Controller
+    if record.find_ffmpeg() is None:
+        pytest.skip("no ffmpeg")
+    hub, srv, c = served
+    cell = _FakeCell()
+    ctl = Controller(hub)
+    rec = record.Recorder(hub, tmp_path, meta={"plan": "p"})
+    cap = LiveCapture(hub, cell, [View("v", (1, 0, 1), (0, 0, 0), width=64, height=48)], fps=1.0,
+                      controller=ctl, recorder=rec)
+    record.register(srv, rec, cap)
+    assert c.info()["features"]["record"]["available"]
+    code, j = _post(c, "/api/v1/record/start", {"view": "v", "fps": 10})
+    assert code == 200 and j["file"].startswith("v_") and j["frames"] == 0
+    assert _post(c, "/api/v1/record/start", {"view": "v"})[0] == 400            # already recording
+    assert _post(c, "/api/v1/record/start", {"view": "x"})[0] == 404
+    for k in range(51):                                    # 1.0 s simulated at 50 samples/s -> 11 frames
+        cap(round(k * 0.02, 6))
+    assert rec.active["v"].frames == 11
+    ctl.command("pause")                                   # the run pauses: the recording with it
+    th = threading.Thread(target=lambda: cap(1.02), daemon=True)
+    th.start()
+    time.sleep(0.5)
+    assert rec.active["v"].frames == 11
+    ctl.command("resume")
+    th.join(2)
+    for k in range(52, 101):
+        cap(round(k * 0.02, 6))
+    assert rec.active["v"].frames == 21                    # 0 .. 2.0 s
+    code, j = _post(c, "/api/v1/record/stop", {"view": "v"})
+    assert code == 200 and j["saved"] and j["frames"] == 21 and j["t_start"] == 0.0 and j["t_end"] == pytest.approx(2.0)
+    mp4 = tmp_path / j["file"]
+    assert mp4.is_file() and not list(tmp_path.glob("*.part.mp4"))
+    side = json.loads(mp4.with_suffix(".json").read_text())
+    assert side["frames"] == 21 and side["plan"] == "p" and side["fps"] == 10.0
+    info = _ffprobe(mp4)
+    if info:
+        assert (info["width"], info["height"], int(info["nb_read_frames"])) == (64, 48, 21)
+        assert info["r_frame_rate"] == "10/1"
+    with c._get("/api/v1/recordings/" + j["file"]) as r:
+        assert r.read() == mp4.read_bytes()
+    with pytest.raises(Exception, match="404"):
+        c._get("/api/v1/recordings/..%2F..%2Fetc%2Fpasswd")
+    # discard leaves nothing; a recording still open when the run ends is saved
+    _post(c, "/api/v1/record/start", {"view": "v", "fps": 5})
+    cap(2.02)
+    assert _post(c, "/api/v1/record/discard", {"view": "v"})[1]["saved"] is None
+    _post(c, "/api/v1/record/start", {"view": "v", "fps": 5})
+    for k in range(102, 130):
+        cap(round(k * 0.02, 6))
+    cap.finish("done")
+    assert len(list(tmp_path.glob("*.mp4"))) == 2 and [e["kind"] for e in hub.events].count("record_saved") == 2
+    cap.close()
+
+
+@pytest.mark.skipif(not _renders(), reason="no OpenGL context (set MUJOCO_GL)")
+def test_record_a_mujoco_run(tmp_path):
+    """The real thing: the first 3 s of the strict plan, recorded at 20 fps, run unchanged."""
+    from rsf.live import record
+    from rsf.model.layout import load_world
+    from rsf.model.workflow import Workflow
+    from rsf.sim.mujoco_cell import MujocoCell
+    if record.find_ffmpeg() is None:
+        pytest.skip("no ffmpeg")
+    world = load_world(CELL / "layouts" / "strict.yaml")
+    wf = Workflow.from_file(CELL / "workflows" / "inspect_and_sort.yaml")
+    occ = wf.initial_occupancy(world, wf.resolve_sets(world))
+    traj = json.loads(gzip.decompress((CELL / "plans" / "strict_cycle1.json.gz").read_bytes()))
+    cell = MujocoCell(world, occ)
+    plain = cell.run(traj, t_end=3.0)
+    hub = Hub()
+    rec = record.Recorder(hub, tmp_path)
+    cap = LiveCapture(hub, cell, [overview(world, width=320, height=180)], fps=2.0, recorder=rec)
+    rec.start("overview", 320, 180, 20)
+    seen = cell.run(traj, t_end=3.0, on_sample=cap)
+    cap.finish()
+    cap.close()
+    assert np.array_equal(plain.q, seen.q)
+    (f,) = tmp_path.glob("*.mp4")
+    side = json.loads(f.with_suffix(".json").read_text())
+    assert side["frames"] == 61 and side["error"] is None           # 0 .. 3.0 s at 20 fps
+    info = _ffprobe(f)
+    if info:
+        assert info["codec_name"] in ("h264", "mpeg4") and int(info["nb_read_frames"]) == 61

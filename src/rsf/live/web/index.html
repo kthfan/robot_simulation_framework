@@ -46,6 +46,14 @@
       <button id="camhelp">?</button>
       <div id="campose" class="muted"></div>
     </div>
+    <div id="record" hidden>
+      <button id="recstart" class="rec">● Record</button>
+      <label>fps <select id="recfps"><option>10</option><option selected>20</option><option>30</option></select></label>
+      <button id="recsave" hidden>■ Stop and save</button>
+      <button id="recdiscard" hidden>Discard</button>
+      <span id="recstate" class="muted"></span>
+      <div id="reclist" class="muted"></div>
+    </div>
     <div id="controls" hidden>
       <button data-act="pause">Pause</button>
       <button data-act="resume">Resume</button>
