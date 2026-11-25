@@ -25,6 +25,14 @@ computer only (127.0.0.1). From another computer, either:
   and open `http://localhost:8765/` on the main computer while it runs; or
 * **the network**: `--live 0.0.0.0:8765`, open `http://<gpu-box>:8765/`.
 
+**Ending a run.** Ctrl-C, SIGTERM or SIGHUP (a closed terminal or SSH session) end a
+live run at once, also during `--live-hold`: the server closes (`[live] closed`) and the
+port is free. Through `remote_isaac.sh run` from a terminal the remote command gets a
+terminal too (`ssh -t`), so Ctrl-C here reaches it and a dropped connection ends it.
+A run left on the GPU box by older versions (the port then reads *in use*):
+`tools/isaac/remote_isaac.sh stop` (Ctrl-C to this user's `sim_workflow.py`,
+`live_probe.py` and pytest runs there, SIGKILL after 15 s).
+
 | option | default | |
 |---|---|---|
 | `--live [HOST:]PORT` | off | serve the live view (host 127.0.0.1 unless given) |
@@ -68,7 +76,7 @@ steps). `IsaacParams.render_mode`:
 
 | mode | how | |
 |---|---|---|
-| `play` (default) | the timeline plays; an app update renders | as Isaac's own `SimulationContext`; Isaac Sim 5.0: works, 7.5 ms per 640×360 frame |
+| `play` (default) | the timeline plays; an app update renders | as Isaac's own `SimulationContext`; Isaac Sim 5.0: works, 7.5 ms per 640×360 frame (`live_probe.py`: `use: play`) |
 | `step` | `rep.orchestrator.step(rt_subframes=1, delta_time=0)` | Isaac Sim 5.0: works, 44 ms |
 | `update` | an app update, the timeline stopped | Isaac Sim 5.0: **no pictures** (Replicator captures only while the timeline plays) |
 

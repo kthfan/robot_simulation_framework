@@ -18,10 +18,12 @@ answer 403 when the server has none (the feature is off). ``ssl_context`` serves
 """
 from __future__ import annotations
 
+import errno
 import hmac
 import json
 import mimetypes
 import re
+import sys
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -41,6 +43,35 @@ def parse_address(spec, default_host: str = "127.0.0.1") -> tuple:
     return (host or default_host), int(port)
 
 
+class _HTTPServer(ThreadingHTTPServer):
+    """Threads per connection; TLS handshakes in the connection's thread (a client that
+    never finishes one must not hold up the others); viewers that go away are not errors."""
+    daemon_threads = True
+    ssl_context = None
+
+    def finish_request(self, request, client_address):
+        if self.ssl_context is None:
+            return super().finish_request(request, client_address)
+        request.settimeout(15.0)
+        try:
+            tls = self.ssl_context.wrap_socket(request, server_side=True)
+        except OSError:                           # not TLS, or gone during the handshake
+            return None
+        tls.settimeout(None)
+        try:
+            super().finish_request(tls, client_address)
+        finally:
+            try:
+                tls.close()
+            except OSError:
+                pass
+
+    def handle_error(self, request, client_address):
+        if isinstance(sys.exc_info()[1], OSError):  # a closed tab, a reset, a TLS EOF
+            return
+        super().handle_error(request, client_address)
+
+
 class LiveServer:
     def __init__(self, hub: Hub, host: str = "127.0.0.1", port: int = 8765, token: str = None,
                  ssl_context=None):
@@ -54,11 +85,15 @@ class LiveServer:
 
         class Handler(_Handler):
             live = server
-        self.httpd = ThreadingHTTPServer((host, port), Handler)
-        self.httpd.daemon_threads = True
+        try:
+            self.httpd = _HTTPServer((host, port), Handler)
+        except OSError as e:
+            if e.errno == errno.EADDRINUSE:
+                raise OSError(e.errno, f"port {port} is in use on {host}: another program, or an earlier run still "
+                                       f"serving (find it: ss -ltnp | grep :{port}; on the GPU box: tools/isaac/remote_isaac.sh stop)") from None
+            raise
+        self.httpd.ssl_context = ssl_context
         self.tls = ssl_context is not None
-        if ssl_context is not None:
-            self.httpd.socket = ssl_context.wrap_socket(self.httpd.socket, server_side=True)
         self._thread = None
 
     @property
@@ -217,7 +252,7 @@ class _Handler(BaseHTTPRequestHandler):
                                           401 if self.live.token else 403)
                 try:
                     return fn(self, m)
-                except (BrokenPipeError, ConnectionResetError):
+                except OSError:                    # the client went away (also TLS EOF): not an error here
                     return None
         self.send_json({"error": f"no route {method} {u.path}"}, 404)
 

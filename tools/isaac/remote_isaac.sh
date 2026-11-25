@@ -5,12 +5,15 @@
 #   tools/isaac/remote_isaac.sh sync                      # this checkout's files -> the GPU box
 #   tools/isaac/remote_isaac.sh run --cmd "CMD" [--send PATH]... [--collect PATH]... [--view PORT]
 #   tools/isaac/remote_isaac.sh fetch PATH...             # remote -> here (paths relative to the repo)
+#   tools/isaac/remote_isaac.sh stop                      # end runs left on the GPU box (Ctrl-C, then kill)
 #
 # `run` syncs, sends the extra files (--send: git-ignored inputs such as a plan), runs CMD at the
 # remote repository root in the Isaac venv (OMNI_KIT_ACCEPT_EULA=YES, PYTHONPATH=src), and
 # brings back --collect paths (files or directories, relative to the repo), even when CMD fails.
 # --view PORT forwards http://localhost:PORT here to the GPU box's 127.0.0.1:PORT while CMD runs
 # (the live view: CMD with `sim_workflow.py ... --live PORT`; docs/live_view.md).
+# From a terminal, CMD gets one too (ssh -t): Ctrl-C here reaches it, and it ends if the
+# connection drops, so no run is left serving or simulating unseen.
 #
 # Configuration (environment):
 #   RSF_ISAAC_HOST   SSH destination: user@host or a ~/.ssh/config alias (required)
@@ -122,6 +125,8 @@ case "$cmd" in
       fwd="-L $view:127.0.0.1:$view -o ExitOnForwardFailure=yes"
       say "live view: http://localhost:$view/ (once the run serves it: --live $view in CMD)"
     fi
+    # a terminal on the remote side: Ctrl-C reaches CMD, a dropped connection hangs it up
+    [ -t 0 ] && [ -t 1 ] && fwd="-t $fwd"
     t=$(date +%s)
     # the interpreter first: RSF_ISAAC_PYTHON / RSF_ISAAC_VENV may be relative to the remote home
     remote "$(py_env) cd $(printf '%q' "$RDIR") &&
@@ -130,5 +135,12 @@ case "$cmd" in
     say "exit $rc after $(( $(date +%s) - t )) s"
     [ ${#collects[@]} -eq 0 ] || fetch "${collects[@]}"
     exit $rc;;
-  *) sed -n 2,23p "$0"; exit 2;;
+  stop)
+    # Ctrl-C (SIGINT) to this user's runs on the GPU box, then SIGKILL to what is left after 15 s
+    remote "pat='tools/[s]im_workflow.py|tools/isaac/[l]ive_probe.py|python -m [p]ytest';   # [x]: no match on this shell's own line
+            pids=\$(pgrep -u \$(id -u) -f \"\$pat\"); [ -n \"\$pids\" ] || { echo 'no runs'; exit 0; };
+            ps -o pid=,etime=,args= -p \$pids | cut -c1-160; kill -INT \$pids;
+            for i in \$(seq 15); do sleep 1; pids=\$(pgrep -u \$(id -u) -f \"\$pat\") || break; done;
+            [ -z \"\$pids\" ] && echo 'ended' || { kill -KILL \$pids; echo 'killed:' \$pids; }";;
+  *) sed -n 2,26p "$0"; exit 2;;
 esac

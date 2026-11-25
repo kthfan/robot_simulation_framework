@@ -143,9 +143,25 @@ def start_live(a, world, wf, cell, traj, t_end):
     return server, cap
 
 
-def stop_live(a, server, cap, state="done", **result):
-    cap.finish(state, **result)
-    if a.live_hold:
+def interrupt_on_hangup() -> None:
+    """Ctrl-C, SIGTERM and SIGHUP (a closed terminal or SSH session) end a live run: the
+    server closes and the port is free, instead of the process serving on unseen. (SIGINT
+    too: Isaac's app may have replaced Python's own handler.)"""
+    import signal
+
+    def handler(signum, frame):
+        raise KeyboardInterrupt(signal.Signals(signum).name)
+    for sig in ("SIGINT", "SIGTERM", "SIGHUP"):
+        if hasattr(signal, sig):
+            signal.signal(getattr(signal, sig), handler)
+
+
+def stop_live(a, server, cap, state="done", hold=True, **result):
+    try:
+        cap.finish(state, **result)
+    except Exception as e:  # noqa: BLE001  (the port must be freed whatever happens)
+        print(f"[live] finishing: {e!r}", flush=True)
+    if hold and a.live_hold:
         print(f"[live] serving {server.url} {'until Ctrl-C' if a.live_hold < 0 else f'for {a.live_hold:g} s'}", flush=True)
         end = time.time() + (a.live_hold if a.live_hold > 0 else 1e12)
         try:
@@ -156,6 +172,7 @@ def stop_live(a, server, cap, state="done", **result):
         except KeyboardInterrupt:
             pass
     server.close()
+    print("[live] closed", flush=True)
 
 
 def main(argv=None) -> int:
@@ -213,6 +230,8 @@ def main(argv=None) -> int:
         from rsf.sim.mujoco_cell import MujocoCell
         cell = MujocoCell(world, occ, params(a.set))
     live = start_live(a, world, wf, cell, traj, t_end) if a.live else None
+    if live:
+        interrupt_on_hangup()
     t0 = time.time()
     try:
         rep = cell.run(traj, t_end=t_end, on_sample=live[1] if live else None,
@@ -224,7 +243,10 @@ def main(argv=None) -> int:
                 print(f"STOPPED from the live view: {e}", flush=True)
                 stop_live(a, *live, state="stopped", error=str(e))
                 return 3
-            stop_live(a, *live, state="error", error=repr(e))
+            if isinstance(e, KeyboardInterrupt):      # Ctrl-C, SIGTERM, SIGHUP: free the port, no hold
+                stop_live(a, *live, state="interrupted", hold=False)
+            else:
+                stop_live(a, *live, state="error", error=repr(e))
         raise
     if a.report:                                      # the raw run, kept even if judging fails
         save_report(rep, a.report)

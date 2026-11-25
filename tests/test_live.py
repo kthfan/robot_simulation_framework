@@ -317,12 +317,27 @@ def test_tls(tmp_path):
                     "-keyout", str(key), "-out", str(cert)], check=True, capture_output=True)
     ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     ctx.load_cert_chain(cert, key)
-    srv = LiveServer(Hub(), "127.0.0.1", 0, ssl_context=ctx).start()
+    hub = Hub()
+    srv = LiveServer(hub, "127.0.0.1", 0, ssl_context=ctx).start()
+    errors = []
+    srv.httpd.handle_error = (lambda orig: lambda *a: (errors.append(a), orig(*a)))(srv.httpd.handle_error)
     try:
         assert srv.url.startswith("https://")
+        import socket
+        stalled = socket.create_connection(srv.address)        # connects, never says hello
         cctx = ssl.create_default_context(cafile=str(cert))
         op = urllib.request.build_opener(urllib.request.ProxyHandler({}), urllib.request.HTTPSHandler(context=cctx))
+        w = time.time()
         with op.open(srv.url + "api/v1/info", timeout=10) as r:
             assert json.loads(r.read())["api"] == "rsf.live/1"
+        assert time.time() - w < 5                                 # not held up by the stalled one
+        hub.stream("cam").publish(encode_jpeg(_image(10)))
+        raw = cctx.wrap_socket(socket.create_connection(srv.address), server_hostname="localhost")
+        raw.sendall(b"GET /api/v1/video/cam/mjpeg HTTP/1.1\r\nHost: localhost\r\n\r\n")
+        assert b"multipart" in raw.recv(4096)
+        raw.close()                                                # a viewer goes away mid-stream
+        time.sleep(1.5)                                            # the server writes again, finds it gone
+        stalled.close()
+        assert errors == []
     finally:
         srv.close()

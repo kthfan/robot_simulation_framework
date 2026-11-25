@@ -14,7 +14,7 @@ header { display: flex; gap: 12px; align-items: center; padding: 8px 16px; borde
 .pill.running { color: var(--run); border-color: var(--run); }
 .pill.done { color: var(--ok); border-color: var(--ok); }
 .pill.paused { color: var(--text); border-style: dashed; }
-.pill.failed, .pill.error, .pill.stopped, .pill.disconnected { color: var(--fail); border-color: var(--fail); }
+.pill.failed, .pill.error, .pill.stopped, .pill.interrupted, .pill.disconnected { color: var(--fail); border-color: var(--fail); }
 main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; padding: 16px; }
 @media (max-width: 800px) { main { grid-template-columns: minmax(0, 1fr); } }
 #streams { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }

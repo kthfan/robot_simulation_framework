@@ -182,7 +182,7 @@ function listen() {
   const es = new EventSource(`/api/v1/stream?since=${Viewer.events}`);
   es.addEventListener("status", (m) => renderStatus(JSON.parse(m.data)));
   es.addEventListener("event", (m) => { const e = JSON.parse(m.data); Viewer.events = e.seq; addEvent(e.kind, e); });
-  es.onerror = () => { if (!["done", "failed", "stopped"].includes($("state").textContent)) setState("disconnected"); };
+  es.onerror = () => { if (!["done", "failed", "stopped", "interrupted"].includes($("state").textContent)) setState("disconnected"); };
 }
 
 init().catch((e) => { setState("error"); $("run").textContent = String(e); });
