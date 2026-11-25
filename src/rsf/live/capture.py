@@ -119,7 +119,7 @@ class LiveCapture:
         if name != self._seg:
             self._seg = name
             if seg:
-                self.hub.event("segment", name=name, kind=seg.get("kind"), t0=seg["t0"], t1=seg.get("t1"))
+                self.hub.event("segment", name=name, segment_kind=seg.get("kind"), t0=seg["t0"], t1=seg.get("t1"))
         if now - self._last_frame >= 1.0 / self.fps:
             self._last_frame = now
             self.render_all(t)
@@ -139,5 +139,8 @@ class LiveCapture:
         except Exception:  # noqa: BLE001  (a closing app may not render)
             pass
         self.enc.flush_and_stop()
+        close = getattr(self.cell, "close_views", None)
+        if close:
+            close()
         self.hub.update(state=state, **result)
         self.hub.event(state, **result)

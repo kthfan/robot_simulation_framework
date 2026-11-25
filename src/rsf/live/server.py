@@ -5,8 +5,9 @@
 ``GET /api/v1/info``                      api version, run info, streams, transports
 ``GET /api/v1/status``                    status snapshot (state, sim time, segment, ...)
 ``GET /api/v1/events?since=N``            the event log after event *N*
-``GET /api/v1/stream``                    Server-Sent Events: ``status`` and every event
-``GET /api/v1/video/<name>/mjpeg``        the stream as MJPEG (``?fps=`` caps it per viewer)
+``GET /api/v1/stream``                    Server-Sent Events: ``status`` snapshots, ``event`` (``kind`` inside)
+``GET /api/v1/video/<name>/mjpeg``        the stream as MJPEG (``?fps=`` caps it per viewer; the
+                                          latest frame is repeated each second while idle)
 ``GET /api/v1/video/<name>/frame.jpg``    the latest frame
 ========================================  ====================================================
 
@@ -118,7 +119,7 @@ class LiveServer:
                 snap = hub.snapshot()
                 out = []
                 for e in hub.events_since(ev):
-                    out.append(f"event: {e['kind']}\nid: {e['seq']}\ndata: {json.dumps(e, default=float)}\n\n")
+                    out.append(f"event: event\nid: {e['seq']}\ndata: {json.dumps(e, default=float)}\n\n")
                     ev = e["seq"]
                 if snap["status_seq"] != st:
                     st = snap["status_seq"]
@@ -148,20 +149,31 @@ class LiveServer:
             req.send_header("Cache-Control", "no-cache")
             req.send_header("Connection", "close")
             req.end_headers()
+            # Browsers show a part only once the next part starts, so the current frame
+            # goes out twice on connect, and again every second while no new one comes
+            # (the last frame of a finished run included).
+            req.wfile.write(b"--rsfframe\r\n")
+
+            def part(seq, jpeg, meta):
+                head = (f"Content-Type: image/jpeg\r\nContent-Length: {len(jpeg)}\r\n"
+                        f"X-Frame-Seq: {seq}\r\nX-Sim-Time: {meta.get('t', '')}\r\n\r\n")
+                req.wfile.write(head.encode() + jpeg + b"\r\n--rsfframe\r\n")
+                req.wfile.flush()
             seq, last = 0, 0.0
-            if s.jpeg is not None:                 # the current frame at once
-                seq = s.seq - 1
+            if s.jpeg is not None:
+                seq, jpeg, meta = s.seq, s.jpeg, dict(s.frame_meta)
+                part(seq, jpeg, meta)
+                part(seq, jpeg, meta)
             while True:
-                got = s.wait(seq, timeout=15.0)
+                got = s.wait(seq, timeout=1.0)
                 if got is None:
                     if hub.closed:
                         return
+                    if s.jpeg is not None:
+                        part(s.seq, s.jpeg, dict(s.frame_meta))
                     continue
                 seq, jpeg, meta = got
-                head = (f"--rsfframe\r\nContent-Type: image/jpeg\r\nContent-Length: {len(jpeg)}\r\n"
-                        f"X-Frame-Seq: {seq}\r\nX-Sim-Time: {meta.get('t', '')}\r\n\r\n")
-                req.wfile.write(head.encode() + jpeg + b"\r\n")
-                req.wfile.flush()
+                part(seq, jpeg, meta)
                 if min_dt:
                     time.sleep(max(0.0, min_dt - (time.time() - last)))
                     last = time.time()

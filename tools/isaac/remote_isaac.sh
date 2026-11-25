@@ -3,12 +3,14 @@
 #
 #   tools/isaac/remote_isaac.sh check                     # SSH, remote venv, isaacsim, GPU
 #   tools/isaac/remote_isaac.sh sync                      # this checkout's files -> the GPU box
-#   tools/isaac/remote_isaac.sh run --cmd "CMD" [--send PATH]... [--collect PATH]...
+#   tools/isaac/remote_isaac.sh run --cmd "CMD" [--send PATH]... [--collect PATH]... [--view PORT]
 #   tools/isaac/remote_isaac.sh fetch PATH...             # remote -> here (paths relative to the repo)
 #
 # `run` syncs, sends the extra files (--send: git-ignored inputs such as a plan), runs CMD at the
 # remote repository root in the Isaac venv (OMNI_KIT_ACCEPT_EULA=YES, PYTHONPATH=src), and
 # brings back --collect paths (files or directories, relative to the repo), even when CMD fails.
+# --view PORT forwards http://localhost:PORT here to the GPU box's 127.0.0.1:PORT while CMD runs
+# (the live view: CMD with `sim_workflow.py ... --live PORT`; docs/live_view.md).
 #
 # Configuration (environment):
 #   RSF_ISAAC_HOST   SSH destination: user@host or a ~/.ssh/config alias (required)
@@ -43,9 +45,9 @@ py_env() {   # the remote shell prelude that makes `python` Isaac Sim's interpre
   fi
 }
 
-remote() {   # run a shell command on the GPU box (bash -lc, at the remote home)
+remote() {   # run a shell command on the GPU box (bash -lc, at the remote home); $2: extra ssh options
   # shellcheck disable=SC2086
-  $SSH "$HOST" "bash -lc $(printf '%q' "$1")"
+  $SSH ${2:-} "$HOST" "bash -lc $(printf '%q' "$1")"
 }
 
 sync_tree() {
@@ -87,12 +89,13 @@ case "$cmd" in
   sync) sync_tree;;
   fetch) fetch "$@";;
   run)
-    c=""; sends=(); collects=()
+    c=""; sends=(); collects=(); view=
     while [ $# -gt 0 ]; do
       case "$1" in
         --cmd) c=$2; shift 2;;
         --send) sends+=("$2"); shift 2;;
         --collect) collects+=("$2"); shift 2;;
+        --view) view=$2; shift 2;;
         *) say "unknown option $1"; exit 2;;
       esac
     done
@@ -113,10 +116,16 @@ case "$cmd" in
     sync_tree || exit 3
     [ ${#sends[@]} -eq 0 ] || send "${sends[@]}" || exit $?
     say "running on $HOST: $c"
+    fwd=""
+    if [ -n "$view" ]; then
+      case "$view" in *[!0-9]*) say "--view takes a port number"; exit 2;; esac
+      fwd="-L $view:127.0.0.1:$view -o ExitOnForwardFailure=yes"
+      say "live view: http://localhost:$view/ (once the run serves it: --live $view in CMD)"
+    fi
     t=$(date +%s)
     # the interpreter first: RSF_ISAAC_PYTHON / RSF_ISAAC_VENV may be relative to the remote home
     remote "$(py_env) cd $(printf '%q' "$RDIR") &&
-            export OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src && $c"
+            export OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src && $c" "$fwd"
     rc=$?
     say "exit $rc after $(( $(date +%s) - t )) s"
     [ ${#collects[@]} -eq 0 ] || fetch "${collects[@]}"

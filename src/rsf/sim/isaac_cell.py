@@ -48,6 +48,7 @@ class IsaacParams(SimParams):
     arm_max_torque: float = 1.0e4      #: N m: drive limit (MuJoCo's servo is unlimited)
     max_joint_velocity: float = 1.0e6  #: deg/s or m/s: PhysX joint speed limit (off)
     headless: bool = True
+    render_updates: int = 1            #: app updates per rendered frame of the views (RTX converges over more)
 
 
 _APP = None
@@ -78,6 +79,21 @@ def start_physics(ctx, dt: float):
     view.set_subspace_roots("/")
     physx.update_simulation(dt, 0.0)
     return physx, sim_if, view
+
+
+def camera_pose(eye, target, up=(0.0, 0.0, 1.0)) -> np.ndarray:
+    """A USD camera's pose (it looks along its -z, +y up) at *eye* looking at *target*."""
+    eye, target = np.asarray(eye, float), np.asarray(target, float)
+    f = target - eye
+    f /= np.linalg.norm(f)
+    r = np.cross(f, up)
+    if np.linalg.norm(r) < 1e-9:                     # looking straight up or down
+        r = np.cross(f, (0.0, 1.0, 0.0))
+    r /= np.linalg.norm(r)
+    u = np.cross(r, f)
+    T = np.eye(4)
+    T[:3, 0], T[:3, 1], T[:3, 2], T[:3, 3] = r, u, -f, eye
+    return T
 
 
 def _T7(x) -> np.ndarray:
@@ -115,6 +131,9 @@ class IsaacCell:
         self.robot_path = f"{U.ROOT}/robot"
         self._prim_name = U.prim_name
         self._started = False
+        self._views, self._annot = {}, {}            # rendered views (add_view / render)
+        self._k = 0                                   # physics step (a render per step at most)
+        self._rendered_k = None
 
     @staticmethod
     def p_headless(params) -> bool:
@@ -127,6 +146,8 @@ class IsaacCell:
         ctx = omni.usd.get_context()
         ctx.open_stage(str(self.usd_path))
         _APP.update()
+        for v in self._views.values():                # cameras and lights before physics starts
+            self._make_view(v)
         self.physx, self.sim_if, self.view = start_physics(ctx, self.p.timestep)
         self.art = self.view.create_articulation_view(self.robot_path)
         meta = self.art.shared_metatype
@@ -136,6 +157,61 @@ class IsaacCell:
         self._obj0 = {n: v.get_transforms().copy() for n, v in self.objs.items()}     # where the run starts them
         self._idx = np.arange(1, dtype=np.int32)
         self._started = True
+
+    # ── views: RTX pictures of the run ─────────────────────────────────────
+    def add_view(self, view) -> None:
+        """A camera :meth:`render` can draw (:class:`rsf.sim.common.View`)."""
+        self._views[view.name] = view
+        if self._started:
+            self._make_view(view)
+
+    def _make_view(self, v) -> None:
+        import omni.replicator.core as rep
+        import omni.usd
+        from pxr import Gf, UsdGeom, UsdLux
+        st = omni.usd.get_context().get_stage()
+        root = f"{self.robot_path.rsplit('/', 1)[0]}/rsf_live"
+        if not st.GetPrimAtPath(f"{root}/dome"):      # the compiled stage has no lights
+            UsdLux.DomeLight.Define(st, f"{root}/dome").CreateIntensityAttr(1000.0)
+            UsdLux.DistantLight.Define(st, f"{root}/sun").CreateIntensityAttr(2500.0)
+        cam = UsdGeom.Camera.Define(st, f"{root}/{self._prim_name(v.name)}")
+        ha = 20.955                                    # mm, USD's default aperture
+        va = ha * v.height / v.width
+        cam.CreateHorizontalApertureAttr(ha)
+        cam.CreateVerticalApertureAttr(va)
+        cam.CreateFocalLengthAttr(va / (2.0 * math.tan(math.radians(v.fov_deg) / 2.0)))
+        cam.CreateClippingRangeAttr(Gf.Vec2f(0.01, 100.0))
+        xf = UsdGeom.Xformable(cam)
+        xf.ClearXformOpOrder()
+        xf.AddTransformOp().Set(Gf.Matrix4d(*camera_pose(v.eye, v.target).T.ravel().tolist()))
+        rp = rep.create.render_product(str(cam.GetPath()), (int(v.width), int(v.height)))
+        ann = rep.AnnotatorRegistry.get_annotator("rgb")
+        ann.attach([rp])
+        self._annot[v.name] = ann
+
+    def render(self, name: str):
+        """The view *name* of the current state, ``(h, w, 3)`` uint8 RGB (``None`` while the
+        renderer has nothing yet). One app update renders every view; physics does not
+        step in it (``/app/player/playSimulations`` off, as Isaac's ``SimulationContext.render``)."""
+        if not self._started:
+            self._start()
+        if self._rendered_k != self._k:
+            import carb.settings
+            s = carb.settings.get_settings()
+            key = "/app/player/playSimulations"
+            was = s.get(key)
+            s.set_bool(key, False)
+            try:
+                for _ in range(max(1, int(self.p.render_updates))):
+                    _APP.update()
+            finally:
+                if was is not None:
+                    s.set_bool(key, bool(was))
+            self._rendered_k = self._k
+        img = np.asarray(self._annot[name].get_data())
+        if img.ndim != 3 or img.size == 0:
+            return None
+        return img[..., :3].astype(np.uint8, copy=False)
 
     def _path_name(self, i: int):
         from pxr import PhysicsSchemaTools
@@ -225,6 +301,7 @@ class IsaacCell:
                 if progress and len(ts) % 500 == 0:
                     progress(t, time.time() - wall)
             self.physx.update_simulation(p.timestep, k * p.timestep)
+            self._k += 1
         return ExecReport(np.array(ts), np.array(fl), np.array(fp), np.array(qs),
                           {n: np.array(v) for n, v in objs.items()}, contacts, list(traj.get("segments", [])),
                           {"backend": "isaac", "params": dict(vars(p)), "usd": str(self.usd_path),

@@ -219,6 +219,17 @@ tools/isaac/remote_isaac.sh run --collect reports/isaac --cmd "python tools/sim_
     --plan cells/tm_tray/plans/strict_cycle1.json.gz --backend isaac --transfers 2 --out reports/isaac/cycle1.json"
 ```
 
+To watch it while it runs, add a live view (`docs/live_view.md`): `--view 8765` on
+`remote_isaac.sh` and `--live 8765` in the command, then open `http://localhost:8765/`
+here:
+
+```bash
+tools/isaac/remote_isaac.sh run --view 8765 --collect reports/isaac --cmd "python tools/sim_workflow.py \
+    cells/tm_tray/layouts/strict.yaml cells/tm_tray/workflows/inspect_and_sort.yaml \
+    --plan cells/tm_tray/plans/strict_cycle1.json.gz --backend isaac --transfers 2 --out reports/isaac/cycle1.json \
+    --live 8765 --live-hold 60"
+```
+
 The full run:
 
 ```bash

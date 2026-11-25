@@ -9,11 +9,18 @@ plan). ``--set friction.robot=0.3`` etc. changes simulation parameters
 (``rsf.sim.common.SimParams``; Isaac: ``rsf.sim.isaac_cell.IsaacParams``) for
 sensitivity runs. ``--backend isaac`` replays it in Isaac Sim (PhysX) instead of
 MuJoCo: same world, servo and judge (needs Isaac Sim, see ``docs/p5_isaac.md``).
+
+``--live [HOST:]PORT`` serves a live view while it runs: the simulator renders the
+views (Isaac: RTX), a browser shows them at ``http://HOST:PORT/`` and programs read
+``/api/v1/...`` (``rsf.live``, ``docs/live_view.md``). ``--live 8765`` listens on this
+computer only (reach it over SSH: ``tools/isaac/remote_isaac.sh run --view 8765``);
+``--live 0.0.0.0:8765`` on the network.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -56,6 +63,46 @@ def params(sets, backend="mujoco"):
     return p
 
 
+def start_live(a, world, cell, traj, t_end):
+    """The live server and the capture hook of a run (``--live``)."""
+    from rsf.live.capture import LiveCapture
+    from rsf.live.hub import Hub
+    from rsf.live.server import LiveServer, parse_address
+    from rsf.sim.common import View, overview
+    hub = Hub()
+    host, port = parse_address(a.live)
+    server = LiveServer(hub, host, port).start()
+    views = []
+    for spec in a.live_view or ["overview"]:
+        if spec == "overview":
+            views.append(overview(world, width=a.live_size[0], height=a.live_size[1]))
+        else:
+            d = json.loads(spec)
+            d.setdefault("width", a.live_size[0])
+            d.setdefault("height", a.live_size[1])
+            views.append(View.from_spec(d))
+    T = traj["t"]
+    hub.set_info(backend=a.backend, layout=a.layout, workflow=a.workflow, plan=a.plan,
+                 t_end=float(t_end if t_end is not None else T[-1]))
+    cap = LiveCapture(hub, cell, views, fps=a.live_fps, pace=a.live_pace, segments=traj.get("segments", ()),
+                      t_end=float(t_end if t_end is not None else T[-1]), quality=a.live_quality)
+    print(f"[live] {server.url}  (views: {', '.join(v.name for v in views)}; bound to {host}:{server.address[1]})",
+          flush=True)
+    cap.warmup()
+    return server, cap
+
+
+def stop_live(a, server, cap, state="done", **result):
+    cap.finish(state, **result)
+    if a.live_hold:
+        print(f"[live] serving {server.url} {'until Ctrl-C' if a.live_hold < 0 else f'for {a.live_hold:g} s'}", flush=True)
+        try:
+            time.sleep(a.live_hold if a.live_hold > 0 else 1e9)
+        except KeyboardInterrupt:
+            pass
+    server.close()
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("layout")
@@ -67,7 +114,20 @@ def main(argv=None) -> int:
     ap.add_argument("--usd", help="isaac: where to write the compiled stage (default: a temporary file)")
     ap.add_argument("--report", help="also save the raw execution report (.npz)")
     ap.add_argument("--out", required=True)
+    lv = ap.add_argument_group("live view (rsf.live)")
+    lv.add_argument("--live", metavar="[HOST:]PORT", help="serve a live view (default host 127.0.0.1)")
+    lv.add_argument("--live-view", action="append", metavar="SPEC",
+                    help="a view: 'overview' (default) or JSON {name, eye, target, fov_deg, width, height}; repeatable")
+    lv.add_argument("--live-fps", type=float, default=5.0, help="rendered frames per wall-clock second (default 5)")
+    lv.add_argument("--live-size", type=int, nargs=2, metavar=("W", "H"), default=(960, 540))
+    lv.add_argument("--live-pace", type=float, default=0.0,
+                    help="no faster than this x real time (0: as fast as it runs)")
+    lv.add_argument("--live-hold", type=float, default=0.0,
+                    help="seconds to keep serving after the run (-1: until Ctrl-C)")
+    lv.add_argument("--live-quality", type=int, default=80, help="JPEG quality")
     a = ap.parse_args(argv)
+    if a.live and a.backend == "mujoco" and not os.environ.get("DISPLAY"):
+        os.environ.setdefault("MUJOCO_GL", "egl")         # offscreen; MUJOCO_GL=osmesa without a GPU
     from rsf.model.layout import load_world
     from rsf.model.workflow import Workflow
     from rsf.sim import judge as J
@@ -85,8 +145,15 @@ def main(argv=None) -> int:
     else:
         from rsf.sim.mujoco_cell import MujocoCell
         cell = MujocoCell(world, occ, params(a.set))
+    live = start_live(a, world, cell, traj, t_end) if a.live else None
     t0 = time.time()
-    rep = cell.run(traj, t_end=t_end, progress=lambda t, w: print(f"  sim t={t:7.1f} s  wall {w:6.1f} s", flush=True))
+    try:
+        rep = cell.run(traj, t_end=t_end, on_sample=live[1] if live else None,
+                       progress=lambda t, w: print(f"  sim t={t:7.1f} s  wall {w:6.1f} s", flush=True))
+    except BaseException as e:
+        if live:
+            stop_live(a, *live, state="error", error=repr(e))
+        raise
     if a.report:                                      # the raw run, kept even if judging fails
         save_report(rep, a.report)
     res = J.judge(world, wf, rep, occ, traj=traj)
@@ -105,6 +172,10 @@ def main(argv=None) -> int:
     n = sum(t["ok"] for t in res["transfers"])
     print(f"SIM {'PASS' if res['ok'] else 'FAIL'}: {n}/{len(res['transfers'])} transfers "
           f"({res['meta']['sim_seconds']} s simulated, {res['meta']['wall_seconds']} s wall) -> {a.out}")
+    if live:
+        stop_live(a, *live, state="done" if res["ok"] else "failed", ok=res["ok"], passed=n,
+                  transfers=[{k: t[k] for k in ("src", "dst", "ok", "seat_mm", "slip_mm", "track_mm", "carry_tilt_deg")}
+                             for t in res["transfers"]])
     return 0 if res["ok"] else 1
 
 

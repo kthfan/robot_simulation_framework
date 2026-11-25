@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rsf live</title>
+<link rel="stylesheet" href="/web/viewer.css">
+</head>
+<body>
+<header>
+  <span class="brand">rsf live</span>
+  <span id="run" class="muted"></span>
+  <span id="state" class="pill">connecting</span>
+</header>
+<main>
+  <section id="video">
+    <nav id="streams"></nav>
+    <div id="frame"><img id="img" alt="live view"><div id="nosignal">waiting for frames…</div></div>
+  </section>
+  <aside>
+    <dl id="status"></dl>
+    <h3>Result</h3>
+    <div id="result" class="muted">running…</div>
+    <h3>Events</h3>
+    <ol id="events" reversed></ol>
+  </aside>
+</main>
+<script src="/web/viewer.js"></script>
+</body>
+</html>

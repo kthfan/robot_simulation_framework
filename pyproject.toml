@@ -22,6 +22,9 @@ test = ["pytest>=8", "trimesh>=4", "coal>=3", "mujoco>=3.2", "usd-core>=24"]
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"rsf.live" = ["web/*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]

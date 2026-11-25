@@ -23,29 +23,12 @@ sys.path.insert(0, str(ROOT / "src"))
 
 import numpy as np  # noqa: E402
 
-COLORS = {"robot": (0.62, 0.64, 0.68, 1), "gripper": (0.25, 0.27, 0.30, 1), "tray": (0.93, 0.55, 0.15, 1),
-          "jig": (0.30, 0.50, 0.80, 1), "static": (0.82, 0.82, 0.80, 1), "floor": (0.55, 0.56, 0.58, 1)}
-
-
 def colour(m, objects):
     import mujoco
-    for g in range(m.ngeom):
-        b = m.body(m.geom_bodyid[g]).name
-        n = m.geom(g).name
-        if b.startswith("robot/"):
-            c = "gripper" if any(k in b for k in ("gripper", "flange")) else "robot"
-        elif b in objects:
-            c = "tray"
-        elif n.startswith("jig/"):
-            c = "jig"
-        elif n == "floor":
-            c = "floor"
-        else:
-            c = "static"
-        m.geom_rgba[g] = COLORS[c]
+
+    from rsf.sim.mujoco_cell import style
+    style(m, objects)
     m.vis.global_.offwidth, m.vis.global_.offheight = 1280, 960
-    m.vis.headlight.ambient[:] = 0.45
-    m.vis.headlight.diffuse[:] = 0.55
     return mujoco
 
 

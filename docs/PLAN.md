@@ -355,6 +355,8 @@ M3 碰撞判定移植、World→MuJoCo 編譯器。D29 夾爪 strict／as_built 
   偵測率與位姿誤差對這些條件的關係。
 - ~~slot 位置擾動後的定位與修正~~：strict 完成（2026-11-23，見下方進度）；as_built／recommended、執行中逐 slot 讀取尚未做。
 - ~~放寬攜帶限制~~：完成（2026-11-23，見下方進度）。
+- **實時檢視（P7，2026-11-25）**：模擬端渲染（Isaac RTX）、HTTP API + 瀏覽器檢視器、可在另一台主機看；
+  第一版 MJPEG 完成（`docs/live_view.md`），Isaac 渲染待 GPU 驗證。之後：WebRTC、控制、錄影、debug console 等。
 
 ### 仍待確認
 - cuRobo CPU 移植是否進行、範圍（見 `docs/curobo_cpu_port.md` §4），以及是否把 kthfan/curobo 加入此 session。

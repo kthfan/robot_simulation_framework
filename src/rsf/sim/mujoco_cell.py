@@ -31,6 +31,30 @@ from rsf.sim.common import ARM_KP, ARM_KV, ExecReport, Reference, SimParams, T_o
 
 _T = T_of
 
+#: Colours of rendered views (the compiled model's own are for collision debugging).
+COLORS = {"robot": (0.62, 0.64, 0.68, 1), "gripper": (0.25, 0.27, 0.30, 1), "tray": (0.93, 0.55, 0.15, 1),
+          "jig": (0.30, 0.50, 0.80, 1), "static": (0.82, 0.82, 0.80, 1), "floor": (0.55, 0.56, 0.58, 1)}
+
+
+def style(m, objects) -> None:
+    """Colour the geoms of a cell model by role and light it for pictures (visual only)."""
+    for g in range(m.ngeom):
+        b = m.body(m.geom_bodyid[g]).name
+        n = m.geom(g).name
+        if b.startswith(ROBOT_PREFIX):
+            c = "gripper" if any(k in b for k in ("gripper", "flange")) else "robot"
+        elif b in objects:
+            c = "tray"
+        elif n.startswith("jig/"):
+            c = "jig"
+        elif n == "floor":
+            c = "floor"
+        else:
+            c = "static"
+        m.geom_rgba[g] = COLORS[c]
+    m.vis.headlight.ambient[:] = 0.45
+    m.vis.headlight.diffuse[:] = 0.55
+
 
 class MujocoCell:
     def __init__(self, world, occupancy: Optional[dict] = None, params: Optional[SimParams] = None,
@@ -90,6 +114,49 @@ class MujocoCell:
         self.flange_id = m.body(ROBOT_PREFIX + flange).id
         self.robot_body = np.array([m.body(i).name.startswith(ROBOT_PREFIX) for i in range(m.nbody)])
         self.obj_id = {n: m.body(n).id for n in self.object_names}
+
+    # ── views: pictures of the run (visual only; the physics is not touched) ──
+    def add_view(self, view) -> None:
+        """A camera :meth:`render` can draw (:class:`rsf.sim.common.View`)."""
+        mj, m = self.mj, self.m
+        if not hasattr(self, "_views"):
+            self._views, self._renderers = {}, {}
+            self.d_view = mj.MjData(m)
+            style(m, set(self.object_names))
+        m.vis.global_.offwidth = max(int(m.vis.global_.offwidth), int(view.width))
+        m.vis.global_.offheight = max(int(m.vis.global_.offheight), int(view.height))
+        self._views[view.name] = view
+        self._renderers.pop(view.name, None)
+
+    def render(self, name: str) -> np.ndarray:
+        """The view *name* of the current state, ``(h, w, 3)`` uint8 RGB."""
+        mj, m = self.mj, self.m
+        v = self._views[name]
+        r = self._renderers.get(name)
+        if r is None:
+            r = self._renderers[name] = mj.Renderer(m, int(v.height), int(v.width))
+        dv = self.d_view                          # fresh kinematics of the state (d.xpos lags a step)
+        dv.qpos[:] = self.d.qpos
+        mj.mj_kinematics(m, dv)
+        mj.mj_camlight(m, dv)
+        eye, target = np.asarray(v.eye, float), np.asarray(v.target, float)
+        f = target - eye
+        dist = float(np.linalg.norm(f))
+        f /= dist
+        cam = mj.MjvCamera()
+        cam.type = mj.mjtCamera.mjCAMERA_FREE
+        cam.lookat[:] = target
+        cam.distance = dist
+        cam.azimuth = math.degrees(math.atan2(f[1], f[0]))
+        cam.elevation = math.degrees(math.asin(max(-1.0, min(1.0, f[2]))))
+        m.vis.global_.fovy = float(v.fov_deg)
+        r.update_scene(dv, cam)
+        return r.render()
+
+    def close_views(self) -> None:
+        for r in getattr(self, "_renderers", {}).values():
+            r.close()
+        self._renderers = {}
 
     # ── helpers ────────────────────────────────────────────────────────────
     def _qadr(self, names):

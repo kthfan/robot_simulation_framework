@@ -52,16 +52,19 @@ class LiveClient:
                 line = raw.decode().rstrip("\r\n")
                 if not line:
                     if data:
-                        yield kind, json.loads("\n".join(data))
+                        d = json.loads("\n".join(data))
+                        yield (d.get("kind", kind) if kind == "event" else kind), d
                     kind, data = "message", []
                 elif line.startswith("event:"):
                     kind = line[6:].strip()
                 elif line.startswith("data:"):
                     data.append(line[5:].strip())
 
-    def mjpeg(self, stream: str, fps: float = 0.0) -> Iterator[tuple]:
-        """``(jpeg, headers)`` of every frame of *stream* as it is published."""
+    def mjpeg(self, stream: str, fps: float = 0.0, repeats: bool = False) -> Iterator[tuple]:
+        """``(jpeg, headers)`` of every frame of *stream* as it is published (the server
+        repeats the latest frame for browsers; *repeats* keeps those)."""
         q = f"?fps={fps}" if fps else ""
+        last = None
         with self._get(f"/api/v1/video/{stream}/mjpeg{q}") as r:
             while True:
                 line = r.readline()
@@ -76,4 +79,7 @@ class LiveClient:
                         break
                     k, _, v = h.partition(":")
                     headers[k.strip().lower()] = v.strip()
-                yield r.read(int(headers["content-length"])), headers
+                jpeg = r.read(int(headers["content-length"]))
+                if repeats or headers.get("x-frame-seq") != last:
+                    last = headers.get("x-frame-seq")
+                    yield jpeg, headers

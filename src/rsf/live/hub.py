@@ -77,10 +77,10 @@ class Hub:
             self.status_seq += 1
             self.cond.notify_all()
 
-    def event(self, kind: str, **data) -> dict:
+    def event(self, kind: str, /, **data) -> dict:
         with self.cond:
             self.event_seq += 1
-            e = {"seq": self.event_seq, "kind": kind, "wall": time.time(), **data}
+            e = {**data, "seq": self.event_seq, "kind": kind, "wall": time.time()}
             self.events.append(e)
             del self.events[:-self._max]
             self.cond.notify_all()
