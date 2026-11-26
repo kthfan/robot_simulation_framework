@@ -12,3 +12,6 @@ cells/*/plans/*.json
 !cells/*/plans/*.summary.json
 !cells/*/plans/gpu/*.json
 MUJOCO_LOG.TXT
+
+# agent worktrees (temporary)
+.claude/worktrees/
