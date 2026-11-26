@@ -18,7 +18,7 @@ bash cells/example_pick_place/run.sh      # the same through the command-line to
 
 | Area you changed | Tests to run |
 |---|---|
-| `rsf.model` (layout, world, workflow, registry, audit) | `test_tm_tray_layout.py`, `test_workflow_audit.py`, `test_example_cell.py` |
+| `rsf.model` (layout, world, workflow, registry, audit) | `test_tm_tray_layout.py`, `test_workflow_audit.py`, `test_usd_model.py`, `test_example_cell.py` |
 | `rsf.kinematics`, `rsf.collision` | `test_kinematics_reach.py`, `test_collision.py`, `test_m3_collision.py` |
 | `rsf.planning` | `test_teach.py`, `test_plan.py`, `test_rrt.py`, `test_example_cell.py` |
 | `rsf.compile`, `rsf.sim` | `test_compile_mjcf.py`, `test_usd.py`, `test_sim.py`, `test_vision.py`, `test_example_cell.py` |
@@ -94,7 +94,9 @@ before changing the module.
   usd-core` or `opencv-python` into an Isaac venv.
 - MuJoCo and PhysX collide meshes as convex hulls; the planner (coal) uses
   exact triangles. Concave parts must be split into convex pieces, or the
-  simulation disagrees with the plan.
+  simulation disagrees with the plan (the audit's `rsf.convex_meshes` warns).
+- A USD file that does not author `metersPerUnit` / `upAxis` is centimetres and
+  Y up (USD's fallbacks). Tests that write USD set both.
 - A skill's first waypoint must arrive `free` (the engine rejects anything
   else).
 - The audit runs every *loaded* plugin's checks unless the layout lists

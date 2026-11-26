@@ -40,10 +40,11 @@ entities:                                   # built in order
 
 objects:                                    # movable things; a template at every selected feature
   block:
-    urdf: ../assets/block.urdf
+    model: ../assets/block.usda             # a model is a URDF or a USD file (docs/cell_model.md, Models)
+    prim: /block                            # the part's root prim: its frame is the block's frame
     at: {kind: slot}
     initially: all                          # templates everywhere; the workflow says where blocks really start
-    # mass: from the URDF's inertial (0.2 kg)
+    # mass: from the USD's physics:mass (0.2 kg); `mass:` here would override it
 
 robot:
   urdf: ../assets/arm_gripper.urdf

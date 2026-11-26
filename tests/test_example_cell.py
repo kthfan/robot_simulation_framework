@@ -18,6 +18,7 @@ from rsf.model.workflow import Workflow, expand
 
 pytest.importorskip("eaik")
 pytest.importorskip("coal")
+pytest.importorskip("pxr")          # the block is a USD model
 
 CELL = Path(__file__).resolve().parents[1] / "cells" / "example_pick_place"
 LAYOUT = CELL / "layouts" / "main.yaml"

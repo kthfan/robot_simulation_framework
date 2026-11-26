@@ -4,7 +4,7 @@ A cell is three kinds of file, all under `cells/<cell>/`:
 
 | File | Says | Format |
 |---|---|---|
-| `assets/` (+ `asset_spec.yaml`) | what the hardware is: robot, tool, fixtures, objects | URDF + meshes |
+| `assets/` (+ `asset_spec.yaml`) | what the hardware is: robot, tool, fixtures, objects | URDF + meshes (robot); URDF or USD (parts) |
 | `layouts/*.yaml` | where everything stands in this installation | `rsf.layout/1` |
 | `workflows/*.yaml` | what the cell does, in what order | `rsf.workflow/1` |
 | `plugin/<name>/` | cell-specific generators, checks, skills, schedulers | Python package |
@@ -51,7 +51,71 @@ audit: ["tm_tray.*", "rsf.*"]     # optional: which checks run (default all)
   nothing. Variants are small files that `extends:` a record (`strict.yaml`
   changes one number of `as_built.yaml`).
 - **Paths** are relative to the file that wrote them, also across `extends`.
-- URDF meshes that are exact axis-aligned boxes become box solids.
+- Meshes that are exactly boxes (8 corners, any orientation) become box solids.
+- A key set to `null` in a variant removes it (`urdf: null` with `model: ...` switches a
+  part from URDF to USD in an `extends:` file).
+
+### Models: URDF or USD
+
+`entities` (without a generator), `placements` and `objects` take a **model**: the
+solids of one part, placed relative to each other. Write `model: <file>`; the older
+`urdf: <file>` still works. The file's suffix decides how it is read:
+
+| Suffix | Read as | Options |
+|---|---|---|
+| `.urdf` | every link's `<collision>` at joint values 0; mass: the links' `<inertial>` masses | — |
+| `.usd`, `.usda`, `.usdc`, `.usdz` | `rsf.model.usd_model` (needs `pxr`: `pip install usd-core`, or Isaac Sim's own) | `prim`, `collision`, `frames` |
+
+```yaml
+placements:
+  jig:  {model: ../assets/jig.usd, prim: /jig, at: {kind: slot}}
+objects:
+  tray: {model: ../assets/tray.usdc, prim: /tray, mass: 1.2, at: {kind: slot}}
+entities:
+  rack: {model: ../assets/rack.usda, prim: /rack, pose: {xyz: [1, 0, 0]},
+         collision: ["/rack/collision/*"],
+         frames: {prims: "/rack/slots/*", kind: slot}}
+```
+
+How a USD file is read:
+
+- **`prim`**: the part's root. Its frame is the part's frame (where `pose` / `at` put
+  it); only prims under it are read. Default: the whole stage, in the stage's frame.
+- **Units and axes**: `metersPerUnit` scales to metres; a `Y`-up stage is turned so +Y
+  becomes +Z. A stage that authors neither gets USD's fallbacks, **centimetres and
+  Y up**. If a part comes out 100× too small or lying on its side, check what the file
+  authors (`UsdModel.meters_per_unit`, `.up_axis`).
+- **Which prims collide**, the first rule that selects anything:
+  1. `collision: [glob, ...]` (USD paths; a prim matches when it or an ancestor does);
+  2. prims with `UsdPhysics.CollisionAPI` (as Isaac Sim and physics exporters mark them);
+  3. all geometry; `guide` purpose never; `render` purpose is left out when `proxy`
+     prims stand for it.
+- **Shapes**:
+  - `Mesh` polygons are triangulated.
+  - `Cube` is a box.
+  - `Sphere` and `Cylinder` stay exact under a uniform scale, and are otherwise
+    triangulated.
+  - `Capsule` and `Cone` are triangulated.
+  - Scale, shear and mirrors are baked into the vertices.
+  - Instanced prims are read through their prototypes.
+  - Non-box meshes are written once as OBJ files into the mesh cache (`RSF_CACHE`,
+    default `~/.cache/rsf`), because every backend reads meshes from files.
+- **Names**: a solid is named by its prim path below `prim`, e.g.
+  `jig/incoming/L0/C0/Geometry/Cube_01`.
+- **Mass** (objects): the layout's `mass:`, else `physics:mass` of `UsdPhysics.MassAPI`
+  on `prim` (or summed over the bodies under it), with `kilogramsPerUnit` applied.
+  The audit warns about an object without a mass (`rsf.object_mass`).
+- **`frames`** (entities, placements): prims matching `prims` become features named
+  `<entity>/<prim name>` of `kind`. Their attributes come from the prim's `customData`
+  under `rsf`: `customData = {dictionary rsf = {string role = "source"}}`.
+
+**Concave meshes.** MuJoCo and PhysX collide every mesh as its convex hull; the planner
+(coal) uses its exact triangles. A pocket or recess in one mesh therefore exists in the
+plan but not in the simulation. The audit's `rsf.convex_meshes` warns when a mesh's
+hull is more than 5 % larger than the mesh. Split such parts into convex pieces in the
+USD.
+
+The robot stays a URDF: IK, the planner and the simulators need its joints.
 
 Built-in generators (any cell):
 

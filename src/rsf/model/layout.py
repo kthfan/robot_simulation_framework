@@ -9,13 +9,14 @@
     process: {...}                  # free-form cell process parameters
     entities:                       # built in order; later ones may use earlier features
       pedestal: {generator: tm_tray.pedestal, params: {...}}
-      fence:    {urdf: assets/fence.urdf, pose: {xyz: [0, 1, 0], rpy: [0, 0, 0]}}
+      fence:    {model: assets/fence.urdf, pose: {xyz: [0, 1, 0], rpy: [0, 0, 0]}}
+      rack:     {model: assets/rack.usd, prim: /rack, frames: {prims: "/rack/slots/*", kind: slot}}
       incoming: {generator: ..., params: {...},
                  displace: {xyz: [0.006, -0.004, 0], rpy: [0, 0, 0.01], about: [1.0, 0, 0]}}
     placements:                     # one fixed copy per selected feature
-      jig: {urdf: ..., at: {kind: slot}, offset: {xyz: [...]}}
+      jig: {model: ..., at: {kind: slot}, offset: {xyz: [...]}}
     objects:                        # movable things, initially at selected features
-      tray: {urdf: ..., at: {kind: slot}, offset: {...}, initially: all}
+      tray: {model: ..., at: {kind: slot}, offset: {...}, initially: all, mass: 1.2}
     robot: {urdf: ..., base: {feature: pedestal/arm_base}, tool_frame: flange}
 
 ``displace`` moves a built entity rigidly in the world (where it really stands, or
@@ -24,6 +25,12 @@ later built on those features (placements, objects). The rotation is about
 ``about`` (a world point; default the origin), then ``xyz`` is added; or
 ``{matrix}``. Features whose attributes encode their pose are rebuilt by a
 ``feature_move`` hook registered for their kind.
+
+A **model** (``model:``, or the older ``urdf:``) is a URDF or a USD file
+(``.usd/.usda/.usdc/.usdz``), told apart by its suffix: the solids of a part, placed
+together. USD options (``rsf.model.usd_model``): ``prim`` (the part's root prim and
+frame), ``collision`` (prim globs), ``frames`` (``{prims: glob, kind}``: prims that
+become features of an entity or placement). ``mass`` (objects) overrides the model's.
 
 Paths are relative to the YAML file that wrote them. Overrides are dotted paths
 into the resolved document (``entities.pedestal.params.leg_height``); a path
@@ -48,7 +55,12 @@ from rsf.model.world import Entity, Feature, ObjectInstance, RobotSpec, Solid, W
 SCHEMA = "rsf.layout/1"
 TOP_KEYS = {"schema", "name", "description", "extends", "plugins", "process", "entities",
             "placements", "objects", "robot", "audit"}
-_PATH_KEYS = {"urdf", "mesh"}
+_PATH_KEYS = {"urdf", "mesh", "model"}
+#: keys of a model-based entry, by section (generators have their own params)
+_MODEL_KEYS = {"urdf", "model", "prim", "collision", "frames"}
+_SECTION_KEYS = {"entities": _MODEL_KEYS | {"pose", "tags", "kind", "displace"},
+                 "placements": _MODEL_KEYS | {"at", "offset", "tags", "kind"},
+                 "objects": (_MODEL_KEYS - {"frames"}) | {"at", "offset", "initially", "mass"}}
 
 
 class LayoutError(ValueError):
@@ -189,12 +201,55 @@ def parse_pose(spec: Optional[dict], ctx: Optional[BuildContext] = None) -> np.n
     return base @ se3.make_T(R, np.asarray(spec.get("xyz", (0.0, 0.0, 0.0)), dtype=float))
 
 
-def _urdf_entity(name: str, spec: dict, ctx: BuildContext) -> Entity:
-    model = UrdfModel.from_file(spec["urdf"])
+@dataclass
+class _Model:
+    """A layout entry's model: solids in its own frame, mass, named frames."""
+    source: Path
+    solids: list
+    mass: Optional[float]
+    frames: dict            #: name -> (T, attrs)
+    kind: str               #: urdf | usd
+
+
+def load_model(spec: dict, where: str, section: str) -> _Model:
+    """The ``model:`` / ``urdf:`` of a layout entry (``where``: its name, for errors)."""
+    from rsf.model import usd_model
+    spec = {k: v for k, v in spec.items() if v is not None}      # null: unset (a variant switching urdf -> model)
+    unknown = set(spec) - _SECTION_KEYS[section]
+    if unknown:
+        raise LayoutError(f"{section} {where!r}: unknown key(s) {sorted(unknown)}")
+    if ("model" in spec) == ("urdf" in spec):
+        raise LayoutError(f"{section} {where!r}: needs exactly one of 'model' and 'urdf'")
+    path = Path(spec.get("model") or spec["urdf"])
+    suffix = path.suffix.lower()
+    if suffix in usd_model.SUFFIXES:
+        try:
+            m = usd_model.load(path, spec.get("prim"), spec.get("collision"), spec.get("frames"))
+        except usd_model.UsdError as e:
+            raise LayoutError(f"{section} {where!r}: {e}") from None
+        return _Model(path, list(m.solids), m.mass, dict(m.frames), "usd")
+    if suffix != ".urdf":
+        raise LayoutError(f"{section} {where!r}: {path.name}: a model is .urdf or {'/'.join(usd_model.SUFFIXES)}")
+    usd_only = {"prim", "collision", "frames"} & set(spec)
+    if usd_only:
+        raise LayoutError(f"{section} {where!r}: {sorted(usd_only)} apply to USD models only")
+    model = UrdfModel.from_file(path)
+    mass = sum(l.mass or 0.0 for l in model.links.values()) or None
+    return _Model(path, solids_from_urdf(model), mass, {}, "urdf")
+
+
+def _frame_features(m: _Model, spec: dict, owner: str, T: np.ndarray) -> tuple:
+    kind = (spec.get("frames") or {}).get("kind", "frame")
+    return tuple(Feature(f"{owner}/{n}", T @ Tf, kind, owner, dict(attrs)) for n, (Tf, attrs) in m.frames.items())
+
+
+def _model_entity(name: str, spec: dict, ctx: BuildContext) -> Entity:
+    m = load_model(spec, name, "entities")
     T = parse_pose(spec.get("pose"), ctx)
     tags = frozenset(spec.get("tags", [])) | {name}
-    solids = tuple(s.moved(T) for s in solids_from_urdf(model, prefix=f"{name}/", entity=name, tags=tags))
-    return Entity(name, spec.get("kind", "static"), solids, (), {"urdf": spec["urdf"]})
+    solids = tuple(Solid(f"{name}/{s.name}", T @ s.T, s.shape, name, tags) for s in m.solids)
+    return Entity(name, spec.get("kind", "static"), solids, _frame_features(m, spec, name, T),
+                  {"model": str(m.source)})
 
 
 def displacement(spec: Optional[dict]) -> np.ndarray:
@@ -239,10 +294,10 @@ def _build_entity(name: str, spec: dict, ctx: BuildContext) -> Entity:
         ent = registry.get("generator", spec["generator"])(name, dict(spec.get("params") or {}), ctx)
         if ent.name != name:
             raise LayoutError(f"generator {spec['generator']} returned entity {ent.name!r} for {name!r}")
-    elif "urdf" in spec:
-        ent = _urdf_entity(name, spec, ctx)
+    elif spec.get("urdf") is not None or spec.get("model") is not None:
+        ent = _model_entity(name, spec, ctx)
     else:
-        raise LayoutError(f"entity {name!r} needs a generator or a urdf")
+        raise LayoutError(f"entity {name!r} needs a generator or a model")
     if spec.get("displace"):
         ent = displace_entity(ent, displacement(spec["displace"]))
     return ent
@@ -251,8 +306,8 @@ def _build_entity(name: str, spec: dict, ctx: BuildContext) -> Entity:
 def _placements(doc: dict, ctx: BuildContext) -> list:
     out = []
     for pname, spec in (doc.get("placements") or {}).items():
-        model = UrdfModel.from_file(spec["urdf"])
-        local = solids_from_urdf(model)
+        m = load_model(spec, pname, "placements")
+        local = m.solids
         off = parse_pose(spec.get("offset"))
         targets = ctx.features(spec["at"])
         if not targets:
@@ -262,17 +317,17 @@ def _placements(doc: dict, ctx: BuildContext) -> list:
             tags = frozenset(spec.get("tags", [])) | {pname, f"at:{f.key}"}
             T = f.T @ off
             solids = tuple(Solid(f"{ename}/{s.name}", T @ s.T, s.shape, ename, tags) for s in local)
-            out.append(Entity(ename, spec.get("kind", "fixture"), solids, (), {"at": f.key, "urdf": spec["urdf"]}))
+            out.append(Entity(ename, spec.get("kind", "fixture"), solids, _frame_features(m, spec, ename, T),
+                              {"at": f.key, "model": str(m.source)}))
     return out
 
 
 def _objects(doc: dict, ctx: BuildContext, occupancy: Optional[dict]) -> list:
     out = []
     for oname, spec in (doc.get("objects") or {}).items():
-        model = UrdfModel.from_file(spec["urdf"])
-        local = tuple(Solid(s.name, s.T, s.shape, oname, frozenset({oname, "object"}))
-                      for s in solids_from_urdf(model))
-        mass = sum(l.mass or 0.0 for l in model.links.values()) or None
+        m = load_model(spec, oname, "objects")
+        local = tuple(Solid(s.name, s.T, s.shape, oname, frozenset({oname, "object"})) for s in m.solids)
+        mass = float(spec["mass"]) if spec.get("mass") is not None else m.mass
         off = parse_pose(spec.get("offset"))
         candidates = ctx.features(spec["at"])
         if occupancy is not None and oname in occupancy:
@@ -285,8 +340,7 @@ def _objects(doc: dict, ctx: BuildContext, occupancy: Optional[dict]) -> list:
             raise LayoutError(f"object {oname!r}: not a place for it: {sorted(unknown)}")
         for f in candidates:
             if f.key in keys:
-                out.append(ObjectInstance(f"{oname}/{f.key}", oname, local, f.T @ off, f.key, mass,
-                                          Path(spec["urdf"])))
+                out.append(ObjectInstance(f"{oname}/{f.key}", oname, local, f.T @ off, f.key, mass, m.source))
     return out
 
 

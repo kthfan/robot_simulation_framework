@@ -1,141 +1,141 @@
 {
  "schema": "rsf.trajectory_summary/1",
- "duration": 35.151,
- "samples": 3201,
+ "duration": 38.572,
+ "samples": 3535,
  "segments": [
   {
    "name": "free001:pick:stand_a/top/above",
    "kind": "free",
    "t0": 0.0,
-   "t1": 3.8295,
+   "t1": 5.3025,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:stand_a/top/grasp",
    "kind": "line",
-   "t0": 3.8295,
-   "t1": 6.0295,
+   "t0": 5.3025,
+   "t1": 7.5025,
    "caps": "near",
    "event": ""
   },
   {
    "name": "pick:stand_a/top/grasp:act",
    "kind": "hold",
-   "t0": 6.0295,
-   "t1": 6.6695,
+   "t0": 7.5025,
+   "t1": 8.1425,
    "caps": null,
    "event": "close the fingers"
   },
   {
    "name": "pick:stand_a/top/lift",
    "kind": "line",
-   "t0": 6.6695,
-   "t1": 8.8695,
+   "t0": 8.1425,
+   "t1": 10.3425,
    "caps": "near",
    "event": ""
   },
   {
    "name": "free002:place:stand_c/top/above",
    "kind": "free",
-   "t0": 8.8695,
-   "t1": 11.9373,
+   "t0": 10.3425,
+   "t1": 13.3508,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:stand_c/top/place_down",
    "kind": "line",
-   "t0": 11.9373,
-   "t1": 14.1373,
+   "t0": 13.3508,
+   "t1": 15.5508,
    "caps": "near",
    "event": ""
   },
   {
    "name": "place:stand_c/top/place_down:act",
    "kind": "hold",
-   "t0": 14.1373,
-   "t1": 14.7773,
+   "t0": 15.5508,
+   "t1": 16.1908,
    "caps": null,
    "event": "open the fingers"
   },
   {
    "name": "place:stand_c/top/retreat",
    "kind": "line",
-   "t0": 14.7773,
-   "t1": 16.9773,
+   "t0": 16.1908,
+   "t1": 18.3908,
    "caps": "near",
    "event": ""
   },
   {
    "name": "free003:pick:stand_b/top/above",
    "kind": "free",
-   "t0": 16.9773,
-   "t1": 18.1208,
+   "t0": 18.3908,
+   "t1": 19.5343,
    "caps": "empty",
    "event": ""
   },
   {
    "name": "pick:stand_b/top/grasp",
    "kind": "line",
-   "t0": 18.1208,
-   "t1": 20.3208,
+   "t0": 19.5343,
+   "t1": 21.7343,
    "caps": "near",
    "event": ""
   },
   {
    "name": "pick:stand_b/top/grasp:act",
    "kind": "hold",
-   "t0": 20.3208,
-   "t1": 20.9608,
+   "t0": 21.7343,
+   "t1": 22.3743,
    "caps": null,
    "event": "close the fingers"
   },
   {
    "name": "pick:stand_b/top/lift",
    "kind": "line",
-   "t0": 20.9608,
-   "t1": 23.1608,
+   "t0": 22.3743,
+   "t1": 24.5743,
    "caps": "near",
    "event": ""
   },
   {
    "name": "free004:place:stand_d/top/above",
    "kind": "free",
-   "t0": 23.1608,
-   "t1": 26.1577,
+   "t0": 24.5743,
+   "t1": 27.642,
    "caps": "carry",
    "event": ""
   },
   {
    "name": "place:stand_d/top/place_down",
    "kind": "line",
-   "t0": 26.1577,
-   "t1": 28.3577,
+   "t0": 27.642,
+   "t1": 29.842,
    "caps": "near",
    "event": ""
   },
   {
    "name": "place:stand_d/top/place_down:act",
    "kind": "hold",
-   "t0": 28.3577,
-   "t1": 28.9977,
+   "t0": 29.842,
+   "t1": 30.482,
    "caps": null,
    "event": "open the fingers"
   },
   {
    "name": "place:stand_d/top/retreat",
    "kind": "line",
-   "t0": 28.9977,
-   "t1": 31.1977,
+   "t0": 30.482,
+   "t1": 32.682,
    "caps": "near",
    "event": ""
   },
   {
    "name": "free005:home",
    "kind": "free",
-   "t0": 31.1977,
-   "t1": 35.1505,
+   "t0": 32.682,
+   "t1": 38.5721,
    "caps": "empty",
    "event": ""
   }
@@ -148,6 +148,6 @@
   "paths": "cpu",
   "problems": [],
   "ok": true,
-  "seconds": 9.0
+  "seconds": 14.0
  }
 }

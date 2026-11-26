@@ -50,11 +50,34 @@ def variant_urdf(job: dict, lock: dict, carried, workdir: Path) -> Path:
             d = np.array(b["dims"]) / 2.0
             p = write_box_obj(workdir / f"carried_{i}.obj", -d, d)
             geos.append(Geometry("mesh", np.array(b["pose_in_link"]), name=f"carried_{i}", filename=str(p), path=p))
+        for i, b in enumerate(carried.get("meshes", [])):      # non-box parts (USD models), embedded
+            p = obj_file(b["vertices"], b["faces"], workdir)
+            geos.append(Geometry("mesh", np.array(b["pose_in_link"]), name=f"carried_m{i}", filename=str(p), path=p))
         m.add_link(Link("carried_object", visuals=list(geos), collisions=list(geos), mass=1.0))
         m.add_joint(Joint("carried_object_joint", "fixed", carried["link"], "carried_object", np.eye(4)))
     tag = hashlib.sha1(json.dumps([lock, carried], sort_keys=True).encode()).hexdigest()[:10]
     out = urdf.parent / f"_rsf_variant_{tag}.urdf"          # beside the original: relative mesh paths hold
     out.write_text(m.to_xml(relative_to=out.parent))
+    return out
+
+
+def obj_file(vertices, faces, workdir: Path) -> Path:
+    """Embedded mesh arrays as an OBJ file in *workdir* (named by content)."""
+    from rsf.model.usd_model import write_obj
+    return write_obj(np.asarray(vertices, float), np.asarray(faces, int), workdir / "meshes")
+
+
+def materialize(scene: dict, workdir: Path) -> dict:
+    """A job scene with every mesh as a file cuRobo can load here: relative paths are
+    the repository's, embedded ``vertices`` / ``faces`` are written out."""
+    out = {k: dict(v) for k, v in scene.items()}
+    for name, e in list(out.get("mesh", {}).items()):
+        e = dict(e)
+        if "vertices" in e:
+            e["file_path"] = str(obj_file(e.pop("vertices"), e.pop("faces"), workdir))
+        elif not Path(e["file_path"]).is_absolute():
+            e["file_path"] = str(ROOT / e["file_path"])
+        out["mesh"][name] = e
     return out
 
 
@@ -169,11 +192,14 @@ def main(argv=None) -> int:
 
     job = json.loads(Path(a.job).read_text())
     scenes = job.get("scenes", {})
+    work = Path("/tmp/rsf_variants")
+    work.mkdir(parents=True, exist_ok=True)
+    scenes = {k: materialize(v, work) for k, v in scenes.items()}
     for s in job["segments"]:                                  # scenes stored once, by id
         if isinstance(s["scene"], str):
             s["scene"] = scenes[s["scene"]]
-    work = Path("/tmp/rsf_variants")
-    work.mkdir(parents=True, exist_ok=True)
+        else:
+            s["scene"] = materialize(s["scene"], work)
     groups = {}
     for s in job["segments"]:
         key = json.dumps([s["lock_joints"], s["carried"]], sort_keys=True)

@@ -97,7 +97,7 @@
   },
   "prefer": {
    "branch": {
-    "joint_3": -1,
+    "joint_3": 1,
     "joint_5": -1
    },
    "q_ref": [
@@ -109,7 +109,7 @@
     0.0
    ]
   },
-  "seconds": 4.0
+  "seconds": 3.7
  },
  "ok": true,
  "sequences": [
@@ -126,12 +126,12 @@
      "sequence": "pick:stand_a/top",
      "name": "above",
      "q": [
-      2.276786,
-      -0.027118,
-      -1.758676,
-      0.215449,
-      4.711886,
-      0.70599
+      -0.311199,
+      0.668434,
+      0.876296,
+      -3.116945,
+      4.711698,
+      -1.881996
      ],
      "xyz": [
       0.45,
@@ -140,7 +140,7 @@
      ],
      "quat_wxyz": [
       0.0,
-      1.0,
+      -1.0,
       -0.0,
       -0.0
      ],
@@ -157,10 +157,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.084633,
-     "limit_margin": 0.911678,
+     "manipulability": 0.066195,
+     "limit_margin": 1.484221,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": 1
      },
      "action": ""
@@ -169,12 +169,12 @@
      "sequence": "pick:stand_a/top",
      "name": "grasp",
      "q": [
-      2.276786,
-      -0.110321,
-      -1.945314,
-      0.485289,
-      4.711886,
-      0.70599
+      -0.311199,
+      0.694989,
+      1.091893,
+      -3.359097,
+      4.711698,
+      -1.881996
      ],
      "xyz": [
       0.45,
@@ -184,8 +184,8 @@
      "quat_wxyz": [
       0.0,
       1.0,
-      -0.0,
-      -0.0
+      0.0,
+      0.0
      ],
      "joints": {
       "finger_right_joint": 0.035,
@@ -195,15 +195,15 @@
      "clearance": 0.01,
      "margin": 0.005,
      "nearest": [
-      "finger_left",
+      "finger_right",
       "stand_a"
      ],
      "along_slack": 0.005,
-     "along_samples": 21,
-     "manipulability": 0.080178,
-     "limit_margin": 0.72504,
+     "along_samples": 20,
+     "manipulability": 0.076458,
+     "limit_margin": 1.484221,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": 1
      },
      "action": "close the fingers"
@@ -212,12 +212,12 @@
      "sequence": "pick:stand_a/top",
      "name": "lift",
      "q": [
-      2.276786,
-      -0.027118,
-      -1.758676,
-      0.215449,
-      4.711886,
-      0.70599
+      -0.311199,
+      0.668434,
+      0.876296,
+      -3.116945,
+      4.711698,
+      -1.881996
      ],
      "xyz": [
       0.45,
@@ -226,9 +226,9 @@
      ],
      "quat_wxyz": [
       0.0,
-      1.0,
+      -1.0,
       -0.0,
-      -0.0
+      0.0
      ],
      "joints": {
       "finger_right_joint": 0.018,
@@ -241,12 +241,12 @@
       "link_1",
       "floor"
      ],
-     "along_slack": 0.00476,
-     "along_samples": 21,
-     "manipulability": 0.084633,
-     "limit_margin": 0.911678,
+     "along_slack": 0.005,
+     "along_samples": 20,
+     "manipulability": 0.066195,
+     "limit_margin": 1.484221,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": 1
      },
      "action": ""
@@ -266,12 +266,12 @@
      "sequence": "place:stand_c/top",
      "name": "above",
      "q": [
-      3.146477,
-      0.137291,
-      -1.912795,
-      0.20511,
-      4.711065,
-      1.575681
+      0.638616,
+      0.479024,
+      1.180096,
+      -3.230793,
+      4.712408,
+      -0.932181
      ],
      "xyz": [
       0.45,
@@ -297,11 +297,11 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.070315,
-     "limit_margin": 0.757559,
+     "manipulability": 0.069013,
+     "limit_margin": 1.483511,
      "branch": {
-      "joint_3": -1,
-      "joint_5": 1
+      "joint_3": 1,
+      "joint_5": -1
      },
      "action": ""
     },
@@ -309,12 +309,12 @@
      "sequence": "place:stand_c/top",
      "name": "place_down",
      "q": [
-      3.146477,
-      0.049398,
-      -2.111129,
-      0.491337,
-      4.711065,
-      1.575681
+      0.638616,
+      0.52918,
+      1.36772,
+      -3.468572,
+      4.712408,
+      -0.932181
      ],
      "xyz": [
       0.45,
@@ -332,19 +332,19 @@
       "finger_left_joint": 0.018
      },
      "arrive": "line",
-     "clearance": -0.0,
+     "clearance": 0.0,
      "margin": 0.0,
      "nearest": [
       "attached/block",
       "stand_c"
      ],
-     "along_slack": -0.0,
-     "along_samples": 21,
-     "manipulability": 0.064005,
-     "limit_margin": 0.559225,
+     "along_slack": 0.0,
+     "along_samples": 20,
+     "manipulability": 0.073104,
+     "limit_margin": 1.302634,
      "branch": {
-      "joint_3": -1,
-      "joint_5": 1
+      "joint_3": 1,
+      "joint_5": -1
      },
      "action": "open the fingers"
     },
@@ -352,12 +352,12 @@
      "sequence": "place:stand_c/top",
      "name": "retreat",
      "q": [
-      3.146477,
-      0.137291,
-      -1.912795,
-      0.20511,
-      4.711065,
-      1.575681
+      0.638616,
+      0.479024,
+      1.180096,
+      -3.230793,
+      4.712408,
+      -0.932181
      ],
      "xyz": [
       0.45,
@@ -381,13 +381,13 @@
       "link_1",
       "floor"
      ],
-     "along_slack": 0.00976,
-     "along_samples": 21,
-     "manipulability": 0.070315,
-     "limit_margin": 0.757559,
+     "along_slack": 0.01,
+     "along_samples": 20,
+     "manipulability": 0.069013,
+     "limit_margin": 1.483511,
      "branch": {
-      "joint_3": -1,
-      "joint_5": 1
+      "joint_3": 1,
+      "joint_5": -1
      },
      "action": ""
     }
@@ -406,12 +406,12 @@
      "sequence": "pick:stand_b/top",
      "name": "above",
      "q": [
-      2.502976,
-      0.137284,
-      -1.912825,
-      0.205253,
-      4.711674,
-      0.93218
+      -0.004885,
+      0.479011,
+      1.179964,
+      -3.231093,
+      4.71198,
+      -1.575682
      ],
      "xyz": [
       0.45,
@@ -421,8 +421,8 @@
      "quat_wxyz": [
       0.0,
       -1.0,
-      0.0,
-      -0.0
+      -0.0,
+      0.0
      ],
      "joints": {
       "finger_right_joint": 0.035,
@@ -437,10 +437,10 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.070314,
-     "limit_margin": 0.757529,
+     "manipulability": 0.069009,
+     "limit_margin": 1.483939,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": 1
      },
      "action": ""
@@ -449,12 +449,12 @@
      "sequence": "pick:stand_b/top",
      "name": "grasp",
      "q": [
-      2.502976,
-      0.04938,
-      -2.111152,
-      0.491484,
-      4.711674,
-      0.93218
+      -0.004885,
+      0.529135,
+      1.367631,
+      -3.468884,
+      4.71198,
+      -1.575682
      ],
      "xyz": [
       0.45,
@@ -465,7 +465,7 @@
       0.0,
       1.0,
       -0.0,
-      -0.0
+      0.0
      ],
      "joints": {
       "finger_right_joint": 0.035,
@@ -475,15 +475,15 @@
      "clearance": 0.01,
      "margin": 0.005,
      "nearest": [
-      "finger_left",
+      "finger_right",
       "stand_b"
      ],
      "along_slack": 0.005,
-     "along_samples": 21,
-     "manipulability": 0.064004,
-     "limit_margin": 0.559202,
+     "along_samples": 20,
+     "manipulability": 0.073103,
+     "limit_margin": 1.302723,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": 1
      },
      "action": "close the fingers"
@@ -492,12 +492,12 @@
      "sequence": "pick:stand_b/top",
      "name": "lift",
      "q": [
-      2.502976,
-      0.137284,
-      -1.912825,
-      0.205253,
-      4.711674,
-      0.93218
+      -0.004885,
+      0.479011,
+      1.179964,
+      -3.231093,
+      4.71198,
+      -1.575682
      ],
      "xyz": [
       0.45,
@@ -506,9 +506,9 @@
      ],
      "quat_wxyz": [
       0.0,
-      1.0,
-      0.0,
-      -0.0
+      -1.0,
+      -0.0,
+      0.0
      ],
      "joints": {
       "finger_right_joint": 0.018,
@@ -521,12 +521,12 @@
       "link_1",
       "floor"
      ],
-     "along_slack": 0.00476,
-     "along_samples": 21,
-     "manipulability": 0.070314,
-     "limit_margin": 0.757529,
+     "along_slack": 0.005,
+     "along_samples": 20,
+     "manipulability": 0.069009,
+     "limit_margin": 1.483939,
      "branch": {
-      "joint_3": -1,
+      "joint_3": 1,
       "joint_5": 1
      },
      "action": ""
@@ -546,12 +546,12 @@
      "sequence": "place:stand_d/top",
      "name": "above",
      "q": [
-      3.452791,
-      -0.027103,
-      -1.758613,
-      0.215143,
-      4.710827,
-      1.881995
+      0.864806,
+      0.668427,
+      0.876565,
+      -3.116456,
+      4.71248,
+      -0.705991
      ],
      "xyz": [
       0.45,
@@ -562,7 +562,7 @@
       0.0,
       1.0,
       -0.0,
-      0.0
+      -0.0
      ],
      "joints": {
       "finger_right_joint": 0.018,
@@ -577,11 +577,11 @@
      ],
      "along_slack": null,
      "along_samples": 0,
-     "manipulability": 0.084634,
-     "limit_margin": 0.911741,
+     "manipulability": 0.06621,
+     "limit_margin": 1.483439,
      "branch": {
-      "joint_3": -1,
-      "joint_5": 1
+      "joint_3": 1,
+      "joint_5": -1
      },
      "action": ""
     },
@@ -589,12 +589,12 @@
      "sequence": "place:stand_d/top",
      "name": "place_down",
      "q": [
-      3.452791,
-      -0.110286,
-      -1.945266,
-      0.48498,
-      4.710827,
-      1.881995
+      0.864806,
+      0.695045,
+      1.092058,
+      -3.358568,
+      4.71248,
+      -0.705991
      ],
      "xyz": [
       0.45,
@@ -603,28 +603,28 @@
      ],
      "quat_wxyz": [
       0.0,
-      1.0,
+      -1.0,
       -0.0,
-      0.0
+      -0.0
      ],
      "joints": {
       "finger_right_joint": 0.018,
       "finger_left_joint": 0.018
      },
      "arrive": "line",
-     "clearance": -0.0,
+     "clearance": 0.0,
      "margin": 0.0,
      "nearest": [
       "attached/block",
       "stand_d"
      ],
-     "along_slack": -0.0,
-     "along_samples": 21,
-     "manipulability": 0.080179,
-     "limit_margin": 0.725088,
+     "along_slack": 0.0,
+     "along_samples": 20,
+     "manipulability": 0.076464,
+     "limit_margin": 1.483439,
      "branch": {
-      "joint_3": -1,
-      "joint_5": 1
+      "joint_3": 1,
+      "joint_5": -1
      },
      "action": "open the fingers"
     },
@@ -632,12 +632,12 @@
      "sequence": "place:stand_d/top",
      "name": "retreat",
      "q": [
-      3.452791,
-      -0.027103,
-      -1.758613,
-      0.215143,
-      4.710827,
-      1.881995
+      0.864806,
+      0.668427,
+      0.876565,
+      -3.116456,
+      4.71248,
+      -0.705991
      ],
      "xyz": [
       0.45,
@@ -646,9 +646,9 @@
      ],
      "quat_wxyz": [
       0.0,
-      1.0,
+      -1.0,
       -0.0,
-      0.0
+      -0.0
      ],
      "joints": {
       "finger_right_joint": 0.035,
@@ -661,13 +661,13 @@
       "link_1",
       "floor"
      ],
-     "along_slack": 0.00976,
-     "along_samples": 21,
-     "manipulability": 0.084634,
-     "limit_margin": 0.911741,
+     "along_slack": 0.01,
+     "along_samples": 20,
+     "manipulability": 0.06621,
+     "limit_margin": 1.483439,
      "branch": {
-      "joint_3": -1,
-      "joint_5": 1
+      "joint_3": 1,
+      "joint_5": -1
      },
      "action": ""
     }

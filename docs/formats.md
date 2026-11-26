@@ -8,6 +8,7 @@ field says otherwise.
 | File | Schema | Written by | Read by |
 |---|---|---|---|
 | layout YAML | `rsf.layout/1` | you | everything (`rsf.model.layout.load_world`) |
+| part models | URDF, USD (`.usd/.usda/.usdc/.usdz`) | you, CAD / Isaac exports | `rsf.model.layout` (docs/cell_model.md, Models) |
 | workflow YAML | `rsf.workflow/1` | you | `rsf.model.workflow` |
 | teach table JSON + CSV | (below) | `python -m rsf teach` | `tools/plan_workflow.py` |
 | cuRobo job | `rsf.curobo_job/1` | `plan_workflow.py job` | `tools/kaggle/curobo_free_plan.py` |
@@ -69,6 +70,12 @@ action`.
                "tool_bound": {"tool_axis": [...], "reference_axis": [0, 0, 1], "max_angle": rad} | null}],
  "meta": {...}}
 ```
+
+Mesh obstacles inside the repository keep their `file_path`, relative to the
+repository root. Others, such as the USD mesh cache, are embedded as `vertices` /
+`faces` (no `file_path`); the runner writes them back to files
+(`curobo_free_plan.materialize`). A carried object's box solids are in `boxes`; its
+other solids are in `meshes` (`{name, pose_in_link, vertices, faces}`).
 
 Results: `{"<segment name>": {"success": true, "q": [[joints] ...], "dt": s}, ...}`.
 A result whose ends differ from the segment's by more than 1e-3 rad is

@@ -192,14 +192,17 @@ def write_job(world, segs: list, path, *, margin: float = 0.005, meta: Optional[
     for s in segs:
         if s.kind != "free":
             continue
-        sd = scene_dict(s.scene.solids, base, exclude=lambda x: "robot_seat" in x.tags)
+        sd = portable_scene(scene_dict(s.scene.solids, base, exclude=lambda x: "robot_seat" in x.tags), root)
         scene = hashlib.sha1(json.dumps(sd, sort_keys=True).encode()).hexdigest()[:12]
         scenes[scene] = sd                                   # segments share a few scenes
         carried = None
         if s.carried is not None:
             name, link, solids, T = s.carried
             carried = {"link": link, "boxes": [{"name": b.name, "dims": [float(v) for v in b.shape.size],
-                                                "pose_in_link": (T @ b.T).tolist()} for b in solids]}
+                                                "pose_in_link": (T @ b.T).tolist()} for b in solids
+                                               if b.shape.kind == "box"],
+                       "meshes": [{"name": b.name, "pose_in_link": (T @ b.T).tolist(), **mesh_arrays(b.shape)}
+                                  for b in solids if b.shape.kind != "box"]}
         bound = None
         if carried is not None and arm is not None:
             # the carry rule (carry_frame) as a cuRobo ToolPoseBound: a tool-frame axis
@@ -222,6 +225,45 @@ def write_job(world, segs: list, path, *, margin: float = 0.005, meta: Optional[
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(path).write_text(json.dumps(job))
     return job
+
+
+def mesh_arrays(shape) -> dict:
+    """``{"vertices", "faces"}`` of a mesh, cylinder or sphere shape (scale applied)."""
+    import trimesh
+    if shape.kind == "mesh":
+        m = trimesh.load(str(shape.path), force="mesh", process=False)
+        V = np.asarray(m.vertices, float) * (1.0 if shape.scale is None else np.asarray(shape.scale, float))
+        F = np.asarray(m.faces)
+    elif shape.kind == "cylinder":
+        m = trimesh.creation.cylinder(radius=shape.radius, height=shape.length, sections=48)
+        V, F = np.asarray(m.vertices), np.asarray(m.faces)
+    elif shape.kind == "sphere":
+        m = trimesh.creation.icosphere(subdivisions=3, radius=shape.radius)
+        V, F = np.asarray(m.vertices), np.asarray(m.faces)
+    else:
+        raise ValueError(f"no mesh for a {shape.kind}")
+    return {"vertices": np.round(V, 9).tolist(), "faces": F.astype(int).tolist()}
+
+
+def portable_scene(scene: dict, root=None) -> dict:
+    """A cuRobo scene dict that another machine's checkout can load: mesh files inside
+    the repository *root* by relative path, others (the USD mesh cache) embedded as
+    ``vertices`` / ``faces`` (``tools/kaggle/curobo_free_plan.py`` writes them back
+    to files)."""
+    import os
+    from rsf.model.world import Shape
+    out = {k: dict(v) for k, v in scene.items()}
+    for name, e in list(out.get("mesh", {}).items()):
+        e = dict(e)
+        p = Path(e["file_path"]).resolve()
+        inside = root is not None and Path(root).resolve() in p.parents
+        if inside:
+            e["file_path"] = os.path.relpath(p, Path(root).resolve())
+        else:
+            e.update(mesh_arrays(Shape.mesh(p, e.pop("scale", None))))
+            e.pop("file_path")
+        out["mesh"][name] = e
+    return out
 
 
 def attach_results(segs: list, results: dict) -> list:

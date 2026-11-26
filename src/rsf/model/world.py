@@ -189,10 +189,19 @@ def _as_box(path: Path, scale) -> Optional[tuple]:
     """``(T_box, size)`` if the mesh is exactly a rectangular cuboid (8 corners, any
     orientation): ``T_box`` puts the box centre and axes in the mesh frame."""
     V = _obj_vertices(path)
-    if V is None or len(V) != 8:
+    if V is None:
         return None
     if scale is not None:
         V = V * np.asarray(scale, float)
+    return box_from_vertices(V)
+
+
+def box_from_vertices(V) -> Optional[tuple]:
+    """``(T_box, size)`` if the 8 points *V* are exactly a rectangular cuboid's corners
+    (any orientation), else None."""
+    V = np.asarray(V, float)
+    if V.shape != (8, 3):
+        return None
     import itertools
     d = (V - V[0])[1:]
     found = None

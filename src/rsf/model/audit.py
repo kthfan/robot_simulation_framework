@@ -97,3 +97,50 @@ def _robot_model(world) -> list:
                      f"tool frame {world.robot.tool_frame!r} is a link",
                      f"tool frame {world.robot.tool_frame!r} is not a link of {m.name}"))
     return out
+
+
+#: A mesh whose convex hull exceeds its own volume by more than this is reported.
+HULL_EXCESS = 0.05
+
+
+@registry.register("check", "rsf.convex_meshes")
+def _convex_meshes(world) -> list:
+    """MuJoCo and PhysX collide a mesh as its convex hull, the planner (coal) as its
+    triangles: a concave mesh (a pocket, a recess) behaves differently in simulation
+    than in the plan. A warning per mesh solid whose hull is more than ``HULL_EXCESS``
+    larger than the mesh (or whose volume cannot be judged: not watertight)."""
+    meshes = {}
+    for s in world.solids(objects=False) + [x for o in world.objects for x in o.world_solids()]:
+        if s.shape.kind == "mesh":
+            meshes.setdefault((str(s.shape.path), None if s.shape.scale is None else tuple(s.shape.scale)), []).append(s.name)
+    if not meshes:
+        return []
+    import trimesh
+    out = []
+    for (path, scale), names in sorted(meshes.items()):
+        m = trimesh.load(path, force="mesh")
+        if scale is not None:
+            m.apply_scale(scale)
+        who = names[0] + (f" (+{len(names) - 1} more)" if len(names) > 1 else "")
+        if not m.is_watertight or m.volume <= 0:
+            out.append(Check("rsf.convex_meshes", WARN, f"{who}: not watertight, its convexity cannot be judged "
+                             "(simulators use its convex hull)"))
+            continue
+        excess = m.convex_hull.volume / m.volume - 1.0
+        if excess > HULL_EXCESS:
+            out.append(Check("rsf.convex_meshes", WARN, f"{who}: concave, its convex hull is {excess:.0%} larger: "
+                             "MuJoCo / PhysX collide the hull; split it into convex parts", excess))
+    if not out:
+        out.append(Check("rsf.convex_meshes", PASS, f"{len(meshes)} meshes convex (hull within {HULL_EXCESS:.0%})"))
+    return out
+
+
+@registry.register("check", "rsf.object_mass")
+def _object_mass(world) -> list:
+    """Every movable object has a mass (URDF inertials, USD MassAPI, or the layout's
+    ``mass:``); without one MuJoCo assumes water's density."""
+    missing = sorted({o.kind for o in world.objects if not o.mass})
+    if not world.objects:
+        return []
+    return [check("rsf.object_mass", not missing, "every object has a mass",
+                  f"no mass for {missing}: set `mass:` in the layout's objects", soft=True)]

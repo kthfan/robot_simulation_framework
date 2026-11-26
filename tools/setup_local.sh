@@ -49,6 +49,7 @@ fi
 
 if [ "${SKIP_ISAAC:-0}" = 1 ]; then
   pip install -q opencv-python-headless       # with Isaac Sim, its own OpenCV provides cv2
+  pip install -q usd-core                     # USD models (rsf.model.usd_model); Isaac Sim brings its own pxr
 fi
 
 if [ "${ISAAC_ONLY:-0}" = 1 ]; then

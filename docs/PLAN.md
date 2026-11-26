@@ -337,6 +337,9 @@ M3 碰撞判定移植、World→MuJoCo 編譯器。D29 夾爪 strict／as_built 
 
 ### 已決定（使用者 2026-11-12）
 - 3D 輸入：URDF、mesh、USD。
+  → 2026-11-26：零件（治具、物件）可用 USD 組合 mesh 輸入（layout `model:`，`rsf.model.usd_model`）；
+  機械手臂仍為 URDF。使用者無法提供 USD 檔，以 jig/tray 轉成的 USD（cm、Y-up、巢狀變換、instancing、
+  CollisionAPI）驗證與 URDF 結果一致（`tests/test_usd_model.py`）。
 - 實機程式格式：暫緩，由使用者設計。
 - 離線（自動點位、路徑生成）無 GPU；real-time 有 GPU，延後實作（含移動物進入工作區）。
   → 2026-11-16 更新：free move 路徑由 cuRobo 在 GPU 離線計算（先用 Kaggle），上線時匯入。

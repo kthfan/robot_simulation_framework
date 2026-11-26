@@ -79,11 +79,18 @@ parameters and the naming conventions in §6.
     part (a pocket, a recess) into convex pieces. The tray cell's tray is three
     boxes for this reason (docs/assets.md).
   - Masses come from `<inertial>`. MuJoCo needs them on every moving link.
-- **Objects** (things the robot moves): a URDF per object type. Its root
-  frame is where it stands on a feature (the example's block has its origin at
-  the centre of its underside). Mass is the sum of the URDF's link masses.
-- **Fixtures** (fixed things): a generator (§5.1), `rsf.box`, or a URDF under
-  `entities:` / `placements:`.
+- **Objects** (things the robot moves): a **model**, a URDF or a USD file, per
+  object type (docs/cell_model.md, Models).
+  - Its frame is where it stands on a feature. The example's block,
+    `assets/block.usda`, has its origin at the centre of its underside.
+  - Its mass comes from the URDF's links, the USD's `physics:mass`, or `mass:` in
+    the layout.
+- **Fixtures** (fixed things): a generator (§5.1), `rsf.box`, or a model (URDF or
+  USD) under `entities:` / `placements:`.
+- A part made of many meshes (a CAD export) is best given as USD: one file holds
+  the meshes and their placement. Mark the colliders with `UsdPhysics.CollisionAPI`
+  or name them with `collision:`, so the visual meshes do not become obstacles.
+  Check the units: an unauthored `metersPerUnit` means centimetres.
 
 ## 4. Layout and workflow
 
