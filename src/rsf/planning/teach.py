@@ -275,6 +275,11 @@ class TeachEngine:
     def explore(self, seq: Sequence) -> "Explored":
         """Every feasible chain of every run of *seq* (the expensive part)."""
         wps = seq.waypoints
+        if not wps:
+            return Explored(seq, [], [], ["no waypoints"])
+        if wps[0].arrive != "free":
+            # nothing in the sequence says where a line or path to its first waypoint starts
+            return Explored(seq, [], [], [f"{wps[0].name}: the first waypoint must arrive 'free', not {wps[0].arrive!r}"])
         runs, cur = [], []
         for wp in wps:
             if wp.arrive == "free" and cur:

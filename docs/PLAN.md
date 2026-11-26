@@ -1,4 +1,6 @@
-# Robot Simulation Framework — 實作計畫 (Draft v0.1)
+# Robot Simulation Framework — 實作計畫
+
+> 入口文件：`README.md`（英文）；開發新 cell：`docs/new_cell.md`；名詞與 D/M 編號：`docs/decisions.md`。
 
 狀態：**v0.2，已納入使用者 2026-11-12 的決定**（§9）
 日期：2026-11-12
@@ -80,6 +82,9 @@ workflow (流程 YAML)                ┘          (CPU)        (CPU)           
 ```
 
 ### 2.2 Repo 結構
+
+> 2026-11-12 的草稿規劃。實際結構見 `README.md` 的 Repository map；`skills/`、`drivers/`、`codegen/`、
+> `perception/`、`viz/`、`agent/` 尚未建立（技能在各 cell 的 plugin、AprilGrid 在 `rsf.sim.vision`）。
 
 ```
 robot_simulation_framework/
@@ -346,7 +351,7 @@ M3 碰撞判定移植、World→MuJoCo 編譯器。D29 夾爪 strict／as_built 
 - D30 作為 M6 的參考決策。
 - `ToolPoseBound` 已有 `center_weight`（§6.1 #3）。
 
-- Tray 尺寸：保留原設定（0.1329 × 0.2470 × 0.0851，2.5 mm recess）。
+- Tray 尺寸：保留原設定（0.1329 × 0.2470，2.5 mm recess）；高度 2026-11-19 更正為 0.130 m（原 0.0851）。
 - 實機已裝 air cylinder：預設模型包含；夾爪實際運行不會全關 → `tool.operating_range`（min 0.021）。
 - 實作原則：保持彈性與可擴充性（資產組合改由 `cells/<cell>/asset_spec.yaml` 宣告；幾何生成器放在 `rsf.model.primitives`）。
 

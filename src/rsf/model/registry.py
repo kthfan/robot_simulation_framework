@@ -7,12 +7,19 @@ plugin, not a framework change.
 
 Kinds used by the framework:
 
-=============  =============================================================
-``generator``  ``fn(name, params, ctx) -> Entity``: builds solids and features
-``scheduler``  ``cls(world, spec, **params)``: orders task sources/targets
-``check``      ``fn(world) -> list[Check]``: audit rules
-``skill``      later (P3): expands a task into keyframes
-=============  =============================================================
+================  ==========================================================
+``generator``     ``fn(name, params, ctx) -> Entity``: builds solids and features
+``check``         ``fn(world) -> list[Check]``: audit rules
+``skill``         ``fn(world, args) -> list[Sequence]``: a task's motions (rsf.planning.teach)
+``scheduler``     ``cls(world, sets, **params)`` with ``.next(occupancy)``: which features a cycle uses
+``effect``        ``fn(occupancy, args)``: a workflow step's state change (``transfer``)
+``feature_move``  ``fn(feature, T) -> Feature``: rebuild a feature of this kind moved by ``displace``
+``targets``       ``fn(world, feature) -> {name: T}``: tool poses for reach studies (rsf.planning.reach)
+``vision``        cell-specific locating inputs (labels, cameras; tools/sim_locate.py)
+``kinematics``    ``fn(world, **kw)``: an IK backend other than EAIK (``load_arm(world, backend=...)``)
+================  ==========================================================
+
+docs/new_cell.md shows the first three in a complete example cell.
 """
 from __future__ import annotations
 

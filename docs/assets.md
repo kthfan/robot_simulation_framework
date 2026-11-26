@@ -14,7 +14,7 @@ AI-Robotics-V2 D28–D30 (gripper, D455 case, jaws) and `cell_core.assets.JIG_BO
 | Gripper body, plate, D455 | AI-Robotics-V2 `program/robot_config/egu50_v2.urdf` + `meshs/` (D29-corrected) | body/plate/D455 colliders, jaw joints and limits, inertials |
 | Jaw colliders, air cylinder | `tm5s_v13.urdf` meshes | `Cube_2/Cube_01_2` (right jaw), `Cube_3/Cube_01_3` (left jaw), `Cube_1/Cube_01_1` (air cylinder) |
 | Jig with label | `kthfan.github.io/tmp/tray_jig_with_label.diff` (user) | all jig/label boxes |
-| Tray | AI-Robotics-V2 `cell_core.assets` (measured from tray.usd; user 2026-11-12: keep) | generated: 0.1329 × 0.2470 × 0.0851 m, two 6.5 mm rails, underside recessed 2.5 mm, 1.2 kg |
+| Tray | AI-Robotics-V2 `cell_core.assets` (measured from tray.usd; user 2026-11-12: keep; height 130 mm, user 2026-11-19) | generated: 0.1329 × 0.2470 × 0.130 m, two 6.5 mm rails, underside recessed 2.5 mm, 1.2 kg |
 
 Only collision meshes were supplied, so collision meshes are also the visuals.
 The arm uses tm_description's collision STLs as visuals as well (its visual OBJs

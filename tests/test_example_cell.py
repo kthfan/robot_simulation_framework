@@ -125,3 +125,16 @@ def test_judge_settings(cell):
     assert J.settings(world) == {"carry_from": "grasp:act", "carry_to": "place_down", "track_caps": ("near",)}
     with pytest.raises(ValueError, match="unknown"):
         J.settings(replace(world, process={"judge": {"carry_form": "x"}}))
+
+
+def test_a_sequence_must_start_with_a_free_arrival(cell):
+    """A line or path into the first waypoint has no start: the engine says so instead of guessing."""
+    from dataclasses import replace
+
+    from rsf.model import registry
+    from rsf.planning.teach import make_engine
+    world, _ = cell
+    (seq,) = registry.get("skill", "example.pick")(world, {"at": "stand_a/top"})
+    bad = replace(seq, waypoints=[replace(seq.waypoints[0], arrive="line")] + seq.waypoints[1:])
+    r = make_engine(world).teach(bad)
+    assert not r.ok and "first waypoint must arrive 'free'" in r.problems[0]
