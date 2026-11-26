@@ -5,6 +5,7 @@ Expected orders and verdicts come from the frozen original ``cell_core``.
 from __future__ import annotations
 
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -81,6 +82,46 @@ def test_set_used_as_a_single_target_must_hold_one_feature(world):
            "cycle": [{"skill": "noop", "args": {"at": "$a"}}], "max_cycles": 1}
     with pytest.raises(WorkflowError, match="exactly one"):
         expand(Workflow.from_dict(doc), world)
+
+
+def _round_trip(scheduler: dict, **extra) -> Workflow:
+    """Every incoming tray to the table and straight back: the occupancy at a cycle's
+    start never changes."""
+    return Workflow.from_dict({
+        "name": "round_trip", "sets": {"incoming": {"kind": "slot", "role": "incoming"},
+                                       "table": {"kind": "slot", "role": "inspection"}},
+        "initial": {"tray": ["incoming"]}, "scheduler": scheduler,
+        "cycle": [{"skill": "tm_tray.transfer", "effect": "transfer", "args": {"from": "$s", "to": "$table"}},
+                  {"skill": "tm_tray.transfer", "effect": "transfer", "args": {"from": "$table", "to": "$s"}}],
+        **extra})
+
+
+def test_a_cycle_that_would_repeat_forever_is_an_error(world):
+    ordered = {"type": "rsf.ordered", "params": {"bind": {"s": {"set": "incoming", "state": "occupied"}}}}
+    with pytest.raises(WorkflowError, match="rsf.each"):           # memoryless: the first tray forever
+        expand(_round_trip(ordered), world)
+    # a step that moves something without its effect: nothing changes, the same cycle again
+    wf = _round_trip(ordered)
+    wf.cycle = [replace(st, effect=None) for st in wf.cycle]
+    with pytest.raises(WorkflowError, match="effect"):
+        expand(wf, world)
+    # on purpose: max_cycles set in the workflow
+    ex = expand(_round_trip(ordered, max_cycles=3), world)
+    assert len(ex.tasks) == 6 and ex.end.name == "max_cycles"
+
+
+def test_rsf_each_visits_every_feature_once(world):
+    each = {"type": "rsf.each", "params": {"bind": {"s": {"set": "incoming", "order": ["-height", "column"],
+                                                         "state": "occupied"}}, "on_done": "all_visited"}}
+    ex = expand(_round_trip(each), world)
+    order = [t.args["from"] for t in ex.tasks[::2]]
+    assert len(order) == 12 and len(set(order)) == 12 and ex.end.name == "all_visited"
+    assert order[:2] == ["incoming/L2/C0", "incoming/L2/C1"]       # top shelf first, then by column
+    assert ex.occupancy == Workflow.initial_occupancy(_round_trip(each), world,
+                                                      _round_trip(each).resolve_sets(world))  # all back home
+    with pytest.raises(ValueError, match="exactly one binding"):
+        expand(_round_trip({"type": "rsf.each", "params": {"bind": {"a": {"set": "incoming"},
+                                                                     "b": {"set": "table"}}}}), world)
 
 
 # ── selectors ────────────────────────────────────────────────────────────────

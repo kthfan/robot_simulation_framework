@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The example cell's whole pipeline, stage by stage (docs/new_cell.md). From the repo root:
-#   bash cells/example_pick_place/run.sh            # ~45 s on a laptop CPU, no GPU
+#   bash cells/example_pick_place/run.sh            # ~20 s on a laptop CPU, no GPU
 # Each stage writes a file the next one reads; each prints a verdict and exits non-zero on failure.
 set -euo pipefail
 cd "$(dirname "$0")/../.."

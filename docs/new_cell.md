@@ -11,8 +11,9 @@ bash cells/example_pick_place/run.sh        # ~20 s, CPU only: audit, expand, te
 
 ![The example cell's first transfer, phase by phase (MuJoCo)](images/example_transfer.png)
 
-`tests/test_example_cell.py` runs the same pipeline (one cycle, ~11 s). Copy
-that test for a new cell, too.
+`tests/test_example_cell.py` runs the same pipeline (one cycle, ~15 s). Copy
+that test for a new cell, too: it runs one cycle by loading the workflow with
+`max_cycles: 1`.
 
 Before starting, read [cell_model.md](cell_model.md) for the file formats and
 [decisions.md](decisions.md) for the vocabulary.
@@ -36,7 +37,14 @@ plugin  (Python)        ─┘
 | simulate + judge | `python tools/sim_workflow.py <layout> <wf> --plan <plan.json> --out <report.json>` | trajectory | judge report | `SIM PASS`, exit 0 |
 
 All commands run from the repository root with `PYTHONPATH=src`. File formats
-are in [formats.md](formats.md).
+are in [formats.md](formats.md). Shorter runs while developing:
+
+- `plan_workflow.py ... --cycles N` plans only the first N cycles. Use a teach
+  table that covers them.
+- `sim_workflow.py ... --transfers N` simulates up to the end of the N-th
+  transfer.
+- `--set dotted.path=value` on `rsf world/audit/teach` overrides a layout
+  value without editing the file.
 
 ## 2. Cell layout on disk
 
@@ -87,6 +95,12 @@ Points that are easy to miss:
 
 - `plugins: [../plugin/<name>]`: the package is imported before anything is
   built, so its `register` calls run.
+- **Copy the example's plugin into your cell** and rename its registrations
+  (`example.*` → `<your plugin>.*`) rather than loading `cells/example_pick_place`'s
+  plugin from your layout. A cell's skills encode its process: they will
+  change, and another cell must not change with them. Loading two plugins
+  works (names are global, so they must differ), but then restrict `audit:`
+  to your checks.
 - `audit: ["rsf.*", "<plugin>.*"]`: limits the audit to these checks.
   Otherwise every *loaded* plugin's checks run (in a test session, other cells'
   plugins too).
@@ -119,9 +133,26 @@ def stand(name, params, ctx):
     return Entity(name, "static", (box,), (top,))
 ```
 
+The data types (`rsf.model.world`, frozen dataclasses; poses are 4×4 arrays):
+
+| Type | Fields (in order) |
+|---|---|
+| `Shape` | `Shape.box([x, y, z])` (full size, centred on the solid's pose), `Shape.mesh(path, scale=None)`, `Shape("cylinder", radius=, length=)` (along z), `Shape("sphere", radius=)` |
+| `Solid` | `name`, `T` (world pose of the shape's frame), `shape`, `entity`, `tags` (frozenset: what contact rules match) |
+| `Feature` | `key`, `T`, `kind`, `entity`, `attrs` (dict of plain data), `tags` |
+| `Entity` | `name`, `kind` (`static`, `fixture`, `frame`, ...), `solids` (tuple), `features` (tuple), `meta` |
+
+`rsf.core.se3` has the pose helpers (`make_T(R, p)`, `rot_x/y/z(a)`,
+`rpy_to_matrix`, `inv`).
+
 - Feature keys are global (`<entity>/<local>` by convention). `kind` and
-  `attrs` are what selectors match: `{kind: slot, role: source}` and
-  `order: [y]` (`x`, `y`, `z` are the feature's position).
+  `attrs` are what selectors match: `{kind: slot, role: source}`. `order:`
+  takes the same names, with `-` for descending: `order: [y]` (`x`, `y`, `z`
+  are the feature's position), `order: [-height, column]`.
+- Attributes are the interface between your generators and your skills. The
+  example's skills read `support` (the solid the slot rests on; a held block
+  may touch it). A generator of another fixture (a table with a grid of slots)
+  must set the attributes its cell's skills read.
 - Reject unknown `params`, so a typo in a layout fails instead of being ignored.
 - *ctx* (`BuildContext`) gives `ctx.process`, earlier entities' features
   (`ctx.feature(key)`, `ctx.features(selector)`) and `parse_pose(spec, ctx)`.
@@ -168,7 +199,7 @@ Typical rules (example `skills.rules`):
 ```python
 ContactRule(allow=True, links=("finger_*",), names=("block/stand_a/top/*",))   # fingers grip it
 ContactRule(margin=0.0, names=("block/stand_a/top/*",))                        # rest of the robot: no penetration
-ContactRule(margin=0.0, links=("attached/*",), names=("stand_a",))             # held block starts on its stand
+ContactRule(margin=0.0, links=("attached/*",), names=("stand_a",))             # held block starts on its support
 ContactRule(allow=True, links=("link_0",), tags=("robot_seat",))               # base on the floor
 ```
 
@@ -241,7 +272,7 @@ The judge checks every transfer:
 
 | criterion | pass condition |
 |---|---|
-| placement | ≤ 2 mm / 1° |
+| placement (reported as `seat_mm` / `seat_deg`: the object against where the plan sets it down) | ≤ 2 mm / 1° |
 | slip relative to the flange while carried | ≤ 5 mm |
 | contacts | robot touches only the object it moves, and its base the `robot_seat` |
 | tracking | ≤ 1 mm on `track_caps` segments |
@@ -260,6 +291,7 @@ Options:
 |---|---|
 | `LayoutError: unknown top-level key` / `no feature 'x' built yet` | typo; entities are built in order, so a feature used by a later entity must come from an earlier one |
 | `RegistryError: unknown skill` | the plugin is not under the layout's `plugins:`, or the module is not imported by its `__init__.py` |
+| expand: `cycle N would repeat cycle N-1` | a step that moves something lacks `effect: transfer`, or a round trip uses `rsf.ordered` (use `rsf.each`); docs/cell_model.md, Workflow |
 | teach `no IK` | pose out of reach or outside the joint limits (with `limit_margin_deg`); check `T` and the tool frame |
 | teach `start in collision` / `sample k/n: A vs B` | the scene or rules: a contact that is intended needs a rule (`allow` or margin 0) |
 | plan `FAIL free...` | no collision-free free move: the scene is too tight, or a carry rule (`carry_*`) is too strict |

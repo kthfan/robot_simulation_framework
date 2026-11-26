@@ -13,7 +13,7 @@ command needs `PYTHONPATH=src`. Pytest sets it itself (`pyproject.toml`).
 python -m pytest -q                       # default suite (a few minutes); "slow" tests deselected
 python -m pytest -q -m slow               # the long ones (full-cell teach, whole-run simulation)
 python -m pytest -q tests/test_example_cell.py   # the pipeline end to end on the example cell (~15 s)
-bash cells/example_pick_place/run.sh      # the same through the command-line tools
+bash cells/example_pick_place/run.sh      # the same through the command-line tools (~20 s)
 ```
 
 | Area you changed | Tests to run |
@@ -40,7 +40,7 @@ into a file.
 | Task | Start at |
 |---|---|
 | a new cell, skill or workflow | docs/new_cell.md and `cells/example_pick_place/` (copy it) |
-| a layout / workflow key | `src/rsf/model/layout.py`, `workflow.py` (module docstrings list the keys); docs/cell_model.md |
+| a layout / workflow key, a scheduler | docs/cell_model.md; `src/rsf/model/layout.py`, `workflow.py`, `rsf/orchestrator/scheduler.py` |
 | why a teach point fails | `rsf.planning.teach` (`TeachEngine._follow` writes the messages); the skill's scene and contact rules |
 | a free move fails or the gate rejects a sample | `rsf.planning.plan` (`plan_free_cpu`, `check_segment`); docs/p4_paths.md |
 | a simulated transfer fails | `rsf.sim.judge` (criteria), `rsf.sim.mujoco_cell` / `isaac_cell`; docs/p5_sim.md |

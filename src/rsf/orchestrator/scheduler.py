@@ -14,6 +14,23 @@ in a fixed order, whose state matches::
         bind:
           source:      {set: incoming, order: [-height, column], state: occupied, on_none: request_refill}
           destination: {set: outgoing, order: [height, column],  state: empty,    on_none: request_removal}
+
+Binding keys: ``set`` (a workflow set), ``order`` (feature attributes or ``x``/``y``/``z``;
+a leading ``-`` sorts descending), ``state`` (``occupied`` / ``empty`` / ``any``, default
+``any``), ``on_none`` (the end event's name, default ``<binding>_exhausted``). It keeps no
+memory between cycles: the run ends only when the cycle's effects change the occupancy so
+that a binding finds nothing (a cycle that puts things back where they were repeats forever).
+
+``rsf.each`` visits every feature of a set once, in order, whatever happens to it
+(round trips, inspections)::
+
+    scheduler:
+      type: rsf.each
+      params:
+        bind: {slot: {set: source, order: [index], state: occupied}}   # exactly one binding
+        on_done: all_visited
+
+A feature not in the wanted ``state`` when its turn comes is skipped.
 """
 from __future__ import annotations
 
@@ -75,3 +92,35 @@ class OrderedScheduler:
 
 def _state_ok(occupancy: dict, key: str, state: str) -> bool:
     return state == "any" or (state == "occupied") == (key in occupancy)
+
+
+@register("scheduler", "rsf.each")
+class EachScheduler:
+    """Every feature of one set once, in a fixed order (module docstring)."""
+
+    def __init__(self, world, sets: dict, bind: dict, on_done: str = "all_visited"):
+        if not bind or len(bind) != 1:
+            raise ValueError(f"rsf.each: needs exactly one binding, got {sorted(bind or {})}")
+        ((name, spec),) = bind.items()
+        unknown = set(spec) - {"set", "order", "state"}
+        if unknown:
+            raise ValueError(f"binding {name!r}: unknown key(s) {sorted(unknown)}")
+        if spec.get("set") not in sets:
+            raise ValueError(f"binding {name!r}: no set {spec.get('set')!r}")
+        self.state = spec.get("state", "any")
+        if self.state not in STATES:
+            raise ValueError(f"binding {name!r}: state {self.state!r} not in {STATES}")
+        self.name = name
+        self.queue = [f.key for f in sort_features(sets[spec["set"]], spec.get("order", []))]
+        self._order = list(self.queue)
+        self.on_done = str(on_done)
+
+    def order(self, name: str) -> list:
+        return list(self._order)
+
+    def next(self, occupancy: dict):
+        while self.queue:
+            key = self.queue.pop(0)
+            if _state_ok(occupancy, key, self.state):
+                return {self.name: key}
+        return Event(self.on_done, self.name, f"every feature of {self.name!r} visited")

@@ -34,6 +34,8 @@ means *as it is used here*, so you do not need the original.
 | gate | the CPU check of every trajectory sample with exact meshes; nothing passes without it | `plan.check_segment` |
 | job | the free segments written for cuRobo on a GPU | `rsf.curobo_job/1` |
 | transfer | a pick sequence followed by a place sequence, judged as one | `rsf.sim.judge` |
+| seat | where the plan sets an object down; the judge's *placement* criterion is the error against it (`seat_mm`, `seat_deg`) | `rsf.sim.judge` |
+| cycle / binding / end event | one repetition of a workflow's steps; the features a scheduler gives it (`$name`); why the run stopped (`sources_empty`, `max_cycles`) | `rsf.model.workflow` |
 | `robot_seat` | tag of solids the arm's base may touch (its mount, the floor) | |
 
 ## This repository's phases (P0–P7)

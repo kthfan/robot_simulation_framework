@@ -88,16 +88,19 @@ def rules(world, key: str, *, holding: bool) -> ContactPolicy:
 
     * the fingers may touch the block at *key* (they grip it), the rest of the
       gripper keeps 0 from it;
-    * a held block may stand on its own stand (margin 0: it starts and ends there);
+    * a held block may stand on its slot's support (the feature attribute
+      ``support``, margin 0: it starts and ends there);
     * the arm's base may stand on the floor (``robot_seat``)."""
     p = params(world)
-    stand = world.feature(key).get("stand")
+    support = world.feature(key).get("support")
+    if not support:
+        raise ValueError(f"{key}: the slot has no 'support' attribute (the solid it rests on)")
     own = f"{world.object_at(key).name}/*"
     out = [ContactRule(allow=True, links=FINGER_LINKS, names=(own,), label="fingers grip the block"),
            ContactRule(margin=0.0, names=(own,), label="the block being handled"),
            ContactRule(allow=True, links=("link_0",), tags=("robot_seat",), label="base on the floor")]
     if holding:
-        out.insert(0, ContactRule(margin=0.0, links=("attached/*",), names=(stand,), label="held block on its stand"))
+        out.insert(0, ContactRule(margin=0.0, links=("attached/*",), names=(support,), label="held block on its support"))
     return ContactPolicy(p["margin"], out)
 
 

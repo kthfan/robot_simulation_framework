@@ -11,8 +11,13 @@ gives the layout document and the entities built before this one.
       stand_a: {generator: example.stand, params: {xy: [0.45, -0.25], yaw_deg: 0, role: source}}
 
 builds the solid ``stand_a`` (a box from the floor up to ``height``) and the
-feature ``stand_a/top`` (kind ``slot``, attributes ``role`` and ``stand``): its
-origin on the top face's centre, z up, x the direction the gripper's fingers close.
+feature ``stand_a/top`` (kind ``slot``): its origin on the top face's centre, z up,
+x the direction the gripper's fingers close. Its attributes:
+
+* ``role``: what the workflow's sets select (``source`` / ``target``);
+* ``support``: the name of the solid the slot rests on. The skills need it: a
+  held block may touch its support at the start and end of a move (margin 0);
+* ``height``: the top's height.
 """
 from __future__ import annotations
 
@@ -37,5 +42,5 @@ def stand(name: str, params: dict, ctx) -> Entity:
     box = Solid(name, se3.make_T(R, (x, y, h / 2)), Shape.box([*p["size"], h]), name,
                 frozenset({name, "stand"}))
     top = Feature(f"{name}/top", se3.make_T(R, (x, y, h)), "slot", name,
-                  {"role": p["role"], "stand": name, "height": h})
+                  {"role": p["role"], "support": name, "height": h})
     return Entity(name, "static", (box,), (top,))

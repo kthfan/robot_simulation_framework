@@ -15,16 +15,25 @@
       type: rsf.ordered
       params: {bind: {source: {...}, destination: {...}}}
     cycle:                            # repeated for every scheduler binding
-      - {skill: transfer, args: {object: tray, from: $source, to: $inspection}}
+      - {skill: tm_tray.transfer, effect: transfer, args: {object: tray, from: $source, to: $inspection}}
       - {skill: wait, args: {signal: inspection_done}}
-      - {skill: transfer, args: {object: tray, from: $inspection, to: $destination}}
-    params: {...}                     # passed to every skill (P3)
+      - {skill: tm_tray.transfer, effect: transfer, args: {object: tray, from: $inspection, to: $destination}}
+    params: {...}                     # passed to every skill
+    max_cycles: 1000                  # optional: stop after this many cycles (end event ``max_cycles``)
+    description: "..."                # optional
 
 ``$name`` in an argument is a scheduler binding, or a set that holds exactly one
 feature. A step's state change (its *effect*) is looked up by ``effect:`` or,
-by default, by the skill's name in the ``effect`` registry; skills with no
-registered effect do not change occupancy. Skills themselves (motion) are P3:
-expansion only decides *what* happens *where*, in order.
+by default, by the skill's name in the ``effect`` registry (``effect: none``:
+none); skills with no registered effect do not change occupancy. A plugin's
+skills are named ``<plugin>.<name>``, so a step that moves something names its
+effect (``effect: transfer``). Expansion decides *what* happens *where*, in
+order; the skills (``rsf.planning.teach``) decide the motion.
+
+A cycle that starts in the same occupancy with the same bindings as the cycle
+before would repeat until ``max_cycles``: :func:`expand` raises instead (a step
+without its ``effect:``, or ``rsf.ordered`` on a round trip -- use ``rsf.each``),
+unless the workflow sets ``max_cycles`` itself.
 """
 from __future__ import annotations
 
@@ -64,6 +73,7 @@ class Workflow:
     params: dict = field(default_factory=dict)
     max_cycles: int = 1000
     description: str = ""
+    max_cycles_set: bool = False     #: the workflow chose max_cycles (repeating cycles are intended)
 
     @classmethod
     def from_file(cls, path) -> "Workflow":
@@ -90,7 +100,7 @@ class Workflow:
             raise WorkflowError("empty cycle")
         return cls(doc.get("name", ""), dict(doc.get("sets") or {}), dict(doc["scheduler"]), cycle,
                    doc.get("initial"), dict(doc.get("params") or {}), int(doc.get("max_cycles", 1000)),
-                   doc.get("description", ""))
+                   doc.get("description", ""), "max_cycles" in doc)
 
     # ── resolution ─────────────────────────────────────────────────────────
     def resolve_sets(self, world) -> dict:
@@ -144,11 +154,20 @@ def expand(workflow: Workflow, world, occupancy: Optional[dict] = None) -> Expan
     occ = dict(occupancy if occupancy is not None else workflow.initial_occupancy(world, sets))
     sch = registry.get("scheduler", workflow.scheduler["type"])(world, sets, **(workflow.scheduler.get("params") or {}))
     tasks, end = [], None
+    last = None
     for c in range(workflow.max_cycles):
+        start = dict(occ)
         b = sch.next(occ)
         if isinstance(b, Event):
             end = b
             break
+        if last == (start, b) and not workflow.max_cycles_set:
+            raise WorkflowError(
+                f"cycle {c} would repeat cycle {c - 1} (same occupancy, same bindings {b}) until max_cycles: "
+                "does a step that moves something lack its `effect:` (e.g. effect: transfer)? Does the cycle "
+                "put things back where they were (rsf.ordered keeps no memory; use rsf.each)? To repeat on "
+                "purpose, set max_cycles in the workflow.")
+        last = (start, dict(b))
         for step in workflow.cycle:
             args = {k: _resolve(v, b, sets) for k, v in step.args.items()}
             eff = step.effect or step.skill
