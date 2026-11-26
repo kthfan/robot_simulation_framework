@@ -128,8 +128,9 @@ touch the simulation). Click the picture first: keys go to it, not to the page.
 
 | input | moves |
 |---|---|
-| W / S, A / D | forward / back, left / right: along the floor (the heading); *fly along the view* follows the view's pitch |
-| T / G | up / down (world vertical) |
+| W / S | forward / back along the view, pitch included (looking at the floor, W goes toward it) |
+| A / D | left / right (the camera's right) |
+| T / G | up / down along the camera's up: perpendicular to the view, tilted with it (level view: vertical) |
 | Shift / Alt (held) | × 4 / × 0.25 |
 | [ / ] | speed down / up (also the *speed* slider, 0.05–5 m/s) |
 | drag (left button) | look around: right turns right, up looks up |

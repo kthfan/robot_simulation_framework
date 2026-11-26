@@ -20,9 +20,9 @@
       <div id="help" hidden>
         <h3>Camera (shared: everyone sees it where it was last put)</h3>
         <table>
-          <tr><td>W / S</td><td>forward / back (along the floor; “fly” follows the view)</td></tr>
+          <tr><td>W / S</td><td>forward / back, along the view (looking down: down)</td></tr>
           <tr><td>A / D</td><td>left / right</td></tr>
-          <tr><td>T / G</td><td>up / down</td></tr>
+          <tr><td>T / G</td><td>up / down, the camera's up (tilts with the view)</td></tr>
           <tr><td>Shift / Alt</td><td>× 4 faster / × 0.25 slower</td></tr>
           <tr><td>[ / ]</td><td>speed down / up</td></tr>
           <tr><td>drag (left)</td><td>look around</td></tr>
@@ -41,7 +41,6 @@
       <label>fov <input id="camfov" type="range" min="5" max="120" step="1"></label>
       <label>look <input id="camsens" type="range" min="0.03" max="0.6" step="0.01"></label>
       <label><input id="caminv" type="checkbox"> invert Y</label>
-      <label><input id="camfly" type="checkbox"> fly along the view</label>
       <button id="camcopy">Copy as --live-view</button>
       <button id="camhelp">?</button>
       <div id="campose" class="muted"></div>

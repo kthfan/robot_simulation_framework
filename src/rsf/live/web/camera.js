@@ -1,4 +1,4 @@
-// Camera control of the shown view: keyboard (WASD, T/G), mouse (drag to look, FPS mouse
+// Camera control of the shown view: keyboard (WASD, T/G: in the camera's own frame), mouse (drag to look, FPS mouse
 // look on double-click, right/middle/Shift drag to pan, wheel to move, Ctrl+wheel to zoom).
 // The camera is the server's (shared: every viewer sees it where the last one put it);
 // this computes the pose from the input and sends it (absolute, at most ~30 per second),
@@ -9,7 +9,7 @@ const Camera = (() => {
     view: null, pose: null, frame: null,
     keys: new Set(), drag: null, last: 0,
     dirty: false, inflight: false, quietUntil: 0,
-    set: { speed: 0.5, sens: 0.15, invertY: false, fly: false },
+    set: { speed: 0.5, sens: 0.15, invertY: false },
   };
   const KEYS = new Set(["KeyW", "KeyA", "KeyS", "KeyD", "KeyT", "KeyG"]);
   const rad = (d) => d * Math.PI / 180;
@@ -17,16 +17,16 @@ const Camera = (() => {
   const $ = (id) => document.getElementById(id);
 
   try { Object.assign(S.set, JSON.parse(localStorage.getItem("rsf-live-camera") || "{}")); } catch (e) { /* none */ }
+  delete S.set.fly;                                    // (an earlier option: moving is always in the camera's frame)
   const save = () => { try { localStorage.setItem("rsf-live-camera", JSON.stringify(S.set)); } catch (e) { /* */ } };
 
   // yaw about world z from +x (counter-clockwise from above), pitch up from horizontal (server's convention)
   function basis(p) {
     const y = rad(p.yaw), q = rad(p.pitch);
     const f = [Math.cos(q) * Math.cos(y), Math.cos(q) * Math.sin(y), Math.sin(q)];     // view direction
-    const h = [Math.cos(y), Math.sin(y), 0];                                           // heading on the floor
     const r = [Math.sin(y), -Math.cos(y), 0];                                          // right
     const u = [r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2], r[0] * f[1] - r[1] * f[0]];  // camera up
-    return { f, h, r, u };
+    return { f, r, u };
   }
   const add = (e, v, k) => { e[0] += v[0] * k; e[1] += v[1] * k; e[2] += v[2] * k; };
 
@@ -59,13 +59,14 @@ const Camera = (() => {
       let v = S.set.speed * dt;
       if (S.keys.has("Shift")) v *= 4;
       if (S.keys.has("Alt")) v *= 0.25;
-      const fw = S.set.fly ? b.f : b.h;
       const e = S.pose.eye;
       let moved = false;
       const go = (code, dir, k) => { if (S.keys.has(code)) { add(e, dir, k); moved = true; } };
-      go("KeyW", fw, v); go("KeyS", fw, -v);
+      // the camera's own frame: W/S along the view (pitch included: looking down, W goes down),
+      // A/D to its right, T/G to its up (tilted with the view)
+      go("KeyW", b.f, v); go("KeyS", b.f, -v);
       go("KeyD", b.r, v); go("KeyA", b.r, -v);
-      go("KeyT", [0, 0, 1], v); go("KeyG", [0, 0, 1], -v);
+      go("KeyT", b.u, v); go("KeyG", b.u, -v);
       if (moved) changed();
     }
     requestAnimationFrame(tick);
@@ -120,8 +121,6 @@ const Camera = (() => {
     $("camsens").oninput = () => { S.set.sens = Number($("camsens").value); save(); };
     $("caminv").checked = S.set.invertY;
     $("caminv").onchange = () => { S.set.invertY = $("caminv").checked; save(); };
-    $("camfly").checked = S.set.fly;
-    $("camfly").onchange = () => { S.set.fly = $("camfly").checked; save(); };
     $("camfov").oninput = () => { if (S.pose) { S.pose.fov_deg = Number($("camfov").value); changed(); } };
     $("camreset").onclick = reset;
     $("camcopy").onclick = async () => {
