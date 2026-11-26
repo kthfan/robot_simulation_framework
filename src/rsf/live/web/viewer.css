@@ -17,12 +17,17 @@ header { display: flex; gap: 12px; align-items: center; padding: 8px 16px; borde
 .pill.failed, .pill.error, .pill.stopped, .pill.interrupted, .pill.disconnected { color: var(--fail); border-color: var(--fail); }
 main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; padding: 16px; }
 @media (max-width: 800px) { main { grid-template-columns: minmax(0, 1fr); } }
-#streams { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+#bar { display: flex; gap: 6px 12px; margin-bottom: 8px; flex-wrap: wrap; align-items: center; }
+#streams { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+#transport { font-size: 12px; font-variant-numeric: tabular-nums; }
+#tstats.fail { color: var(--fail); }
 #streams button { background: var(--panel); color: var(--text); border: 1px solid var(--line);
                   border-radius: 6px; padding: 4px 10px; cursor: pointer; }
 #streams button.on { border-color: var(--run); color: var(--run); }
 #frame { position: relative; background: #000; border-radius: 6px; overflow: hidden; }
 #img { display: block; width: 100%; height: auto; user-select: none; -webkit-user-drag: none; }
+#vid { display: block; width: 100%; height: auto; background: #000; pointer-events: none; }
+#img[hidden], #vid[hidden] { display: none; }
 #frame { cursor: grab; outline: none; }
 #frame:focus { box-shadow: 0 0 0 2px var(--run); }
 #frame.locked { cursor: none; box-shadow: 0 0 0 2px var(--ok); }

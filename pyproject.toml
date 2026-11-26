@@ -17,6 +17,7 @@ isaac = ["isaacsim[all,extscache]>=5"]       # run it: Python 3.12 (6.x), RTX GP
 eaik = ["eaik @ git+https://github.com/kthfan/EAIK.git@v1.2.2+robust.1", "motion_planner @ git+https://github.com/kthfan/robot_arm_motion_planner.git", "urchin"]
 collision = ["coal>=3", "trimesh>=4"]
 curobo = []  # installed from kthfan/curobo dev/main; GPU only
+live = ["aiortc>=1.9"]                       # WebRTC video for the live view (--live-webrtc); the rest is stdlib
 test = ["pytest>=8", "trimesh>=4", "coal>=3", "mujoco>=3.2", "usd-core>=24"]
 
 [tool.setuptools.packages.find]

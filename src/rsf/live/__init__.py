@@ -12,9 +12,12 @@ host and to other programs.
   updates the status, optionally paces the run to real time.
 * :mod:`rsf.live.client`: the API from Python (``LiveClient``).
 
+* :mod:`rsf.live.webrtc`: the views over WebRTC (VP8/H.264, UDP), optional (aiortc).
+
 Video goes out as MJPEG (``multipart/x-mixed-replace``): any browser shows it, it
-crosses an SSH tunnel and needs nothing beyond HTTP. Transports are named in
-``/api/v1/info`` (``transports``) so others (WebRTC, WebSocket) can be added
-without changing the hub or the capture. See ``docs/live_view.md``.
+crosses an SSH tunnel and needs nothing beyond HTTP; with :mod:`rsf.live.webrtc` also
+over WebRTC (less bandwidth and lag, UDP between the computers). Transports are named
+in ``/api/v1/info`` (``transports``) so others (WebSocket) can be added without
+changing the hub or the capture. See ``docs/live_view.md``.
 """
 API = "rsf.live/1"

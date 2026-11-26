@@ -549,3 +549,91 @@ def test_record_a_mujoco_run(tmp_path):
     info = _ffprobe(f)
     if info:
         assert info["codec_name"] in ("h264", "mpeg4") and int(info["nb_read_frames"]) == 61
+
+
+# ── WebRTC (rsf.live.webrtc; needs aiortc) ─────────────────────────────────
+def _webrtc():
+    from rsf.live import webrtc
+    if webrtc.missing():
+        pytest.skip(webrtc.missing())
+    return webrtc
+
+
+def _publisher(hub, name, img, dt=0.05, n=None):
+    st = hub.stream(name, width=img.shape[1], height=img.shape[0])
+
+    def run():
+        k = 0
+        while not hub.closed and (n is None or k < n):
+            st.publish(encode_jpeg(img), rgb=img, t=k * dt)
+            k += 1
+            time.sleep(dt)
+    threading.Thread(target=run, daemon=True).start()
+    return st
+
+
+def test_parse_ice():
+    from rsf.live.webrtc import parse_ice
+    assert parse_ice("stun:stun.example.org:3478") == {"urls": "stun:stun.example.org:3478"}
+    assert parse_ice('{"urls": ["turn:t.example.org"], "username": "u", "credential": "p", "x": 1}') == \
+        {"urls": ["turn:t.example.org"], "username": "u", "credential": "p"}
+    with pytest.raises(ValueError):
+        parse_ice("http://example.org")
+
+
+def test_webrtc_sends_the_rendered_frames(served):
+    """The view arrives over WebRTC (aiortc on both ends) as the RGB it was rendered as
+    (VP8: within coding error), odd sizes cropped to even; the server lists webrtc first."""
+    import asyncio
+    webrtc = _webrtc()
+    hub, srv, c = served
+    rtc = webrtc.register(srv, hub)
+    img = _image(200, 65, 49)                                  # odd: cropped to 64 x 48
+    _publisher(hub, "cam", img)
+    info = c.info()
+    assert info["transports"][0] == "webrtc" and "mjpeg" in info["transports"]
+    assert info["features"]["webrtc"]["ice_servers"] == []
+    frames, ans = asyncio.run(webrtc.receive(srv.url, "cam", frames=3))
+    assert ans["codec"] == "VP8" and ans["id"]
+    f = frames[-1]
+    assert f.shape == (48, 64, 3)
+    assert abs(float(f[..., 0][f[..., 1] < 100].mean()) - 200) < 12        # red background
+    assert f[18, 24].min() > 230                                           # the white square
+    ev = [e for e in hub.events if e["kind"] == "webrtc"]
+    assert [e["state"] for e in ev][:2] == ["offered", "connected"]
+    for _ in range(50):                                         # the client closed: the peer goes
+        if not rtc.peers:
+            break
+        time.sleep(0.1)
+    assert rtc.peers == {} and c._json("/api/v1/webrtc")["peers"] == {}
+
+
+def test_webrtc_repeats_the_latest_frame_while_idle(served):
+    """A still scene (a paused run) still sends a frame every idle_s: a new viewer gets a
+    picture, a decoder recovers from a loss."""
+    import asyncio
+    webrtc = _webrtc()
+    hub, srv, c = served
+    webrtc.register(srv, hub, idle_s=0.2)
+    _publisher(hub, "cam", _image(90), n=1)
+    t = time.time()
+    frames, _ = asyncio.run(webrtc.receive(srv.url, "cam", frames=4, timeout=10))
+    assert len(frames) == 4 and time.time() - t < 8
+
+
+def test_webrtc_refusals(served):
+    webrtc = _webrtc()
+    hub, srv, c = served
+    assert c.info()["transports"] == ["mjpeg", "jpeg"]           # not registered: no route
+    assert _post(c, "/api/v1/webrtc/offer", {"sdp": "v=0", "type": "offer", "stream": "cam"})[0] == 404
+    rtc = webrtc.register(srv, hub, max_peers=0)
+    hub.stream("cam")
+    for body, code in (({"sdp": "v=0", "type": "offer", "stream": "nope"}, 404),
+                       ({"sdp": "nonsense", "type": "offer", "stream": "cam"}, 400),
+                       ({"sdp": "v=0", "type": "answer", "stream": "cam"}, 400),
+                       ({"sdp": "v=0", "type": "offer", "stream": "cam"}, 503)):     # max_peers
+        got, j = _post(c, "/api/v1/webrtc/offer", body)
+        assert got == code and j["error"], (body, got, j)
+    assert _post(c, "/api/v1/webrtc/abc123/close", {}) == (200, {"closed": False})
+    srv.close()                                                 # closes the peers' loop with the server
+    assert not rtc._thread.is_alive()

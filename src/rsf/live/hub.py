@@ -9,7 +9,9 @@ from typing import Optional
 
 
 class VideoStream:
-    """The latest frame of one picture source (a rendered view)."""
+    """The latest frame of one picture source (a rendered view): as JPEG (MJPEG, frames,
+    recordings) and, when the publisher gives it, as the RGB image it came from (video
+    encoders such as WebRTC's take it as is, without decoding the JPEG)."""
 
     def __init__(self, name: str, hub: "Hub", **meta):
         self.name = name
@@ -17,18 +19,34 @@ class VideoStream:
         self._hub = hub
         self.seq = 0
         self.jpeg: Optional[bytes] = None
+        self.rgb = None                           # (h, w, 3) uint8 of the same frame, or None
         self.frame_meta: dict = {}
         self._times: list = []                   # wall times of recent frames (frame rate)
+        self._listeners: list = []               # called (no lock held) after each frame
 
-    def publish(self, jpeg: bytes, **meta) -> int:
+    def publish(self, jpeg: bytes, rgb=None, **meta) -> int:
         now = time.time()
         with self._hub.cond:
             self.seq += 1
             self.jpeg = jpeg
+            self.rgb = rgb
             self.frame_meta = {**meta, "seq": self.seq, "wall": now}
             self._times = [t for t in self._times if now - t < 2.0] + [now]
             self._hub.cond.notify_all()
-            return self.seq
+            seq, listeners = self.seq, list(self._listeners)
+        for fn in listeners:                     # e.g. waking an asyncio loop (call_soon_threadsafe)
+            fn(seq)
+        return seq
+
+    def listen(self, fn) -> None:
+        """Call ``fn(seq)`` after every new frame (on the publishing thread: it must not block)."""
+        with self._hub.cond:
+            self._listeners.append(fn)
+
+    def unlisten(self, fn) -> None:
+        with self._hub.cond:
+            if fn in self._listeners:
+                self._listeners.remove(fn)
 
     @property
     def fps(self) -> float:

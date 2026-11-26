@@ -51,7 +51,7 @@ class _Encoder(threading.Thread):
                     return
                 work, self._slot = self._slot, {}
             for name, (rgb, meta) in work.items():
-                self.hub.streams[name].publish(encode_jpeg(rgb, self.quality), **meta)
+                self.hub.streams[name].publish(encode_jpeg(rgb, self.quality), rgb=rgb, **meta)
 
     def flush_and_stop(self, timeout: float = 5.0):
         with self._cv:

@@ -15,6 +15,8 @@ Further endpoints are added with :meth:`LiveServer.route` (a regex on the path, 
 handler taking the request handler and the match), so features need no change here;
 ``auth=True`` routes need the server's token (``Authorization: Bearer <token>``), and
 answer 403 when the server has none (the feature is off). ``ssl_context`` serves HTTPS.
+Video transports beyond MJPEG/JPEG register themselves too (``rsf.live.webrtc``) and
+put their name in :attr:`LiveServer.transports`; ``on_close`` holds their shutdowns.
 """
 from __future__ import annotations
 
@@ -79,6 +81,7 @@ class LiveServer:
         self.routes: list = []                    # (method, compiled regex, handler, auth)
         self.transports = ["mjpeg", "jpeg"]
         self.features: dict = {}                  # name -> description, listed in /api/v1/info
+        self.on_close: list = []                  # callables run by close() (features' own threads, peers)
         self.token = token
         self._add_defaults()
         server = self
@@ -128,6 +131,11 @@ class LiveServer:
 
     def close(self) -> None:
         self.hub.close()                           # ends the streaming responses
+        for fn in self.on_close:
+            try:
+                fn()
+            except Exception as e:  # noqa: BLE001  (the port must be freed whatever happens)
+                print(f"[live] closing: {e!r}", flush=True)
         self.httpd.shutdown()
         self.httpd.server_close()
 

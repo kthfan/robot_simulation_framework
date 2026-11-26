@@ -45,6 +45,11 @@ A run left on the GPU box by older versions (the port then reads *in use*):
 | `--live-quality` | 80 | JPEG quality |
 
 | `--live-record-dir` | `reports/live` | where recordings are saved (on the computer that simulates) |
+| `--live-webrtc` | off | also send the views over WebRTC (needs `aiortc`); the viewer tries it first, MJPEG when it does not connect ([WebRTC](#webrtc)) |
+| `--live-webrtc-ice URL` | none | a STUN/TURN server for both ends: `stun:host:3478` or JSON `{"urls", "username", "credential"}`; repeatable |
+| `--live-webrtc-codec` | `auto` | `vp8`, `h264` (auto: as negotiated, VP8 with Chrome and Firefox) |
+| `--live-webrtc-kbps` | 0 | top bitrate per viewer, kbit/s (0: aiortc's, VP8 1500, H.264 3000) |
+| `--live-webrtc-peers` | 8 | at most this many WebRTC viewers (each has its own encoder) |
 | `--live-control` | off | pause / resume / step / pace / stop from the viewer (token) |
 | `--live-debug` | off | a Python console in the running simulation (token; implies `--live-control`) |
 | `--live-cert F --live-key F` | | serve HTTPS (PEM certificate and key) |
@@ -159,6 +164,54 @@ Browsers show an MJPEG frame only when the next one starts (Chrome: measured), s
 server sends a new frame again 60 ms later unless a newer one came: a single frame (a
 camera moved while paused) shows within ~0.1 s instead of waiting.
 
+## WebRTC
+
+`--live-webrtc` sends every view also as a WebRTC video (VP8, or H.264), encoded on the
+simulating computer from the rendered picture (not from the JPEG). The viewer's *video*
+menu picks the transport (`webrtc`, `mjpeg`, `jpeg`; the choice is kept by the browser,
+`?transport=` in the address sets it); beside it the codec, size, frames/s, bitrate and
+round trip as the browser measures them.
+
+```bash
+pip install aiortc          # in the simulator's Python (it brings PyAV); or pip install -e ".[live]"
+python tools/sim_workflow.py ... --live 0.0.0.0:8765 --live-webrtc
+```
+
+Measured here (Chromium and the server on one computer; frames carry their publish time):
+
+| | lag, publish → shown (median / 90 %) | bandwidth, 960×540 overview |
+|---|---|---|
+| WebRTC (VP8) | 35 / 49 ms | 0.25–0.5 Mbit/s at 10–18 frames/s |
+| MJPEG (quality 80) | 69 / 76 ms | 2.4 Mbit/s at 10 frames/s (30 kB a frame) |
+
+Over a network MJPEG adds TCP's waits on a lossy link and its bandwidth on a slow one;
+WebRTC's jitter buffer and rate control (the browser's estimate, REMB) take those.
+
+* **The network.** Signalling is one HTTP request (`POST /api/v1/webrtc/offer`), so it
+  goes wherever the page goes, an SSH tunnel included. **The media does not:** it is UDP
+  between the two computers, on ports chosen per connection (no fixed range). The browser
+  must reach one of the simulating computer's addresses (every interface but loopback is
+  offered), or give both ends a STUN/TURN server (`--live-webrtc-ice`; a TURN server
+  relays when nothing else gets through). Through `remote_isaac.sh run --view` the page
+  comes over the tunnel and the video directly, when the GPU box is reachable over UDP
+  (the same LAN).
+* **Fallback.** When no picture comes within 8 s, or the server refuses the offer (no
+  aiortc, `--live-webrtc-peers` reached), the viewer shows MJPEG and says why beside the
+  menu. Without aiortc on the server `--live-webrtc` prints `[live] WebRTC off: ...` and
+  the run goes on with MJPEG.
+* **Frames.** A viewer gets each new frame of the view (the capture's `--live-fps`, or
+  `--live-fps-interactive` while a camera moves) and the latest one again every second
+  while none comes (paused, or the run is over): a new viewer gets a picture and a
+  decoder recovers from a loss. Odd sizes lose their last row/column (4:2:0 video).
+* **Cost.** Each viewer has its own encoder (aiortc encodes per connection), on aiortc's
+  threads, not the simulation's: here a 960×540 VP8 stream at 19 frames/s added 15 % of a
+  CPU core to the server process (a textured test picture; 6 % without a viewer, for the JPEGs). Nothing is encoded while no one watches over WebRTC.
+* **Security.** Like the MJPEG stream it needs no token (it does not touch the
+  simulation); the media is encrypted (DTLS-SRTP), and only the page that made the offer
+  gets it. A peer that has not connected 30 s after its offer is closed.
+* **Isaac Sim's Python:** `aiortc` has wheels for Python 3.10–3.13; installing it next to
+  Isaac Sim is not tested yet.
+
 ## Recording (MP4, on the server)
 
 *● Record* records the shown view; *■ Stop and save* writes it as MP4 to
@@ -233,6 +286,8 @@ address bar). Programs send it as `Authorization: Bearer <token>`.
 | `GET /api/v1/views` | every view's camera: `eye`, `target`, `yaw`, `pitch` (deg), `fov_deg` |
 | `POST /api/v1/views/<view>/pose` | `{"eye": [x, y, z], "yaw": deg, "pitch": deg, "fov_deg": deg}` or `"target"`; missing parts stay |
 | `POST /api/v1/views/<view>/reset` | the view as the run started it |
+| `POST /api/v1/webrtc/offer` | `--live-webrtc`: `{"sdp", "type": "offer", "stream": view}` (recvonly, candidates included) → `{"sdp", "type": "answer", "id", "codec"}` |
+| `POST /api/v1/webrtc/<id>/close`, `GET /api/v1/webrtc` | end a peer; the peers (stream, state, codec, frames sent) |
 | `POST /api/v1/control` (token) | `{"action": "pause" \| "resume" \| "step" \| "pace" \| "stop", "dt": s, "value": x}` |
 | `POST /api/v1/debug/exec` (token) | `{"code": "...", "wait": 10}`: the job (`state`, `ok`, `value`, `output`, `error`, `t`) |
 | `GET /api/v1/debug/job/<id>`, `GET /api/v1/debug/log` (token) | a job still running; every job so far |
@@ -249,6 +304,10 @@ for kind, data in c.events():                 # until the run's server closes
     if kind == "segment":
         print(data["name"])
 jpeg = c.frame("overview")
+
+import asyncio                                # WebRTC (aiortc), as the viewer does it
+from rsf.live.webrtc import receive
+frames, answer = asyncio.run(receive("http://localhost:8765", "overview", frames=10))   # RGB arrays
 ```
 
 ## Design: where features go
@@ -266,11 +325,14 @@ cell (Isaac / MuJoCo) ── add_view(View) / render(name) ──► LiveCapture
 
 * **A picture source** is a view on a cell; a backend offers `add_view` and `render`.
   More cameras, or one riding on the gripper, are more views.
-* **A transport** reads the hub's latest frames: MJPEG now; WebRTC (aiortc/PyAV, H.264
-  or VP8, signalling as `POST /api/v1/webrtc/offer`) and WebSocket fit beside it. The
-  server lists its transports in `/api/v1/info`; the viewer has a matching table
-  (`Viewer.transports` in `viewer.js`). WebRTC's media is UDP: it needs the two computers
-  to reach each other directly (not through the SSH tunnel).
+* **A transport** reads the hub's latest frames: MJPEG and JPEG from the JPEG,
+  WebRTC (`rsf.live.webrtc`) from the RGB image beside it (`VideoStream.rgb`; its
+  tracks wake on `VideoStream.listen`). A WebSocket transport would fit the same way.
+  The server lists its transports in `/api/v1/info` (the viewer uses the first it
+  knows); the viewer has a matching table (`Viewer.transports` in `viewer.js`:
+  `attach(img, stream)`, `detach(img)`; WebRTC draws into a `<video>` over the same frame,
+  so the camera controls work alike). A module's background work stops with the server
+  (`LiveServer.on_close`).
 * **Endpoints** are routes added with `LiveServer.route` (`auth=True` for the token);
   the hub carries any status field and any event kind. Control (`rsf.live.control`) and
   the console (`rsf.live.debug`) are built that way: a module with a `register(server, ...)`
