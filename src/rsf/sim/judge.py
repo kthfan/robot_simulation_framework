@@ -21,7 +21,13 @@ fields) and the plan it executed:
 A *transfer* is a pick sequence followed by a place sequence in the trajectory
 (``pick:<from>/...``, ``place:<to>/...``). Where the carry begins and ends is
 named by phases (``carry_from``: the end of a pick segment, ``carry_to``: the
-start of a place segment); the TM tray cell's are the defaults.
+start of a place segment); the TM tray cell's are the defaults. A layout sets its
+own under ``process.judge``::
+
+    judge:
+      carry_from: "grasp:act"     # the segment whose end starts the carry
+      carry_to: place_down        # the place phase that ends it
+      track_caps: [near]          # segments (by their caps) where the flange must track the plan
 """
 from __future__ import annotations
 
@@ -84,10 +90,23 @@ def planned_object_pose(world, seq, obj_template) -> Optional[np.ndarray]:
     return None
 
 
+def settings(world) -> dict:
+    """``process.judge`` with the defaults (the TM tray cell's phase names)."""
+    j = dict(world.process.get("judge") or {})
+    unknown = set(j) - {"carry_from", "carry_to", "track_caps"}
+    if unknown:
+        raise ValueError(f"process.judge: unknown key(s) {sorted(unknown)}")
+    return {"carry_from": str(j.get("carry_from", "lift:act")), "carry_to": str(j.get("carry_to", "place_down")),
+            "track_caps": tuple(j.get("track_caps", TRACK_CAPS))}
+
+
 def transfers(world, workflow, segments: list, occupancy: dict, *,
-              carry_from: str = "lift:act", carry_to: str = "place_down") -> list:
+              carry_from: Optional[str] = None, carry_to: Optional[str] = None) -> list:
     """The run's transfers, with the body each one moves (tracked from *occupancy*)."""
     from rsf.model import registry
+    cfg = settings(world)
+    carry_from = cfg["carry_from"] if carry_from is None else carry_from
+    carry_to = cfg["carry_to"] if carry_to is None else carry_to
     from rsf.model.workflow import expand
     seqs = {}
     for task in expand(workflow, world).tasks:
@@ -165,6 +184,7 @@ def judge(world, workflow, rep, occupancy: dict, *, carry_caps=None, traj: Optio
     report's planned flange samples (coarser: a corner between them reads
     differently with every alignment)."""
     planned = _planned_flange(world, traj) if traj is not None else None
+    track_caps = settings(world)["track_caps"]
     motion = world.process.get("motion") or {}
     max_tilt = float(motion.get("carry_max_tilt_deg", 15.0))
     level = str(motion.get("carry_tilt_reference", "start")) == "level"
@@ -202,7 +222,7 @@ def judge(world, workflow, rep, occupancy: dict, *, carry_caps=None, traj: Optio
         # 4. tracking where the plan is slow and close
         trk = 0.0
         for s in rep.segments:
-            if s.get("caps") in TRACK_CAPS and s["t0"] >= tr.t0 - 1e-9 and s["t1"] <= tr.t1 + 1e-9:
+            if s.get("caps") in track_caps and s["t0"] >= tr.t0 - 1e-9 and s["t1"] <= tr.t1 + 1e-9:
                 for i in _window(rep, s["t0"], s["t1"]):
                     trk = max(trk, pose_error(rep.flange[i], rep.flange_planned[i])[0])
         r["track_mm"] = trk

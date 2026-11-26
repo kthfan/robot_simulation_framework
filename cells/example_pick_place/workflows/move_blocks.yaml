@@ -1,0 +1,21 @@
+# Move every block from the source stands to the target stands, then stop.
+# Expanded by `python -m rsf expand <layout> <this file>`; keys: docs/cell_model.md.
+schema: rsf.workflow/1
+name: move_blocks
+
+sets:                                       # named feature selections
+  source: {kind: slot, role: source}
+  target: {kind: slot, role: target}
+
+initial:
+  block: [source]                           # a block on every source slot
+
+scheduler:
+  type: rsf.ordered
+  params:
+    bind:                                   # each cycle takes the first matching feature, in this order
+      from: {set: source, order: [y], state: occupied, on_none: sources_empty}
+      to:   {set: target, order: [y], state: empty,    on_none: targets_full}
+
+cycle:
+  - {skill: example.transfer, effect: transfer, args: {object: block, from: $from, to: $to}}

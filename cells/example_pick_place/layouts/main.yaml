@@ -1,0 +1,52 @@
+# The example cell (docs/new_cell.md): a TM5S with a box parallel gripper moves
+# blocks from two source stands to two target stands. Every key is explained in
+# docs/cell_model.md; the plugin's own parameters are in its modules' docstrings.
+schema: rsf.layout/1
+name: example_main
+description: >-
+  Smallest complete cell: four stands in front of the robot, a block on each
+  source stand; the workflow moves them to the target stands.
+
+plugins: [../plugin/example_pick_place]   # imported first: registers example.* generators, checks, skills
+
+audit: ["rsf.*", "example.*"]              # which registered checks `rsf audit` runs (others' plugins may be loaded)
+
+process:
+  # read by the plugin's skills (skills.py: DEFAULTS)
+  pick: {approach: 0.10, open_clearance: 0.015, squeeze: 0.002, margin: 0.005}
+  # read by the framework's planner (rsf.planning.plan) and judge (rsf.sim.judge)
+  motion:
+    dt: 0.01
+    caps:                                   # Cartesian limits of the tool; segments name one (Waypoint meta "caps")
+      near:  {v: 0.05, a: 0.25, w: 0.25, alpha: 1.0}             # straight moves at a block
+      carry: {v: 0.25, a: 1.5, w: 0.5, alpha: 3.0, a_down: 4.0}  # anything holding a block
+      empty: {v: 0.25, a: 1.5, w: 0.5, alpha: 3.0}
+    joint: {v: 1.0, a: 2.0}                 # free moves, rad/s and rad/s^2
+    jaw: {speed: 0.05, settle: 0.3}         # finger speed (m/s) and settling time (s)
+    home: [0.0, 0.0, 1.5708, 0.0, 1.5708, 0.0]   # the run starts and ends here (rad)
+    carry_support: grip                     # the fingers hold the block: no "rests on the gripper" rule
+    carry_max_tilt_deg: 30.0                # a held block stays within 30 deg of how it was picked up
+  judge:
+    carry_from: "grasp:act"                 # the carry starts when the fingers have closed
+    carry_to: "place_down"                  # and ends when the block goes down
+    track_caps: [near]                      # the flange must track the plan within 1 mm on these
+
+entities:                                   # built in order
+  floor: {generator: rsf.box, params: {size: [2.0, 2.0, 0.02], pose: {xyz: [0, 0, -0.01]}, tags: [robot_seat]}}
+  stand_a: {generator: example.stand, params: {xy: [0.45, -0.30], role: source}}
+  stand_b: {generator: example.stand, params: {xy: [0.45, -0.15], role: source}}
+  stand_c: {generator: example.stand, params: {xy: [0.45, 0.15], role: target}}
+  stand_d: {generator: example.stand, params: {xy: [0.45, 0.30], role: target}}
+
+objects:                                    # movable things; a template at every selected feature
+  block:
+    urdf: ../assets/block.urdf
+    at: {kind: slot}
+    initially: all                          # templates everywhere; the workflow says where blocks really start
+    # mass: from the URDF's inertial (0.2 kg)
+
+robot:
+  urdf: ../assets/arm_gripper.urdf
+  base: {xyz: [0, 0, 0]}
+  tool_frame: tcp                           # poses in the skills are this frame's
+  limit_margin_deg: 5.0                     # plan 5 deg inside the URDF's joint limits

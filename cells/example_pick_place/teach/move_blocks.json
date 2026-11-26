@@ -1,0 +1,677 @@
+{
+ "meta": {
+  "layout": "cells/example_pick_place/layouts/main.yaml",
+  "overrides": {},
+  "robot": "/home/user/robot_simulation_framework/cells/example_pick_place/assets/arm_gripper.urdf",
+  "process": {
+   "pick": {
+    "approach": 0.1,
+    "open_clearance": 0.015,
+    "squeeze": 0.002,
+    "margin": 0.005
+   },
+   "motion": {
+    "dt": 0.01,
+    "caps": {
+     "near": {
+      "v": 0.05,
+      "a": 0.25,
+      "w": 0.25,
+      "alpha": 1.0
+     },
+     "carry": {
+      "v": 0.25,
+      "a": 1.5,
+      "w": 0.5,
+      "alpha": 3.0,
+      "a_down": 4.0
+     },
+     "empty": {
+      "v": 0.25,
+      "a": 1.5,
+      "w": 0.5,
+      "alpha": 3.0
+     }
+    },
+    "joint": {
+     "v": 1.0,
+     "a": 2.0
+    },
+    "jaw": {
+     "speed": 0.05,
+     "settle": 0.3
+    },
+    "home": [
+     0.0,
+     0.0,
+     1.5708,
+     0.0,
+     1.5708,
+     0.0
+    ],
+    "carry_support": "grip",
+    "carry_max_tilt_deg": 30.0
+   },
+   "judge": {
+    "carry_from": "grasp:act",
+    "carry_to": "place_down",
+    "track_caps": [
+     "near"
+    ]
+   }
+  },
+  "workflow": "cells/example_pick_place/workflows/move_blocks.yaml",
+  "tasks": [
+   {
+    "index": 0,
+    "cycle": 0,
+    "skill": "example.transfer",
+    "args": {
+     "object": "block",
+     "from": "stand_a/top",
+     "to": "stand_c/top"
+    },
+    "sequences": [
+     "pick:stand_a/top",
+     "place:stand_c/top"
+    ]
+   },
+   {
+    "index": 1,
+    "cycle": 1,
+    "skill": "example.transfer",
+    "args": {
+     "object": "block",
+     "from": "stand_b/top",
+     "to": "stand_d/top"
+    },
+    "sequences": [
+     "pick:stand_b/top",
+     "place:stand_d/top"
+    ]
+   }
+  ],
+  "end": {
+   "name": "sources_empty",
+   "detail": "no occupied feature left for 'from'"
+  },
+  "prefer": {
+   "branch": {
+    "joint_3": -1,
+    "joint_5": -1
+   },
+   "q_ref": [
+    0.0,
+    0.0,
+    1.5708,
+    0.0,
+    1.5708,
+    0.0
+   ]
+  },
+  "seconds": 4.0
+ },
+ "ok": true,
+ "sequences": [
+  {
+   "sequence": "pick:stand_a/top",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "example.pick",
+    "slot": "stand_a/top"
+   },
+   "points": [
+    {
+     "sequence": "pick:stand_a/top",
+     "name": "above",
+     "q": [
+      2.276786,
+      -0.027118,
+      -1.758676,
+      0.215449,
+      4.711886,
+      0.70599
+     ],
+     "xyz": [
+      0.45,
+      -0.3,
+      0.28
+     ],
+     "quat_wxyz": [
+      0.0,
+      1.0,
+      -0.0,
+      -0.0
+     ],
+     "joints": {
+      "finger_right_joint": 0.035,
+      "finger_left_joint": 0.035
+     },
+     "arrive": "free",
+     "clearance": 0.0639,
+     "margin": 0.005,
+     "nearest": [
+      "link_1",
+      "floor"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.084633,
+     "limit_margin": 0.911678,
+     "branch": {
+      "joint_3": -1,
+      "joint_5": 1
+     },
+     "action": ""
+    },
+    {
+     "sequence": "pick:stand_a/top",
+     "name": "grasp",
+     "q": [
+      2.276786,
+      -0.110321,
+      -1.945314,
+      0.485289,
+      4.711886,
+      0.70599
+     ],
+     "xyz": [
+      0.45,
+      -0.3,
+      0.18
+     ],
+     "quat_wxyz": [
+      0.0,
+      1.0,
+      -0.0,
+      -0.0
+     ],
+     "joints": {
+      "finger_right_joint": 0.035,
+      "finger_left_joint": 0.035
+     },
+     "arrive": "line",
+     "clearance": 0.01,
+     "margin": 0.005,
+     "nearest": [
+      "finger_left",
+      "stand_a"
+     ],
+     "along_slack": 0.005,
+     "along_samples": 21,
+     "manipulability": 0.080178,
+     "limit_margin": 0.72504,
+     "branch": {
+      "joint_3": -1,
+      "joint_5": 1
+     },
+     "action": "close the fingers"
+    },
+    {
+     "sequence": "pick:stand_a/top",
+     "name": "lift",
+     "q": [
+      2.276786,
+      -0.027118,
+      -1.758676,
+      0.215449,
+      4.711886,
+      0.70599
+     ],
+     "xyz": [
+      0.45,
+      -0.3,
+      0.28
+     ],
+     "quat_wxyz": [
+      0.0,
+      1.0,
+      -0.0,
+      -0.0
+     ],
+     "joints": {
+      "finger_right_joint": 0.018,
+      "finger_left_joint": 0.018
+     },
+     "arrive": "line",
+     "clearance": 0.0639,
+     "margin": 0.005,
+     "nearest": [
+      "link_1",
+      "floor"
+     ],
+     "along_slack": 0.00476,
+     "along_samples": 21,
+     "manipulability": 0.084633,
+     "limit_margin": 0.911678,
+     "branch": {
+      "joint_3": -1,
+      "joint_5": 1
+     },
+     "action": ""
+    }
+   ]
+  },
+  {
+   "sequence": "place:stand_c/top",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "example.place",
+    "slot": "stand_c/top"
+   },
+   "points": [
+    {
+     "sequence": "place:stand_c/top",
+     "name": "above",
+     "q": [
+      3.146477,
+      0.137291,
+      -1.912795,
+      0.20511,
+      4.711065,
+      1.575681
+     ],
+     "xyz": [
+      0.45,
+      0.15,
+      0.28
+     ],
+     "quat_wxyz": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+     ],
+     "joints": {
+      "finger_right_joint": 0.018,
+      "finger_left_joint": 0.018
+     },
+     "arrive": "free",
+     "clearance": 0.0639,
+     "margin": 0.005,
+     "nearest": [
+      "link_1",
+      "floor"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.070315,
+     "limit_margin": 0.757559,
+     "branch": {
+      "joint_3": -1,
+      "joint_5": 1
+     },
+     "action": ""
+    },
+    {
+     "sequence": "place:stand_c/top",
+     "name": "place_down",
+     "q": [
+      3.146477,
+      0.049398,
+      -2.111129,
+      0.491337,
+      4.711065,
+      1.575681
+     ],
+     "xyz": [
+      0.45,
+      0.15,
+      0.18
+     ],
+     "quat_wxyz": [
+      0.0,
+      -1.0,
+      -0.0,
+      -0.0
+     ],
+     "joints": {
+      "finger_right_joint": 0.018,
+      "finger_left_joint": 0.018
+     },
+     "arrive": "line",
+     "clearance": -0.0,
+     "margin": 0.0,
+     "nearest": [
+      "attached/block",
+      "stand_c"
+     ],
+     "along_slack": -0.0,
+     "along_samples": 21,
+     "manipulability": 0.064005,
+     "limit_margin": 0.559225,
+     "branch": {
+      "joint_3": -1,
+      "joint_5": 1
+     },
+     "action": "open the fingers"
+    },
+    {
+     "sequence": "place:stand_c/top",
+     "name": "retreat",
+     "q": [
+      3.146477,
+      0.137291,
+      -1.912795,
+      0.20511,
+      4.711065,
+      1.575681
+     ],
+     "xyz": [
+      0.45,
+      0.15,
+      0.28
+     ],
+     "quat_wxyz": [
+      0.0,
+      1.0,
+      -0.0,
+      0.0
+     ],
+     "joints": {
+      "finger_right_joint": 0.035,
+      "finger_left_joint": 0.035
+     },
+     "arrive": "line",
+     "clearance": 0.0639,
+     "margin": 0.005,
+     "nearest": [
+      "link_1",
+      "floor"
+     ],
+     "along_slack": 0.00976,
+     "along_samples": 21,
+     "manipulability": 0.070315,
+     "limit_margin": 0.757559,
+     "branch": {
+      "joint_3": -1,
+      "joint_5": 1
+     },
+     "action": ""
+    }
+   ]
+  },
+  {
+   "sequence": "pick:stand_b/top",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "example.pick",
+    "slot": "stand_b/top"
+   },
+   "points": [
+    {
+     "sequence": "pick:stand_b/top",
+     "name": "above",
+     "q": [
+      2.502976,
+      0.137284,
+      -1.912825,
+      0.205253,
+      4.711674,
+      0.93218
+     ],
+     "xyz": [
+      0.45,
+      -0.15,
+      0.28
+     ],
+     "quat_wxyz": [
+      0.0,
+      -1.0,
+      0.0,
+      -0.0
+     ],
+     "joints": {
+      "finger_right_joint": 0.035,
+      "finger_left_joint": 0.035
+     },
+     "arrive": "free",
+     "clearance": 0.0639,
+     "margin": 0.005,
+     "nearest": [
+      "link_1",
+      "floor"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.070314,
+     "limit_margin": 0.757529,
+     "branch": {
+      "joint_3": -1,
+      "joint_5": 1
+     },
+     "action": ""
+    },
+    {
+     "sequence": "pick:stand_b/top",
+     "name": "grasp",
+     "q": [
+      2.502976,
+      0.04938,
+      -2.111152,
+      0.491484,
+      4.711674,
+      0.93218
+     ],
+     "xyz": [
+      0.45,
+      -0.15,
+      0.18
+     ],
+     "quat_wxyz": [
+      0.0,
+      1.0,
+      -0.0,
+      -0.0
+     ],
+     "joints": {
+      "finger_right_joint": 0.035,
+      "finger_left_joint": 0.035
+     },
+     "arrive": "line",
+     "clearance": 0.01,
+     "margin": 0.005,
+     "nearest": [
+      "finger_left",
+      "stand_b"
+     ],
+     "along_slack": 0.005,
+     "along_samples": 21,
+     "manipulability": 0.064004,
+     "limit_margin": 0.559202,
+     "branch": {
+      "joint_3": -1,
+      "joint_5": 1
+     },
+     "action": "close the fingers"
+    },
+    {
+     "sequence": "pick:stand_b/top",
+     "name": "lift",
+     "q": [
+      2.502976,
+      0.137284,
+      -1.912825,
+      0.205253,
+      4.711674,
+      0.93218
+     ],
+     "xyz": [
+      0.45,
+      -0.15,
+      0.28
+     ],
+     "quat_wxyz": [
+      0.0,
+      1.0,
+      0.0,
+      -0.0
+     ],
+     "joints": {
+      "finger_right_joint": 0.018,
+      "finger_left_joint": 0.018
+     },
+     "arrive": "line",
+     "clearance": 0.0639,
+     "margin": 0.005,
+     "nearest": [
+      "link_1",
+      "floor"
+     ],
+     "along_slack": 0.00476,
+     "along_samples": 21,
+     "manipulability": 0.070314,
+     "limit_margin": 0.757529,
+     "branch": {
+      "joint_3": -1,
+      "joint_5": 1
+     },
+     "action": ""
+    }
+   ]
+  },
+  {
+   "sequence": "place:stand_d/top",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "example.place",
+    "slot": "stand_d/top"
+   },
+   "points": [
+    {
+     "sequence": "place:stand_d/top",
+     "name": "above",
+     "q": [
+      3.452791,
+      -0.027103,
+      -1.758613,
+      0.215143,
+      4.710827,
+      1.881995
+     ],
+     "xyz": [
+      0.45,
+      0.3,
+      0.28
+     ],
+     "quat_wxyz": [
+      0.0,
+      1.0,
+      -0.0,
+      0.0
+     ],
+     "joints": {
+      "finger_right_joint": 0.018,
+      "finger_left_joint": 0.018
+     },
+     "arrive": "free",
+     "clearance": 0.0639,
+     "margin": 0.005,
+     "nearest": [
+      "link_1",
+      "floor"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.084634,
+     "limit_margin": 0.911741,
+     "branch": {
+      "joint_3": -1,
+      "joint_5": 1
+     },
+     "action": ""
+    },
+    {
+     "sequence": "place:stand_d/top",
+     "name": "place_down",
+     "q": [
+      3.452791,
+      -0.110286,
+      -1.945266,
+      0.48498,
+      4.710827,
+      1.881995
+     ],
+     "xyz": [
+      0.45,
+      0.3,
+      0.18
+     ],
+     "quat_wxyz": [
+      0.0,
+      1.0,
+      -0.0,
+      0.0
+     ],
+     "joints": {
+      "finger_right_joint": 0.018,
+      "finger_left_joint": 0.018
+     },
+     "arrive": "line",
+     "clearance": -0.0,
+     "margin": 0.0,
+     "nearest": [
+      "attached/block",
+      "stand_d"
+     ],
+     "along_slack": -0.0,
+     "along_samples": 21,
+     "manipulability": 0.080179,
+     "limit_margin": 0.725088,
+     "branch": {
+      "joint_3": -1,
+      "joint_5": 1
+     },
+     "action": "open the fingers"
+    },
+    {
+     "sequence": "place:stand_d/top",
+     "name": "retreat",
+     "q": [
+      3.452791,
+      -0.027103,
+      -1.758613,
+      0.215143,
+      4.710827,
+      1.881995
+     ],
+     "xyz": [
+      0.45,
+      0.3,
+      0.28
+     ],
+     "quat_wxyz": [
+      0.0,
+      1.0,
+      -0.0,
+      0.0
+     ],
+     "joints": {
+      "finger_right_joint": 0.035,
+      "finger_left_joint": 0.035
+     },
+     "arrive": "line",
+     "clearance": 0.0639,
+     "margin": 0.005,
+     "nearest": [
+      "link_1",
+      "floor"
+     ],
+     "along_slack": 0.00976,
+     "along_samples": 21,
+     "manipulability": 0.084634,
+     "limit_margin": 0.911741,
+     "branch": {
+      "joint_3": -1,
+      "joint_5": 1
+     },
+     "action": ""
+    }
+   ]
+  }
+ ]
+}
