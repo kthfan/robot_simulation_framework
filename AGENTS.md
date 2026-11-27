@@ -26,7 +26,7 @@ bash cells/example_pick_place/run.sh      # the same through the command-line to
 | the tray cell's plugin or assets | `test_tm_tray_*.py`, `test_m3_collision.py`, `test_teach.py`, `test_locate.py` |
 
 Tests skip with a reason when an optional dependency is missing (`eaik`,
-`coal`, `mujoco`, `pxr`, `aprilgrid_detector`, `isaacsim`). A skip is not a
+`coal`, `mujoco`, `pxr`, `aprilgrid_detector`, `isaacsim`, `aiortc`). A skip is not a
 pass: say which tests were skipped and why. Offscreen rendering uses OSMesa
 (`MUJOCO_GL=osmesa`, set by `tests/conftest.py`; `apt install libosmesa6`).
 Isaac tests run only in Isaac Sim's Python (docs/local_setup.md). GPU work
