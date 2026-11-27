@@ -96,6 +96,41 @@ class UsdModel:
     visual: Optional[dict] = None        #: where its looks are (:func:`visual_source`)
 
 
+def _pxr() -> None:
+    """Make ``pxr`` importable. In Isaac Sim's own Python (``python.sh``) USD is one of the
+    app's extensions: the app is started (headless) the first time a USD model is read, so
+    ``teach`` / ``plan`` work there too. Elsewhere, ``usd-core`` provides it."""
+    try:
+        import pxr.Usd  # noqa: F401
+        return
+    except ImportError as e:
+        err = e
+    import importlib.util
+    if importlib.util.find_spec("isaacsim") is not None:
+        import sys
+        print("[usd] starting Isaac Sim (headless) for its USD libraries", file=sys.stderr, flush=True)
+        from rsf.sim.isaac_cell import start_app
+        start_app()
+        try:
+            import pxr.Usd  # noqa: F401,F811
+            return
+        except ImportError as e:
+            err = e
+    raise UsdError(no_pxr()) from err
+
+
+def no_pxr() -> str:
+    """Why ``pxr`` is missing and what to do -- which depends on where we run."""
+    import importlib.util
+    if importlib.util.find_spec("isaacsim") is not None:
+        # Isaac Sim's pxr is one of its extensions: importable once the app has started
+        return ("pxr is not loaded yet: in Isaac Sim's Python, USD comes with the app. Start it before "
+                "loading a layout with USD models (rsf.sim.isaac_cell.app(); tools/sim_workflow.py "
+                "--backend isaac does). Do NOT pip install usd-core here: it shadows Isaac's own USD "
+                "and breaks Isaac's extensions (pip uninstall usd-core if you did).")
+    return "reading USD needs pxr: pip install usd-core (outside Isaac Sim's Python)"
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Mesh cache
 # ─────────────────────────────────────────────────────────────────────────────
@@ -252,10 +287,8 @@ def _matches(path: str, globs) -> bool:
 def load(path, prim: Optional[str] = None, collision=None, frames: Optional[dict] = None,
          mesh_dir=None) -> UsdModel:
     """A USD file as solids in *prim*'s frame (module docstring)."""
-    try:
-        from pxr import Usd, UsdGeom, UsdPhysics
-    except ImportError as e:                       # pragma: no cover - depends on the install
-        raise UsdError("reading USD needs pxr: pip install usd-core (Isaac Sim brings its own)") from e
+    _pxr()
+    from pxr import Usd, UsdGeom, UsdPhysics
     path = Path(path)
     if not path.exists():
         raise UsdError(f"no such USD file: {path}")
@@ -357,10 +390,8 @@ def _visual(path: Path, stage, root, C) -> dict:
 
 def visual_source(path, prim: Optional[str] = None) -> dict:
     """:func:`_visual` of a USD file used only for its looks (``visual: {model, prim}``)."""
-    try:
-        from pxr import Usd
-    except ImportError as e:                       # pragma: no cover
-        raise UsdError("reading USD needs pxr: pip install usd-core (Isaac Sim brings its own)") from e
+    _pxr()
+    from pxr import Usd
     path = Path(path)
     if not path.exists():
         raise UsdError(f"no such USD file: {path}")

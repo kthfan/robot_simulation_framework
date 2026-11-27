@@ -495,3 +495,68 @@ def test_looks_of_a_whole_stage_keep_their_placement(tmp_path):
     w = build_world(doc)
     st = world_stage(w)
     assert np.allclose(_bounds(st, "/World/visuals/thing"), _solid_bounds(w.entity("thing").solids), atol=1e-5)
+
+
+def test_isaac_starts_before_the_layout_is_read(monkeypatch):
+    """In Isaac Sim's Python, pxr exists only once the app runs: sim_workflow --backend isaac
+    starts it before reading a layout (which may hold USD models)."""
+    import importlib.util
+
+    import rsf.model.layout as LY
+    import rsf.sim.isaac_cell as IC
+    spec = importlib.util.spec_from_file_location("sw", ROOT / "tools" / "sim_workflow.py")
+    sw = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(sw)
+    order = []
+
+    class Stop(Exception):
+        pass
+
+    def fake_load_world(*a, **k):
+        order.append("layout")
+        raise Stop
+    monkeypatch.setattr(IC, "start_app", lambda p=None: order.append("isaac app"))
+    monkeypatch.setattr(LY, "load_world", fake_load_world)
+    args = [str(EXAMPLE / "layouts" / "main.yaml"), str(EXAMPLE / "workflows" / "move_blocks.yaml"),
+            "--plan", "x.json", "--out", "y.json"]
+    with pytest.raises(Stop):
+        sw.main(args + ["--backend", "isaac"])
+    assert order == ["isaac app", "layout"]
+    order.clear()
+    with pytest.raises(Stop):
+        sw.main(args)                                   # MuJoCo: no Isaac
+    assert order == ["layout"]
+
+
+def test_missing_pxr_advice_depends_on_where_we_run(monkeypatch):
+    import importlib.util
+    real = importlib.util.find_spec
+    monkeypatch.setattr(importlib.util, "find_spec", lambda n, *a: object() if n == "isaacsim" else real(n, *a))
+    msg = UM.no_pxr()
+    assert "Do NOT pip install usd-core" in msg and "app" in msg
+    monkeypatch.setattr(importlib.util, "find_spec", lambda n, *a: None if n == "isaacsim" else real(n, *a))
+    assert "pip install usd-core" in UM.no_pxr() and "NOT" not in UM.no_pxr()
+
+
+def test_in_isaacs_python_the_app_is_started_for_pxr(monkeypatch):
+    """No pxr yet, but Isaac Sim present: the app is started, then pxr is there."""
+    import builtins
+    import importlib.util
+
+    import rsf.sim.isaac_cell as IC
+    real_import, real_spec = builtins.__import__, importlib.util.find_spec
+    state = {"app": False}
+
+    def imp(name, *a, **k):
+        if name.startswith("pxr") and not state["app"]:
+            raise ImportError("no pxr before the app")
+        return real_import(name, *a, **k)
+    monkeypatch.setattr(builtins, "__import__", imp)
+    monkeypatch.setattr(importlib.util, "find_spec", lambda n, *a: object() if n == "isaacsim" else real_spec(n, *a))
+    monkeypatch.setattr(IC, "start_app", lambda p=None: state.update(app=True))
+    UM._pxr()
+    assert state["app"]
+    state["app"] = False                                    # the app starts but brings no pxr: the advice
+    monkeypatch.setattr(IC, "start_app", lambda p=None: None)
+    with pytest.raises(UM.UsdError, match="Do NOT pip install usd-core"):
+        UM._pxr()

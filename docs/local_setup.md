@@ -274,6 +274,15 @@ dependency is already installed in it:
 * the main side, in addition: mujoco, coal, EAIK, motion_planner, urchin, the
   detector.
 
+**Never install `usd-core` into it.** Isaac Sim's USD (`pxr`) is one of the app's
+extensions and is importable only once the app has started. A second `pxr` from
+`usd-core` shadows it, and Isaac's own extensions then fail at start
+(`No to_python (by-value) converter found for C++ type: std::vector<...SdfPath...>`).
+If that happened: `$ISAAC_PY -m pip uninstall -y usd-core`. Layouts with USD models
+need no extra step: `sim_workflow.py --backend isaac` starts the app before reading
+the layout, and other tools (`teach`, `plan`) start it headless the first time a USD
+model is read.
+
 Replace `python` with it. `python.sh` sets its own `PYTHONPATH`, so the
 repository must not rely on it. The tools put `src` on the path themselves, and
 `tools/rsf_cli.py` stands in for `python -m rsf`.

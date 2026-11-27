@@ -79,6 +79,15 @@ def app(headless: bool = True):
     return _APP
 
 
+def start_app(params: Optional["IsaacParams"] = None):
+    """Start the Isaac Sim app if this Python has Isaac Sim (else nothing): its ``pxr``
+    is importable from then on, so do it before loading a layout with USD models."""
+    import importlib.util
+    if importlib.util.find_spec("isaacsim") is None:
+        return None
+    return app(True if params is None else params.headless)
+
+
 def start_physics(ctx, dt: float):
     """Start PhysX on the context's stage and a numpy tensor view of it, as Isaac's own
     ``SimulationContext.initialize_physics`` does: ``(physx, simulation interface, view)``."""
@@ -120,9 +129,7 @@ def _T7(x) -> np.ndarray:
 class IsaacCell:
     def __init__(self, world, occupancy: Optional[dict] = None, params: Optional[IsaacParams] = None,
                  flange: str = "flange", usd_path=None):
-        import importlib.util
-        if importlib.util.find_spec("isaacsim") is not None:
-            app(self.p_headless(params))                   # Isaac's own pxr loads with the app
+        start_app(params)                                    # Isaac's own pxr loads with the app
         from rsf.compile import usd as U
         from rsf.model.urdf import UrdfModel
         self.world = world

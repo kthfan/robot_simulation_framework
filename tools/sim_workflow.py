@@ -225,6 +225,11 @@ def main(argv=None) -> int:
         start_debugpy(a.debugpy, a.debugpy_wait)
     if a.live and a.backend == "mujoco" and not os.environ.get("DISPLAY"):
         os.environ.setdefault("MUJOCO_GL", "egl")         # offscreen; MUJOCO_GL=osmesa without a GPU
+    if a.backend == "isaac":
+        # Isaac Sim's USD (pxr) loads with its app: start it before the layout, which may
+        # read USD models (installing usd-core into Isaac's Python instead breaks Isaac)
+        from rsf.sim.isaac_cell import start_app
+        start_app(params(a.set, "isaac"))
     from rsf.model.layout import load_world
     from rsf.model.workflow import Workflow
     from rsf.sim import judge as J

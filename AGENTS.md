@@ -91,7 +91,11 @@ before changing the module.
 ## Pitfalls
 
 - Isaac Sim's Python brings its own `pxr` and `cv2`. Never `pip install
-  usd-core` or `opencv-python` into an Isaac venv.
+  usd-core` or `opencv-python` into an Isaac venv or `python.sh`: a second `pxr`
+  breaks Isaac's extensions at start. In the standalone `python.sh`, `pxr` exists
+  only once the app runs. `rsf.model.usd_model` starts the app itself when it reads
+  a USD model there; code that needs `pxr` earlier calls
+  `rsf.sim.isaac_cell.start_app()` first.
 - MuJoCo and PhysX collide meshes as convex hulls; the planner (coal) uses
   exact triangles. Concave parts must be split into convex pieces, or the
   simulation disagrees with the plan (the audit's `rsf.convex_meshes` warns).
