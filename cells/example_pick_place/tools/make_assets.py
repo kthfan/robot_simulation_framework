@@ -6,7 +6,8 @@
   fingers. Joint value ``q`` of a finger = its inner face's distance from the tcp
   axis, so the opening is ``2 q``.
 * ``assets/block.usda``: the object, as USD (a model can be a URDF or a USD file): a
-  ``Cube`` scaled to the block's size, marked as a collider, with its mass; the part's
+  ``Cube`` scaled to the block's size, marked as a collider, with its mass and an orange
+  material (Isaac shows it; docs/cell_model.md, Looks); the part's
   frame (``/block``) is at the centre of its underside, so it stands on a feature
   without an offset. Written as plain text, so it needs no USD library.
 
@@ -108,10 +109,27 @@ def Xform "block" (
 {{
     float physics:mass = {BLOCK["mass"]:g}
 
+    def Scope "Looks"
+    {{
+        def Material "orange"
+        {{
+            token outputs:surface.connect = </block/Looks/orange/pbr.outputs:surface>
+
+            def Shader "pbr"
+            {{
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.93, 0.55, 0.15)
+                float inputs:roughness = 0.45
+                token outputs:surface
+            }}
+        }}
+    }}
+
     def Cube "body" (
-        prepend apiSchemas = ["PhysicsCollisionAPI"]
+        prepend apiSchemas = ["PhysicsCollisionAPI", "MaterialBindingAPI"]
     )
     {{
+        rel material:binding = </block/Looks/orange>
         double size = 1
         double3 xformOp:translate = (0, 0, {z / 2:g})
         float3 xformOp:scale = ({x:g}, {y:g}, {z:g})

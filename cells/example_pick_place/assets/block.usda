@@ -13,10 +13,27 @@ def Xform "block" (
 {
     float physics:mass = 0.2
 
+    def Scope "Looks"
+    {
+        def Material "orange"
+        {
+            token outputs:surface.connect = </block/Looks/orange/pbr.outputs:surface>
+
+            def Shader "pbr"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.93, 0.55, 0.15)
+                float inputs:roughness = 0.45
+                token outputs:surface
+            }
+        }
+    }
+
     def Cube "body" (
-        prepend apiSchemas = ["PhysicsCollisionAPI"]
+        prepend apiSchemas = ["PhysicsCollisionAPI", "MaterialBindingAPI"]
     )
     {
+        rel material:binding = </block/Looks/orange>
         double size = 1
         double3 xformOp:translate = (0, 0, 0.03)
         float3 xformOp:scale = (0.04, 0.04, 0.06)
