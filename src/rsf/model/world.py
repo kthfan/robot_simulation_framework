@@ -105,6 +105,7 @@ class ObjectInstance:
     at: Optional[str] = None
     mass: Optional[float] = None
     source: Optional[Path] = None
+    visual: Optional[dict] = None    #: its looks in the object frame (rsf.model.usd_model.visual_source)
 
     def world_solids(self) -> list:
         """The object's solids in the world, named ``<object>/<solid>``."""

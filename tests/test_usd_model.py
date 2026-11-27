@@ -366,3 +366,132 @@ def test_usd_meshes_reach_the_backends(tmp_path):
     m = world_spec(w, robot=False).compile()
     g = m.geom("ball/shell")
     assert g.type[0] == mujoco.mjtGeom.mjGEOM_MESH
+
+
+# ── looks: the original prims referenced in the Isaac stage ─────────────────
+def _fancy_part(path) -> Path:
+    """A part as a CAD / Isaac export comes: centimetres, Y up, a material on every mesh,
+    colliders marked, a rigid body and a joint authored, one piece instanced."""
+    parts = _parts(TRAY)
+    usd = write_usd(path, parts, mpu=0.01, up="Y", physics=True, root="/fixture")
+    stage = Usd.Stage.Open(str(usd))
+    from pxr import UsdShade
+    mat = UsdShade.Material.Define(stage, "/fixture/Looks/orange")
+    sh = UsdShade.Shader.Define(stage, "/fixture/Looks/orange/pbr")
+    sh.CreateIdAttr("UsdPreviewSurface")
+    sh.CreateInput("diffuseColor", Sdf.ValueTypeNames.Color3f).Set(Gf.Vec3f(0.9, 0.5, 0.1))
+    mat.CreateSurfaceOutput().ConnectToSource(sh.ConnectableAPI(), "surface")
+    for name, *_ in parts:
+        UsdShade.MaterialBindingAPI.Apply(stage.GetPrimAtPath(f"/fixture/geo/{name}")).Bind(mat)
+    UsdPhysics.RigidBodyAPI.Apply(stage.GetPrimAtPath("/fixture"))
+    UsdPhysics.RevoluteJoint.Define(stage, "/fixture/hinge")
+    # an instanced prop from another file (its collider and rigid body inside the prototype)
+    prop = Usd.Stage.CreateNew(str(Path(path).with_name("prop.usda")))
+    UsdGeom.SetStageMetersPerUnit(prop, 0.01)
+    UsdGeom.SetStageUpAxis(prop, UsdGeom.Tokens.y)
+    c = UsdGeom.Cube.Define(prop, "/prop/knob")
+    c.CreateSizeAttr(4.0)
+    UsdPhysics.CollisionAPI.Apply(c.GetPrim())
+    UsdPhysics.RigidBodyAPI.Apply(prop.GetPrimAtPath("/prop"))
+    prop.GetRootLayer().Save()
+    inst = stage.DefinePrim("/fixture/geo/prop", "Xform")
+    inst.GetReferences().AddReference(str(Path(path).with_name("prop.usda")), "/prop")
+    inst.SetInstanceable(True)
+    _xform(inst, se3.make_T(None, (0.0, 20.0, 0.0)))                    # 20 cm up (Y)
+    stage.Save()
+    return usd
+
+
+def _bounds(stage, prim_path) -> np.ndarray:
+    cache = UsdGeom.BBoxCache(Usd.TimeCode.Default(), [UsdGeom.Tokens.default_, UsdGeom.Tokens.render])
+    r = cache.ComputeWorldBound(stage.GetPrimAtPath(prim_path)).ComputeAlignedRange()
+    return np.array([list(r.GetMin()), list(r.GetMax())])
+
+
+def _solid_bounds(solids) -> np.ndarray:
+    P = np.vstack([s.corners() for s in solids])
+    return np.array([P.min(0), P.max(0)])
+
+
+def _physics_under(stage, path) -> list:
+    return [(str(p.GetPath()), a) for p in Usd.PrimRange(stage.GetPrimAtPath(path))
+            for a in p.GetAppliedSchemas() if a.startswith(("Physics", "Physx"))]
+
+
+def test_isaac_stage_shows_parts_by_their_original_looks(tmp_path):
+    from pxr import UsdShade
+
+    from rsf.compile.usd import world_stage
+    usd = _fancy_part(tmp_path / "fixture.usda")
+    doc = load_document(EXAMPLE / "layouts" / "main.yaml")
+    pose = {"xyz": [0.9, 0.2, 0.1], "rpy": [0, 0, 0.6]}
+    doc["entities"]["fixture"] = {"model": str(usd), "prim": "/fixture", "pose": pose}
+    w = build_world(doc)
+    st = world_stage(w)
+
+    # the looks sit exactly where the colliders are (cm and Y up converted, pose applied)
+    fixture = w.entity("fixture")
+    assert np.allclose(_bounds(st, "/World/visuals/fixture"), _solid_bounds(fixture.solids), atol=1e-5)
+    # ... with their material
+    meshes = [p for p in Usd.PrimRange(st.GetPrimAtPath("/World/visuals/fixture")) if p.GetTypeName() == "Mesh"]
+    assert len(meshes) == len(fixture.solids) - 1                           # + the prop's Cube
+    bound = {str(UsdShade.MaterialBindingAPI(p).ComputeBoundMaterial()[0].GetPath()) for p in meshes}
+    assert bound == {"/World/visuals/fixture/units/fixture/Looks/orange"}
+    # ... and no physics: no physics schema, the joint inactive
+    assert _physics_under(st, "/World/visuals") == []
+    assert not st.GetPrimAtPath("/World/visuals/fixture/units/fixture/hinge").IsActive()
+    # the colliders stay, invisible; the same colliders as without looks
+    cols = [p for p in Usd.PrimRange(st.GetPrimAtPath("/World/static")) if p.GetCustomDataByKey("rsf:entity") == "fixture"]
+    assert cols and all(UsdGeom.Imageable(p).ComputeVisibility() == UsdGeom.Tokens.invisible for p in cols)
+    plain = world_stage(w, visuals=False)
+    colliders = lambda s: sorted(str(p.GetPath()) for p in s.Traverse() if p.HasAPI(UsdPhysics.CollisionAPI))  # noqa: E731
+    assert colliders(st) == colliders(plain)
+    assert not plain.GetPrimAtPath("/World/visuals")
+    assert all(UsdGeom.Imageable(plain.GetPrimAtPath(str(p.GetPath()))).ComputeVisibility() != UsdGeom.Tokens.invisible
+               for p in cols)                                              # without looks the colliders show
+    # the instanced prop: read through its prototype for the colliders, made editable in the looks
+    assert any(s.name.endswith("geo/prop/knob") for s in fixture.solids)
+    knob = st.GetPrimAtPath("/World/visuals/fixture/units/fixture/geo/prop/knob")
+    assert knob and not knob.IsInstanceProxy() and _physics_under(st, "/World/visuals/fixture/units/fixture/geo/prop") == []
+
+    # objects: the block's looks ride on its body
+    o = w.objects[0]
+    body = f"/World/objects/{o.name.replace('/', '_')}"
+    assert st.GetPrimAtPath(f"{body}/visual")
+    assert np.allclose(_bounds(st, f"{body}/visual"), _solid_bounds(o.world_solids()), atol=1e-6)
+    assert _physics_under(st, f"{body}/visual") == []
+    assert st.GetPrimAtPath(body).HasAPI(UsdPhysics.RigidBodyAPI)          # the body itself keeps its physics
+
+
+def test_visual_options(tmp_path):
+    usd = _fancy_part(tmp_path / "fixture.usda")
+    doc = load_document(EXAMPLE / "layouts" / "main.yaml")
+    doc["entities"]["fixture"] = {"model": str(usd), "prim": "/fixture", "visual": False}
+    assert "visual" not in build_world(doc).entity("fixture").meta
+    # a URDF part with looks from a USD file
+    doc["entities"]["fixture"] = {"model": str(TRAY), "visual": {"model": str(usd), "prim": "/fixture"}}
+    v = build_world(doc).entity("fixture").meta["visual"]
+    assert v["prims"] == ["/fixture"] and not v["keep_ops"]
+    for bad in (True and {"model": str(TRAY)}, {"prim": "/x"}, "yes"):
+        doc["entities"]["fixture"] = {"model": str(TRAY), "visual": bad}
+        with pytest.raises(LayoutError, match="visual"):
+            build_world(doc)
+    # displace moves the looks with the part
+    doc["entities"]["fixture"] = {"model": str(usd), "prim": "/fixture", "displace": {"xyz": [0.1, 0, 0]}}
+    e = build_world(doc).entity("fixture")
+    assert np.allclose(np.asarray(e.meta["visual"]["T"])[:3, 3], (0.1, 0, 0))
+
+
+def test_looks_of_a_whole_stage_keep_their_placement(tmp_path):
+    """No ``prim``: the part is the stage, its top-level prims stay where the stage puts them."""
+    from rsf.compile.usd import world_stage
+    usd = write_usd(tmp_path / "w.usda", _parts(TRAY), mpu=0.01, up="Y", root="/somewhere",
+                    wrap=se3.make_T(se3.rot_z(0.4), (5.0, 1.0, 0.0)))
+    stage = Usd.Stage.Open(str(usd))
+    _xform(stage.GetPrimAtPath("/somewhere"), se3.make_T(se3.rot_x(0.3), (20.0, 0.0, 0.0)))
+    stage.Save()
+    doc = load_document(EXAMPLE / "layouts" / "main.yaml")
+    doc["entities"]["thing"] = {"model": str(usd), "pose": {"xyz": [0.0, 1.0, 0.0]}}
+    w = build_world(doc)
+    st = world_stage(w)
+    assert np.allclose(_bounds(st, "/World/visuals/thing"), _solid_bounds(w.entity("thing").solids), atol=1e-5)

@@ -27,6 +27,7 @@ trajectory ─► rsf.sim.common.Reference (q_ref, qd_ref) ┘
 | friction | materials `robot` 0.4, `object` 0.3, `static` 0.5, combine `max` | MuJoCo's combine rule; the plate–tray pair gets the robot value |
 | contacts | `PhysxContactReportAPI` on the robot's bodies; per pair the deepest separation; robot–robot off (articulation self-collision off) | the judge's contact record: `{t, link, other, depth}` |
 | runtime | `omni.physx` steps physics without rendering; `omni.physics.tensors` (numpy) for the articulation and objects | the long-stable low-level interfaces; nothing imported until a cell is made |
+| looks | parts loaded from USD are shown by their **original prims, referenced** (materials and textures included) under a units / up-axis Xform; every physics schema in them removed, their colliders invisible (`IsaacParams.visuals`, default on; `--set visuals=false` shows the colliders) | the stage is rebuilt from the World so the physics is the planner's; the looks are only for the picture |
 
 Names: USD prim names cannot contain `/`; every prim that stands for a model element
 carries `customData` `rsf:name` (the solid / object / link / joint name), `rsf:kind`
@@ -39,7 +40,10 @@ Stage layout:
   physicsScene              1 kHz, TGS, CPU dynamics
   materials/{robot,object,static}
   static/<solid>            colliders (504 boxes in strict)
+  visuals/<entity>          the original USD prims of fixed parts, referenced (looks only, no physics)
+    units/<prim>            the file's units and up axis -> metres, z up
   objects/<object>          rigid bodies, colliders below (the trays where the run starts them)
+    visual                  the object's original USD prims (moves with the body)
   robot                     ArticulationRootAPI, self-collision off
     base, link_1 … link_6, left_gripper, right_gripper     rigid bodies
       <link>/collision_k    convex hulls

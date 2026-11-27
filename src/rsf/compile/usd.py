@@ -21,6 +21,17 @@ plus :class:`rsf.sim.mujoco_cell.MujocoCell`), written with the core USD schemas
 * physics materials per class (``robot``, ``object``, ``static``) with
   ``max`` friction combining, as in MuJoCo.
 
+**Looks.** A part loaded from USD (``rsf.model.usd_model``; or given ``visual:`` in the
+layout) is shown by its original prims, referenced -- not copied -- under
+``/World/visuals/<entity>`` (fixed parts) or ``/World/objects/<object>/visual`` (moving
+with the body), inside an Xform that converts the file's units and up axis. They are for
+rendering only: every physics schema in them is removed (``Physics*`` / ``Physx*`` API
+schemas; physics prims such as joints and scenes deactivated; instances made editable
+for that), so the colliders above stay the only physics, and those colliders are made
+invisible. Materials and textures come with the reference, resolved against the
+original file. ``world_stage(..., visuals=False)`` (``IsaacParams.visuals``) leaves
+the looks out: the colliders are shown, as without a USD.
+
 Every prim that stands for a model element carries ``customData``
 ``rsf:name`` (the solid, object, link or joint name), ``rsf:kind`` and, for
 robot links, ``rsf:body``: names in USD are sanitised (``/`` is not allowed).
@@ -290,15 +301,65 @@ def _mass_api(prim, mass, com, I):
     api.CreatePrincipalAxesAttr(Gf.Quatf(float(q[0]), *[float(x) for x in q[1:]]))
 
 
-def world_stage(world, path=None, *, params=None, robot: bool = True, objects: bool = True):
+def visual_prim(stage, path: str, vis: dict, T=None):
+    """The looks *vis* (``rsf.model.usd_model.visual_source``) referenced at *path*, at pose
+    *T* in the parent's frame; physics stripped. Returns the top prim."""
+    from pxr import Gf, Usd, UsdGeom
+    top = UsdGeom.Xform.Define(stage, path)
+    if T is not None:
+        _xform(top.GetPrim(), T)
+    units = UsdGeom.Xform.Define(stage, f"{path}/units")          # file coordinates -> metres, z up
+    units.AddTransformOp().Set(Gf.Matrix4d(np.asarray(vis["to_part"], float).T.tolist()))
+    for i, src in enumerate(vis["prims"]):
+        name = prim_name(src.strip("/").split("/")[-1]) or f"src{i}"
+        r = stage.DefinePrim(f"{path}/units/{name}")
+        r.GetReferences().AddReference(vis["usd"], src)
+        if not vis.get("keep_ops", False):                     # the prim's frame is the part's frame
+            UsdGeom.Xformable(r).ClearXformOpOrder()
+        _tag(r, src, "visual", source=vis["usd"])
+    _strip_physics(stage, top.GetPrim())
+    return top.GetPrim()
+
+
+def _strip_physics(stage, top) -> None:
+    """Nothing under *top* takes part in physics: physics API schemas removed, physics
+    prims (joints, scenes, ...) deactivated. Instances are made editable first (their
+    prototypes cannot be changed)."""
+    from pxr import Usd
+    pred = Usd.TraverseInstanceProxies(Usd.PrimDefaultPredicate)
+    while True:
+        inst = [p for p in Usd.PrimRange(top, pred) if p.IsInstance()]
+        if not inst:
+            break
+        for p in inst:
+            p.SetInstanceable(False)
+    for p in list(Usd.PrimRange(top)):
+        if p.GetTypeName().startswith(("Physics", "Physx")):
+            p.SetActive(False)
+            continue
+        for api in p.GetAppliedSchemas():
+            if api.startswith(("Physics", "Physx")):
+                p.RemoveAppliedSchema(api)
+
+
+def _hide(prims) -> None:
+    from pxr import UsdGeom
+    for p in prims:
+        UsdGeom.Imageable(p).MakeInvisible()
+
+
+def world_stage(world, path=None, *, params=None, robot: bool = True, objects: bool = True,
+                visuals: Optional[bool] = None):
     """The world as a ``Usd.Stage`` (written to *path* if given: ``.usda`` / ``.usd``).
 
-    *params*: :class:`rsf.sim.isaac_cell.IsaacParams` (default values if None)."""
+    *params*: :class:`rsf.sim.isaac_cell.IsaacParams` (default values if None).
+    *visuals*: the parts' original looks (module docstring); default ``params.visuals``."""
     from pxr import Gf, Sdf, Usd, UsdGeom, UsdPhysics
     if params is None:
         from rsf.sim.isaac_cell import IsaacParams
         params = IsaacParams()
     p = params
+    visuals = bool(getattr(p, "visuals", True)) if visuals is None else visuals
     stage = Usd.Stage.CreateNew(str(path)) if path is not None else Usd.Stage.CreateInMemory()
     UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z)
     UsdGeom.SetStageMetersPerUnit(stage, 1.0)
@@ -324,10 +385,20 @@ def world_stage(world, path=None, *, params=None, robot: bool = True, objects: b
     meshes: dict = {}
 
     UsdGeom.Scope.Define(stage, f"{ROOT}/static")
+    by_entity: dict = {}
     for s in world.solids(objects=False):
         prim = _shape_prim(stage, f"{ROOT}/static/{prim_name(s.name)}", s.shape, s.T, p, meshes)
         _tag(prim, s.name, "static", entity=s.entity)
         _bind(prim, mats["static"])
+        by_entity.setdefault(s.entity, []).append(prim)
+    if visuals:
+        looks = [e for e in world.entities if e.meta.get("visual")]
+        if looks:
+            UsdGeom.Scope.Define(stage, f"{ROOT}/visuals")
+        for e in looks:
+            v = visual_prim(stage, f"{ROOT}/visuals/{prim_name(e.name)}", e.meta["visual"], e.meta["visual"]["T"])
+            _tag(v, e.name, "entity_visual")
+            _hide(by_entity.get(e.name, []))
 
     if objects:
         UsdGeom.Scope.Define(stage, f"{ROOT}/objects")
@@ -338,10 +409,16 @@ def world_stage(world, path=None, *, params=None, robot: bool = True, objects: b
             _tag(b, o.name, "object")
             UsdPhysics.RigidBodyAPI.Apply(b)
             _mass_api(b, *object_mass(o))
+            cols = []
             for s in o.solids:
                 c = _shape_prim(stage, f"{bp}/{prim_name(s.name)}", s.shape, s.T, p, meshes)
                 _tag(c, f"{o.name}/{s.name}", "object_solid", object=o.name)
                 _bind(c, mats["object"])
+                cols.append(c)
+            if visuals and o.visual:
+                v = visual_prim(stage, f"{bp}/visual", o.visual)
+                _tag(v, o.name, "object_visual", object=o.name)
+                _hide(cols)
 
     if robot and world.robot is not None:
         _robot(stage, world.robot, p, mats["robot"], meshes)

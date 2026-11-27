@@ -49,6 +49,10 @@ backend reads meshes from files.
 rigid bodies under it (``kilogramsPerUnit`` applied); ``None`` without one (the layout's
 ``mass:`` overrides it).
 
+**Looks**: :attr:`UsdModel.visual` (:func:`visual_source`) says where the part's
+appearance is -- the file, ``prim`` and the stage-to-part conversion -- so the Isaac stage
+(``rsf.compile.usd``) can reference the original prims for rendering only.
+
 **Frames**: ``frames: {prims: <glob>, kind: <feature kind>}`` turns the matching prims
 (any type) into named frames: name = the prim's name, attributes = its ``customData``
 under ``rsf`` (``customData = {dictionary rsf = {string role = "source"}}``).
@@ -89,6 +93,7 @@ class UsdModel:
     meters_per_unit: float = 1.0
     up_axis: str = "Z"
     rule: str = ""                       #: which collision rule selected the solids
+    visual: Optional[dict] = None        #: where its looks are (:func:`visual_source`)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -333,4 +338,35 @@ def load(path, prim: Optional[str] = None, collision=None, frames: Optional[dict
         if not out_frames:
             raise UsdError(f"{path.name}: frames {frames['prims']!r} matches no prim")
     return UsdModel(path, solids, mass, out_frames, float(UsdGeom.GetStageMetersPerUnit(stage)),
-                    str(UsdGeom.GetStageUpAxis(stage)), rule)
+                    str(UsdGeom.GetStageUpAxis(stage)), rule, _visual(path, stage, root, C))
+
+
+def _visual(path: Path, stage, root, C) -> dict:
+    """The looks of the part at *root*: what a stage references to show it.
+
+    ``prims``: the prims to reference (``prim`` itself, or every top-level prim of the
+    stage when the part is the whole stage); ``keep_ops``: whether their own transforms
+    stay (a whole stage: yes, its prims sit where the stage puts them; ``prim``: no, its
+    frame is the part's); ``to_part``: stage coordinates -> the part frame (metres, z up)."""
+    if root.IsPseudoRoot():
+        prims, keep = [str(p.GetPath()) for p in root.GetChildren() if p.IsDefined() and not p.IsAbstract()], True
+    else:
+        prims, keep = [str(root.GetPath())], False
+    return {"usd": str(Path(path).resolve()), "prims": prims, "keep_ops": keep, "to_part": np.asarray(C).tolist()}
+
+
+def visual_source(path, prim: Optional[str] = None) -> dict:
+    """:func:`_visual` of a USD file used only for its looks (``visual: {model, prim}``)."""
+    try:
+        from pxr import Usd
+    except ImportError as e:                       # pragma: no cover
+        raise UsdError("reading USD needs pxr: pip install usd-core (Isaac Sim brings its own)") from e
+    path = Path(path)
+    if not path.exists():
+        raise UsdError(f"no such USD file: {path}")
+    stage = Usd.Stage.Open(str(path), Usd.Stage.LoadAll)
+    root = stage.GetPseudoRoot() if prim in (None, "", "/") else stage.GetPrimAtPath(prim)
+    if not root or not root.IsValid():
+        top = [str(p.GetPath()) for p in stage.GetPseudoRoot().GetChildren()]
+        raise UsdError(f"{path.name}: no prim {prim!r} (top-level prims: {top})")
+    return _visual(path, stage, root, _stage_frame(stage))

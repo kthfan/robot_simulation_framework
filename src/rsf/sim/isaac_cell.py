@@ -61,6 +61,9 @@ class IsaacParams(SimParams):
     #: before a render, write the bodies' poses from PhysX to USD (``update_transformations``),
     #: as Isaac's own physics step does when it steps PhysX directly: the renderer reads them there
     render_sync: bool = True
+    #: show parts loaded from USD by their original prims (materials, textures) instead of their
+    #: colliders; physics is the same either way (rsf.compile.usd, "Looks")
+    visuals: bool = True
 
 
 _APP = None

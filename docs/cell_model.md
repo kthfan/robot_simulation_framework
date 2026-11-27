@@ -105,6 +105,14 @@ How a USD file is read:
 - **Mass** (objects): the layout's `mass:`, else `physics:mass` of `UsdPhysics.MassAPI`
   on `prim` (or summed over the bodies under it), with `kilogramsPerUnit` applied.
   The audit warns about an object without a mass (`rsf.object_mass`).
+- **Looks (`visual`)**: the Isaac stage shows a USD part by its **original prims**,
+  with their materials and textures. These are referenced from the file, not copied, and
+  sit exactly where the colliders are; the colliders become invisible. The
+  referenced prims take no part in physics: every `Physics*` / `Physx*` schema in them
+  is removed, physics prims (joints) are deactivated, instances are made editable for
+  that. `visual: false` shows the colliders instead. `visual: {model: <usd>, prim: ...}`
+  takes the looks from another file, also for a URDF part. MuJoCo pictures always show
+  the colliders.
 - **`frames`** (entities, placements): prims matching `prims` become features named
   `<entity>/<prim name>` of `kind`. Their attributes come from the prim's `customData`
   under `rsf`: `customData = {dictionary rsf = {string role = "source"}}`.

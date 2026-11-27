@@ -91,6 +91,8 @@ parameters and the naming conventions in §6.
   the meshes and their placement. Mark the colliders with `UsdPhysics.CollisionAPI`
   or name them with `collision:`, so the visual meshes do not become obstacles.
   Check the units: an unauthored `metersPerUnit` means centimetres.
+  In Isaac's pictures (`--backend isaac`, live view) the part then appears with its
+  own materials. The physics stays the colliders (docs/cell_model.md, Models).
 
 ## 4. Layout and workflow
 

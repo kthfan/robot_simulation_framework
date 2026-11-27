@@ -31,6 +31,9 @@ A **model** (``model:``, or the older ``urdf:``) is a URDF or a USD file
 together. USD options (``rsf.model.usd_model``): ``prim`` (the part's root prim and
 frame), ``collision`` (prim globs), ``frames`` (``{prims: glob, kind}``: prims that
 become features of an entity or placement). ``mass`` (objects) overrides the model's.
+``visual``: the part's looks for rendering (Isaac): ``true`` (default for a USD model:
+the model's own prims), ``false``, or ``{model: <usd>, prim: ...}`` (another file, also
+for a URDF part).
 
 Paths are relative to the YAML file that wrote them. Overrides are dotted paths
 into the resolved document (``entities.pedestal.params.leg_height``); a path
@@ -57,7 +60,7 @@ TOP_KEYS = {"schema", "name", "description", "extends", "plugins", "process", "e
             "placements", "objects", "robot", "audit"}
 _PATH_KEYS = {"urdf", "mesh", "model"}
 #: keys of a model-based entry, by section (generators have their own params)
-_MODEL_KEYS = {"urdf", "model", "prim", "collision", "frames"}
+_MODEL_KEYS = {"urdf", "model", "prim", "collision", "frames", "visual"}
 _SECTION_KEYS = {"entities": _MODEL_KEYS | {"pose", "tags", "kind", "displace"},
                  "placements": _MODEL_KEYS | {"at", "offset", "tags", "kind"},
                  "objects": (_MODEL_KEYS - {"frames"}) | {"at", "offset", "initially", "mass"}}
@@ -209,6 +212,7 @@ class _Model:
     mass: Optional[float]
     frames: dict            #: name -> (T, attrs)
     kind: str               #: urdf | usd
+    visual: Optional[dict] = None   #: rsf.model.usd_model.visual_source (looks; None: the colliders)
 
 
 def load_model(spec: dict, where: str, section: str) -> _Model:
@@ -222,12 +226,25 @@ def load_model(spec: dict, where: str, section: str) -> _Model:
         raise LayoutError(f"{section} {where!r}: needs exactly one of 'model' and 'urdf'")
     path = Path(spec.get("model") or spec["urdf"])
     suffix = path.suffix.lower()
+    vis = spec.get("visual", True)
+    if not (isinstance(vis, bool) or (isinstance(vis, dict) and "model" in vis and set(vis) <= {"model", "prim"})):
+        raise LayoutError(f"{section} {where!r}: visual is true, false or {{model: <usd>, prim: ...}}")
+    visual = None
+    if isinstance(vis, dict):
+        if Path(vis["model"]).suffix.lower() not in usd_model.SUFFIXES:
+            raise LayoutError(f"{section} {where!r}: visual.model must be a USD file")
+        try:
+            visual = usd_model.visual_source(vis["model"], vis.get("prim"))
+        except usd_model.UsdError as e:
+            raise LayoutError(f"{section} {where!r}: visual: {e}") from None
     if suffix in usd_model.SUFFIXES:
         try:
             m = usd_model.load(path, spec.get("prim"), spec.get("collision"), spec.get("frames"))
         except usd_model.UsdError as e:
             raise LayoutError(f"{section} {where!r}: {e}") from None
-        return _Model(path, list(m.solids), m.mass, dict(m.frames), "usd")
+        if vis is True:
+            visual = m.visual
+        return _Model(path, list(m.solids), m.mass, dict(m.frames), "usd", visual)
     if suffix != ".urdf":
         raise LayoutError(f"{section} {where!r}: {path.name}: a model is .urdf or {'/'.join(usd_model.SUFFIXES)}")
     usd_only = {"prim", "collision", "frames"} & set(spec)
@@ -235,7 +252,7 @@ def load_model(spec: dict, where: str, section: str) -> _Model:
         raise LayoutError(f"{section} {where!r}: {sorted(usd_only)} apply to USD models only")
     model = UrdfModel.from_file(path)
     mass = sum(l.mass or 0.0 for l in model.links.values()) or None
-    return _Model(path, solids_from_urdf(model), mass, {}, "urdf")
+    return _Model(path, solids_from_urdf(model), mass, {}, "urdf", visual)
 
 
 def _frame_features(m: _Model, spec: dict, owner: str, T: np.ndarray) -> tuple:
@@ -249,7 +266,15 @@ def _model_entity(name: str, spec: dict, ctx: BuildContext) -> Entity:
     tags = frozenset(spec.get("tags", [])) | {name}
     solids = tuple(Solid(f"{name}/{s.name}", T @ s.T, s.shape, name, tags) for s in m.solids)
     return Entity(name, spec.get("kind", "static"), solids, _frame_features(m, spec, name, T),
-                  {"model": str(m.source)})
+                  _meta(m, T))
+
+
+def _meta(m: _Model, T: np.ndarray, **extra) -> dict:
+    """An entity's meta: its model, and its looks placed at *T* (world)."""
+    out = {**extra, "model": str(m.source)}
+    if m.visual is not None:
+        out["visual"] = {**m.visual, "T": np.asarray(T, float).tolist()}
+    return out
 
 
 def displacement(spec: Optional[dict]) -> np.ndarray:
@@ -282,8 +307,10 @@ def displace_entity(ent: Entity, D: np.ndarray) -> Entity:
             feats.append(registry.get("feature_move", f.kind)(f, D))
         else:
             feats.append(replace(f, T=D @ f.T))
-    return replace(ent, solids=tuple(s.moved(D) for s in ent.solids), features=tuple(feats),
-                   meta=dict(ent.meta, displaced=D.tolist()))
+    meta = dict(ent.meta, displaced=D.tolist())
+    if "visual" in meta:                                   # its looks move with it
+        meta["visual"] = {**meta["visual"], "T": (D @ np.asarray(meta["visual"]["T"], float)).tolist()}
+    return replace(ent, solids=tuple(s.moved(D) for s in ent.solids), features=tuple(feats), meta=meta)
 
 
 def _build_entity(name: str, spec: dict, ctx: BuildContext) -> Entity:
@@ -318,7 +345,7 @@ def _placements(doc: dict, ctx: BuildContext) -> list:
             T = f.T @ off
             solids = tuple(Solid(f"{ename}/{s.name}", T @ s.T, s.shape, ename, tags) for s in local)
             out.append(Entity(ename, spec.get("kind", "fixture"), solids, _frame_features(m, spec, ename, T),
-                              {"at": f.key, "model": str(m.source)}))
+                              _meta(m, T, at=f.key)))
     return out
 
 
@@ -340,7 +367,8 @@ def _objects(doc: dict, ctx: BuildContext, occupancy: Optional[dict]) -> list:
             raise LayoutError(f"object {oname!r}: not a place for it: {sorted(unknown)}")
         for f in candidates:
             if f.key in keys:
-                out.append(ObjectInstance(f"{oname}/{f.key}", oname, local, f.T @ off, f.key, mass, m.source))
+                out.append(ObjectInstance(f"{oname}/{f.key}", oname, local, f.T @ off, f.key, mass, m.source,
+                                          m.visual))
     return out
 
 
