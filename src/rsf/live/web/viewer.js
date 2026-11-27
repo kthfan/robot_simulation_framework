@@ -1,10 +1,59 @@
-// rsf live viewer: frames from /api/v1/video/<name>/<transport>, status and events
-// from /api/v1/stream (SSE). Transports are a table: add one (e.g. webrtc) with
+// rsf live viewer: frames from /api/v1/video/<name>/<transport> (or WebRTC), status and
+// events from /api/v1/stream (SSE). Transports are a table: add one with
 // Viewer.transports.name = {attach(img, stream), detach(img)} and list it in the
-// server's /api/v1/info "transports".
+// server's /api/v1/info "transports" (the first one both know is used; the choice is kept).
 "use strict";
 const Viewer = {
   transports: {
+    webrtc: {                     // VP8/H.264 over UDP (rsf.live.webrtc); falls back to MJPEG when it does not connect
+      _gen: 0,
+      attach(img, stream) {
+        const gen = ++this._gen, video = $("vid");
+        img.hidden = true;
+        video.hidden = false;
+        $("nosignal").style.display = "flex";
+        const ice = (Viewer.features.webrtc || {}).ice_servers || [];
+        const pc = this._pc = new RTCPeerConnection({ iceServers: ice });
+        this._id = null;
+        const fail = (why) => { if (gen === this._gen) Viewer.fallback(`WebRTC: ${why}`); };
+        pc.addTransceiver("video", { direction: "recvonly" });
+        pc.ontrack = (e) => { video.srcObject = new MediaStream([e.track]); video.play().catch(() => {}); };
+        pc.onconnectionstatechange = () => { if (pc.connectionState === "failed") fail("the connection failed"); };
+        video.onplaying = () => { clearTimeout(this._timer); $("nosignal").style.display = "none"; };
+        this._timer = setTimeout(() => fail("no picture within 8 s (UDP blocked between the two computers? " +
+                                            "an SSH tunnel carries only HTTP)"), 8000);
+        (async () => {
+          await pc.setLocalDescription(await pc.createOffer());
+          await iceGathered(pc, 3000, !ice.length);
+          const r = await fetch("/api/v1/webrtc/offer", { method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sdp: pc.localDescription.sdp, type: "offer", stream }) });
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+          if (gen !== this._gen) { closePeer(j.id); return; }
+          this._id = j.id;
+          await pc.setRemoteDescription({ type: j.type, sdp: j.sdp });
+        })().catch((e) => fail(e.message));
+        let prev = null;
+        this._stats = setInterval(async () => {
+          if (gen !== this._gen) return;
+          prev = await rtcStats(pc, prev);
+          if (prev && gen === this._gen) setTransportNote(prev.text);
+        }, 1000);
+      },
+      detach(img) {
+        this._gen++;
+        clearTimeout(this._timer);
+        clearInterval(this._stats);
+        if (this._pc) this._pc.close();
+        if (this._id) closePeer(this._id);
+        this._pc = this._id = null;
+        const video = $("vid");
+        video.onplaying = null;
+        video.srcObject = null;
+        video.hidden = true;
+        img.hidden = false;
+      },
+    },
     mjpeg: {
       attach(img, stream) { img.src = `/api/v1/video/${encodeURIComponent(stream)}/mjpeg?t=${Date.now()}`; },
       detach(img) { img.removeAttribute("src"); },
@@ -18,7 +67,76 @@ const Viewer = {
       detach(img) { clearTimeout(this._t); img.onload = null; img.removeAttribute("src"); },
     },
   },
-  stream: null, transport: null, events: 0,
+  stream: null, transport: null, events: 0, features: {}, available: [],
+};
+
+// The offer goes out with the candidates (no trickle). Without ICE servers only host candidates
+// come, at once, but browsers may report "complete" only seconds later: go 200 ms after the last one.
+function iceGathered(pc, ms, hostOnly) {
+  if (pc.iceGatheringState === "complete") return Promise.resolve();
+  return new Promise((done) => {
+    let quiet = null;
+    const end = () => { clearTimeout(cap); clearTimeout(quiet); done(); };
+    const cap = setTimeout(end, ms);
+    pc.addEventListener("icegatheringstatechange", () => { if (pc.iceGatheringState === "complete") end(); });
+    pc.addEventListener("icecandidate", (e) => {
+      if (!e.candidate) return end();
+      if (hostOnly) { clearTimeout(quiet); quiet = setTimeout(end, 200); }
+    });
+  });
+}
+
+function closePeer(id) {
+  if (id) fetch(`/api/v1/webrtc/${id}/close`, { method: "POST", headers: { "Content-Type": "application/json" },
+    body: "{}", keepalive: true }).catch(() => {});
+}
+
+async function rtcStats(pc, prev) {
+  let rep;
+  try { rep = await pc.getStats(); } catch (e) { return prev; }
+  let inb = null, pair = null;
+  const codecs = {};
+  rep.forEach((r) => {
+    if (r.type === "inbound-rtp" && r.kind === "video") inb = r;
+    if (r.type === "codec") codecs[r.id] = r.mimeType;
+    if (r.type === "candidate-pair" && r.nominated && r.state === "succeeded") pair = r;
+  });
+  if (!inb) return prev;
+  const now = performance.now(), bytes = inb.bytesReceived || 0;
+  const kbps = prev && now > prev.t ? 8 * (bytes - prev.bytes) / (now - prev.t) : null;
+  const parts = [(codecs[inb.codecId] || "").replace("video/", "") || "webrtc"];
+  if (inb.frameWidth) parts.push(`${inb.frameWidth}×${inb.frameHeight}`);
+  if (inb.framesPerSecond !== undefined) parts.push(`${fmt(inb.framesPerSecond, 0)} fps`);
+  if (kbps !== null) parts.push(`${fmt(kbps, 0)} kb/s`);
+  if (pair && pair.currentRoundTripTime !== undefined) parts.push(`rtt ${fmt(1000 * pair.currentRoundTripTime, 0)} ms`);
+  if (inb.packetsLost) parts.push(`lost ${inb.packetsLost}`);
+  return { t: now, bytes, text: parts.join(" · ") };
+}
+
+function setTransportNote(text, bad = false) {
+  const el = $("tstats");
+  el.textContent = text;
+  el.classList.toggle("fail", bad);
+}
+
+function storedTransport() {
+  try { return localStorage.getItem("rsf-live-transport"); } catch (e) { return null; }
+}
+
+function useTransport(name, why) {
+  const img = $("img");
+  if (Viewer.stream && Viewer.transport) Viewer.transports[Viewer.transport].detach(img);
+  Viewer.transport = name;
+  $("tsel").value = name;
+  setTransportNote(why || "", !!why);
+  if (Viewer.stream) Viewer.transports[name].attach(img, Viewer.stream);
+}
+
+// WebRTC did not come up: the next transport (MJPEG), for this page only (the choice stays)
+Viewer.fallback = (why) => {
+  const next = Viewer.available.find((t) => t !== "webrtc");
+  if (!next || Viewer.transport !== "webrtc") return;
+  useTransport(next, `${why}; showing ${next}`);
 };
 
 const $ = (id) => document.getElementById(id);
@@ -31,9 +149,19 @@ async function init() {
   Viewer.info = i;
   $("run").textContent = [i.backend, i.layout, i.plan].filter(Boolean).join(" · ");
   const names = Object.keys(info.streams);
-  const want = params.get("transport");
-  Viewer.transport = (want && Viewer.transports[want]) ? want
-                   : info.transports.find((t) => Viewer.transports[t]) || "jpeg";
+  Viewer.features = info.features || {};
+  Viewer.available = info.transports.filter((t) => Viewer.transports[t] && (t !== "webrtc" || window.RTCPeerConnection));
+  if (!Viewer.available.length) Viewer.available = ["jpeg"];
+  const ok = (t) => t && Viewer.available.includes(t);
+  const want = params.get("transport"), kept = storedTransport();
+  Viewer.transport = ok(want) ? want : ok(kept) ? kept : Viewer.available[0];
+  const tsel = $("tsel");
+  for (const t of Viewer.available) tsel.add(new Option(t, t));
+  tsel.value = Viewer.transport;
+  tsel.onchange = () => {
+    try { localStorage.setItem("rsf-live-transport", tsel.value); } catch (e) { /* storage blocked */ }
+    useTransport(tsel.value);
+  };
   const img = $("img");
   img.addEventListener("load", () => { $("nosignal").style.display = "none"; });
   img.addEventListener("error", () => { $("nosignal").style.display = "flex"; });

@@ -14,8 +14,12 @@
 </header>
 <main>
   <section id="video">
-    <nav id="streams"></nav>
-    <div id="frame"><img id="img" alt="live view" draggable="false"><div id="nosignal">waiting for frames…</div>
+    <div id="bar">
+      <nav id="streams"></nav>
+      <span id="transport"><label title="how the pictures come: webrtc (VP8/H.264 over UDP), mjpeg, jpeg (polling)">video
+        <select id="tsel"></select></label> <span id="tstats" class="muted"></span></span>
+    </div>
+    <div id="frame"><img id="img" alt="live view" draggable="false"><video id="vid" autoplay muted playsinline disablepictureinpicture hidden></video><div id="nosignal">waiting for frames…</div>
       <div id="hint">click: keys move the camera · drag: look · double-click: mouse look · ? help</div>
       <div id="help" hidden>
         <h3>Camera (shared: everyone sees it where it was last put)</h3>

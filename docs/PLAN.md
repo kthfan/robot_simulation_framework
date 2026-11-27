@@ -368,7 +368,8 @@ M3 碰撞判定移植、World→MuJoCo 編譯器。D29 夾爪 strict／as_built 
   已加：暫停/單步/調速/停止、Python debug console（token、預設關閉、不限 localhost、可選 HTTPS）、`--debugpy`；
   可移動視角（共用相機、不需 token；鍵盤 WASD/TG、滑鼠拖曳轉向、雙擊 FPS mouse look、平移、滾輪、Ctrl+滾輪 FOV）；
   錄影（server 端 MP4，依模擬時間、隨暫停而暫停）；Isaac 預設 `render_mode=step`（live_probe 2026-11-25）。
-  之後：WebRTC、錄影等。
+  WebRTC 傳輸（`--live-webrtc`，aiortc，VP8/H.264，UDP；連不上時自動退回 MJPEG；本機延遲 35 ms vs MJPEG 69 ms，
+  頻寬約 1/5～1/10，2026-11-26）。之後：多視角同時顯示、WebSocket 等。
 
 ### 仍待確認
 - cuRobo CPU 移植是否進行、範圍（見 `docs/curobo_cpu_port.md` §4），以及是否把 kthfan/curobo 加入此 session。

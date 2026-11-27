@@ -129,6 +129,17 @@ def start_live(a, world, wf, cell, traj, t_end):
                       fps_interactive=a.live_fps_interactive, recorder=recorder)
     live_views.register(server, cap)
     live_record.register(server, recorder, cap)
+    rtc_note = None
+    if a.live_webrtc:
+        from rsf.live import webrtc
+        why = webrtc.missing()
+        if why:
+            rtc_note = f"off: {why}; the viewer uses MJPEG"
+        else:
+            rtc = webrtc.register(server, hub, ice_servers=a.live_webrtc_ice or (), codec=a.live_webrtc_codec,
+                                  max_peers=a.live_webrtc_peers, max_kbps=a.live_webrtc_kbps or None)
+            rtc_note = (f"on ({rtc.codec}, up to {rtc.max_peers} viewers; media over UDP: the browser must reach this "
+                        f"computer{' or the ICE servers' if rtc.ice_servers else ''}, else it falls back to MJPEG)")
     if console is not None:
         console.ns.update(cell=cell, world=world, workflow=wf, traj=traj, hub=hub, capture=cap, np=np,
                           pause=lambda: ctl.command("pause"), resume=lambda: ctl.command("resume"),
@@ -138,6 +149,8 @@ def start_live(a, world, wf, cell, traj, t_end):
           flush=True)
     print(f"[live] recordings: {recorder.dir.resolve()} ({'ffmpeg ' + recorder.codec[1] if recorder.available else 'off: no ffmpeg'})",
           flush=True)
+    if rtc_note:
+        print(f"[live] WebRTC {rtc_note}", flush=True)
     if token:
         what = "control and a Python console" if a.live_debug else "control"
         hint = "" if os.environ.get("RSF_LIVE_TOKEN") else f" token {token}"
@@ -210,6 +223,15 @@ def main(argv=None) -> int:
     lv.add_argument("--live-quality", type=int, default=80, help="JPEG quality")
     lv.add_argument("--live-record-dir", default="reports/live",
                     help="where recordings (MP4, from the viewer's Record) are saved (default reports/live)")
+    lv.add_argument("--live-webrtc", action="store_true",
+                    help="also send the views over WebRTC (VP8/H.264, UDP; needs aiortc); the viewer tries it first")
+    lv.add_argument("--live-webrtc-ice", action="append", metavar="URL",
+                    help="a STUN/TURN server for WebRTC: stun:host:3478, or JSON {urls, username, credential}; repeatable")
+    lv.add_argument("--live-webrtc-codec", choices=("auto", "vp8", "h264"), default="auto",
+                    help="WebRTC codec (auto: as negotiated with the browser, usually VP8)")
+    lv.add_argument("--live-webrtc-kbps", type=float, default=0.0,
+                    help="WebRTC top bitrate per viewer, kbit/s (0: aiortc's, VP8 1500, H.264 3000)")
+    lv.add_argument("--live-webrtc-peers", type=int, default=8, help="at most this many WebRTC viewers (default 8)")
     lv.add_argument("--live-control", action="store_true", help="pause / step / pace / stop from the viewer (token)")
     lv.add_argument("--live-debug", action="store_true",
                     help="a Python console in the running simulation (token; implies --live-control)")
@@ -219,8 +241,8 @@ def main(argv=None) -> int:
                     help="listen for a debugger (VS Code 'attach'; default host 127.0.0.1); needs debugpy")
     ap.add_argument("--debugpy-wait", action="store_true", help="wait for the debugger before simulating")
     a = ap.parse_args(argv)
-    if (a.live_control or a.live_debug or a.live_cert) and not a.live:
-        ap.error("--live-control / --live-debug / --live-cert need --live")
+    if (a.live_control or a.live_debug or a.live_cert or a.live_webrtc) and not a.live:
+        ap.error("--live-control / --live-debug / --live-cert / --live-webrtc need --live")
     if a.debugpy:
         start_debugpy(a.debugpy, a.debugpy_wait)
     if a.live and a.backend == "mujoco" and not os.environ.get("DISPLAY"):
