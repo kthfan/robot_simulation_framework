@@ -290,8 +290,11 @@ class IsaacCell:
             tx.CreateInput("sourceColorSpace", Sdf.ValueTypeNames.Token).Set("raw")
             tx.CreateInput("st", Sdf.ValueTypeNames.Float2).ConnectToSource(rd.ConnectableAPI(), "result")
             rgb = tx.CreateOutput("rgb", Sdf.ValueTypeNames.Float3)
-            sh.CreateInput("diffuseColor", Sdf.ValueTypeNames.Color3f).ConnectToSource(rgb)
-            sh.CreateInput("emissiveColor", Sdf.ValueTypeNames.Color3f).ConnectToSource(rgb)   # as MuJoCo's emission
+            # self-lit only: the printed sheet looks the same under any light. Lit and self-lit
+            # together over-exposed the white, which ate into the black tags: boards read
+            # 0.1-0.2 % too far (the first RTX run, 2026-11-28)
+            sh.CreateInput("diffuseColor", Sdf.ValueTypeNames.Color3f).Set((0.0, 0.0, 0.0))
+            sh.CreateInput("emissiveColor", Sdf.ValueTypeNames.Color3f).ConnectToSource(rgb)
             mat.CreateSurfaceOutput().ConnectToSource(sh.ConnectableAPI(), "surface")
             UsdShade.MaterialBindingAPI.Apply(mesh.GetPrim()).Bind(mat)
         pix = 0.003                                    # mm per pixel (any: only ratios matter)
