@@ -76,22 +76,33 @@ teach table into segments:
 One cycle of `inspect_and_sort`: 42 segments (16 line, 4 path, 7 free, 15 hold);
 the full run (12 cycles): 493 (192 line, 48 path, 73 free, 180 hold).
 
-## Timing (D14 / D30 caps)
+## Timing
 
-`process.motion` (layout):
+`process.motion` (layout). User 2026-11-28: a free move carrying the tray is as fast
+as an empty one, and the lines in the shelf run at half the free moves' joint speed.
 
-| caps | v (m/s) | a (m/s²) | ω (rad/s) | α (rad/s²) | used for |
-|---|---|---|---|---|---|
-| `in_jig` | 0.05 | 0.25 | 0.25 | 1.0 | lines inside the shelf, the tilt |
-| `carry` | 0.25 | 1.5 | 0.5 | 3.0 | the carried tray's centre (free moves with the tray), a_down 4.0 |
-| `empty` | 0.25 | 1.5 | 0.5 | 3.0 | sight_far → sight_near |
-| joints | 1.0 rad/s | 2.0 rad/s² | | | free moves |
+| caps | limits | used for |
+|---|---|---|
+| `in_jig` | `joint_scale: 0.5`: every joint ≤ 0.5 rad/s, 1.0 rad/s² | lines inside the shelf, the tilt |
+| `empty` | tool v 0.25 m/s, a 1.5 m/s², ω 0.5 rad/s, α 3.0 rad/s² | sight_far → sight_near (locate) |
+| joints | 1.0 rad/s, 2.0 rad/s² | free moves, with or without the tray |
+| `carry` (optional, not in the tm_tray layouts since 2026-11-28) | the carried object's own Cartesian caps | every segment that carries it |
 
-Lines and the tilt: a trapezoid along the tool path (position and rotation
-caps), then a continuous IK walk at every 10 ms sample. Free moves: a trapezoid
-along the joint path, scaled uniformly until every joint is within its caps;
-the path rests only at sharp corners (direction change > 25°); a carried tray
-additionally keeps its own Cartesian caps. Jaws: 0.05 m/s plus 0.5 s settle.
+Until 2026-11-28 the layouts had D30's IN_JIG (tool 0.05 m/s, 0.25 m/s², 0.25 rad/s,
+1.0 rad/s²) and D14's carry caps (0.25 m/s, 1.5 m/s², 0.5 rad/s, 3.0 rad/s², 4.0 m/s²
+downward): half of a run was the slow lines in the shelf.
+
+Lines and the tilt with Cartesian caps: a trapezoid along the tool path (position
+and rotation caps), then a continuous IK walk at every 10 ms sample. With
+`joint_scale`: the path is walked geometrically (1 mm / 0.5°), a trapezoid on its
+joint arc length (the largest joint's travel) with the scaled joint caps gives the
+path parameter at every sample, and the IK is walked again there, so every sample
+lies on the tool path; slowed until finite differences keep the caps. Free moves: a
+trapezoid along the joint path, scaled uniformly until every joint is within its
+caps; the path rests only at sharp corners (direction change > 25°); with `carry`
+caps a carried object additionally keeps them. Jaws: 0.05 m/s plus 0.5 s settle. A
+waypoint's `meta.dwell` (s) holds the arm still after it (the locate reads:
+`process.read_dwell`).
 
 ## Output: `rsf.trajectory/1`
 

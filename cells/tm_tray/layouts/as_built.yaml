@@ -13,6 +13,8 @@ plugins: [../plugin/tm_tray]
 process:
   standoff_far: 0.35      # far AprilGrid read, camera to label (m)
   standoff_near: 0.2768   # near read; plate-free standoff (D24, D28)
+  read_dwell: 0.5         # the arm still at each read (s): exposure and detection. Assumed, not measured
+  reads: tm_tray.reads    # what a read sees in simulation (rsf.sim.reads)
   carry_tilt_deg: 5.0     # plate tilt while carrying, degrees: insurance on top of the push
                           # (user 2026-11-12; D14's design value was 15). User 2026-11-23:
                           # any tilt up to 15 deg is acceptable, about 5 deg for now.
@@ -44,13 +46,17 @@ process:
   # margin 2 mm until the real plate is measured (docs/p2_results.md);
   # overtravel and place_offset are AI-Robotics-V2 D30's 2 mm.
   push_plate: {geometry: air_cylinder_plate, margin: 0.002, overtravel: 0.002, place_offset: 0.002}
-  # Motion timing (AI-Robotics-V2 D14, D30). Caps are of the moving frame
-  # (tool flange); a carried tray also keeps `carry`.
+  # Motion timing. Caps are of the moving frame (tool flange), or of the joints
+  # (`joint_scale`: a fraction of `joint`).
+  # User 2026-11-28: a free move carrying a tray is as fast as an empty one (the
+  # joint caps only; D14's carry caps v 0.25 m/s, a 1.5, w 0.5, alpha 3.0, a_down
+  # 4.0 removed), and the lines inside the shelves and the tilt run at half the
+  # free moves' joint speed and acceleration (was D30 IN_JIG: flange v 0.05 m/s,
+  # a 0.25, w 0.25, alpha 1.0).
   motion:
     dt: 0.01
     caps:
-      in_jig: {v: 0.05, a: 0.25, w: 0.25, alpha: 1.0}
-      carry:  {v: 0.25, a: 1.5, w: 0.5, alpha: 3.0, a_down: 4.0}
+      in_jig: {joint_scale: 0.5}
       empty:  {v: 0.25, a: 1.5, w: 0.5, alpha: 3.0}
     joint: {v: 1.0, a: 2.0}
     # a free move carrying a tray handles it with care (user 2026-11-19): the plate

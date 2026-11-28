@@ -71,15 +71,30 @@ def test_trajectory_is_continuous_and_complete(run):
 
 
 def test_constrained_lines_keep_their_caps(run):
-    """Inside the shelf the flange keeps D30's IN_JIG caps (0.05 m/s, 0.25 m/s^2)."""
+    """Inside the shelf (``in_jig: {joint_scale: 0.5}``, user 2026-11-28) every joint
+    keeps half the free moves' speed and acceleration, and the tool stays on its line."""
     world, segs, traj, problems, eng = run
-    caps = TM.caps_from(world.process["motion"]["caps"]["in_jig"])
+    mo = world.process["motion"]
+    k = mo["caps"]["in_jig"]["joint_scale"]
+    jv, ja = k * mo["joint"]["v"], k * mo["joint"]["a"]
+    n = 0
     for s in segs:
         if s.kind in ("line", "path") and s.caps == "in_jig" and len(s.t) > 3:
-            P = np.array([eng.arm.fk(q)[:3, 3] for q in s.Q])
-            k = TM.point_kinematics(s.t, P)
-            assert k["v"] <= caps.v * 1.05, (s.name, k)
-            assert k["a"] <= caps.a * 1.25, (s.name, k)
+            qd = np.gradient(s.Q, s.t, axis=0)
+            qdd = np.gradient(qd, s.t, axis=0)
+            assert np.abs(qd).max() <= jv * 1.01, s.name
+            assert np.abs(qdd).max() <= ja * 1.01, s.name
+            if s.kind == "line":                   # every sample on the straight tool line
+                a, b = s.poses[0][:3, 3], s.poses[1][:3, 3]
+                u = (b - a) / max(np.linalg.norm(b - a), 1e-12)
+                P = np.array([eng.arm.fk(q)[:3, 3] for q in s.Q]) - a
+                assert np.linalg.norm(P - np.outer(P @ u, u), axis=1).max() < 1e-4, s.name
+            n += 1
+    assert n >= 8
+    # faster than D30's IN_JIG flange cap (0.05 m/s) on the longest in-shelf line
+    ins = max((s for s in segs if s.caps == "in_jig" and s.kind == "line"), key=lambda s: s.t[-1])
+    P = np.array([eng.arm.fk(q)[:3, 3] for q in ins.Q])
+    assert TM.point_kinematics(ins.t, P)["v"] > 0.05
 
 
 def test_jaws_close_after_lift_and_open_before_setting_down(run):
@@ -87,8 +102,8 @@ def test_jaws_close_after_lift_and_open_before_setting_down(run):
     j = traj.joint_names.index("right_gripper_joint")
     seg = {s["name"]: s for s in traj.segments}
     t_lift = seg["pick:incoming/L2/C0/lift:act"]
-    i0 = np.searchsorted(traj.t, t_lift["t0"])
-    i1 = np.searchsorted(traj.t, t_lift["t1"])
+    i0 = int(np.abs(traj.t - t_lift["t0"]).argmin())      # segment times are rounded to 0.1 ms
+    i1 = int(np.abs(traj.t - t_lift["t1"]).argmin())
     assert traj.q[i0, j] == pytest.approx(0.057675, abs=1e-6)
     assert traj.q[i1, j] == pytest.approx(0.0413, abs=1e-4)
     assert t_lift["t1"] - t_lift["t0"] == pytest.approx((0.057675 - 0.0413) / 0.05 + 0.5, abs=0.02)

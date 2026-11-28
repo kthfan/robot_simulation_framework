@@ -4,7 +4,9 @@ The run is cut into segments:
 
 * ``line`` / ``path``: the constrained arrivals of the teach sequences (inside
   shelves, the tilt). Re-walked here with the IK on a trapezoid timed to the
-  segment's Cartesian caps; the same rules as the teach engine apply.
+  segment's caps: Cartesian (``v``, ``a``, ``w``, ``alpha`` of the tool) or by the
+  joints (``joint_scale``: that fraction of the free moves' joint caps, the tool
+  still exactly on its path); the same rules as the teach engine apply.
 * ``free``: every other move (between sequences, between runs inside one, home).
   Planned by cuRobo on a GPU (``tools/kaggle/curobo_free_plan.py``) from a
   *job* this module writes, or by a CPU fallback; then retimed to the joint caps
@@ -19,10 +21,12 @@ Process parameters, ``process.motion``::
 
     motion:
       dt: 0.01                       # output sample period (s)
-      caps:                          # Cartesian caps of the tool (and a carried object)
-        in_jig: {v: 0.05, a: 0.25, w: 0.25, alpha: 1.0}
+      caps:                          # per caps name (a waypoint's meta "caps")
+        in_jig: {joint_scale: 0.5}   # by the joints: this fraction of `joint` (v and a)
+        empty:  {v: 0.25, a: 1.5,  w: 0.5,  alpha: 3.0}   # Cartesian caps of the tool
         carry:  {v: 0.25, a: 1.5,  w: 0.5,  alpha: 3.0, a_down: 4.0}
-        empty:  {v: 0.25, a: 1.5,  w: 0.5,  alpha: 3.0}
+                                     # optional: a carried object's own Cartesian caps,
+                                     # on every segment that carries it (D14)
       joint: {v: 1.0, a: 2.0}        # free moves, rad/s, rad/s^2
       jaw: {speed: 0.05, settle: 0.5}
       home: [0, 0, 0, 0, 0, 0]
@@ -155,6 +159,7 @@ def segments_for_workflow(world, workflow, teach: dict, *, margin: float = 0.005
                 if wp.action:
                     nxt = wps[i + 1].joints if i + 1 < len(wps) else wp.joints
                     segs.append(Segment(f"{seq.name}/{wp.name}:act", "hold", dict(wp.joints),
+                                        duration=float(wp.meta.get("dwell", 0.0)),
                                         joints_end=dict(nxt), event=wp.action))
                     jaws = dict(nxt)
             # what the sequence leaves in the hand
@@ -296,9 +301,45 @@ def _carried_point(arm, q, carried):
     return arm.fk(q) @ np.append(c, 1.0)
 
 
+def _joint_scaled_line(arm, s: Segment, pose_at, dp: float, dr: float, scale: float, motion: dict):
+    """``(t, Q)`` of a tool path timed by the joints: every joint within *scale* times
+    the free moves' joint caps (``motion.joint``), the tool exactly on its path.
+
+    The path is walked geometrically first (1 mm / 0.5 deg); a trapezoid on its
+    joint arc length (the largest joint's travel) gives the path parameter at every
+    ``dt``, and the IK is walked again at those parameters, so the samples lie on the
+    path. Slowed until finite differences of the samples keep the caps."""
+    dt = float(motion["dt"])
+    jv = scale * float(motion["joint"]["v"])
+    ja = scale * float(motion["joint"]["a"])
+    n = max(8, math.ceil(dp / 0.001), math.ceil(dr / math.radians(0.5)))
+    ug = np.linspace(0.0, 1.0, n + 1)
+    Qg = walk(arm, [pose_at(x) for x in ug], s.q_start, max_step=0.2)
+    if Qg is None:
+        return None, None
+    d = np.r_[0.0, np.cumsum(np.abs(np.diff(np.array(Qg), axis=0)).max(axis=1))]
+    if d[-1] < 1e-9:
+        return np.array([0.0, dt]), [np.asarray(s.q_start, float), np.asarray(s.q_goal, float)]
+    v, a = jv, ja
+    for _ in range(8):
+        T = TM.trapezoid(d[-1], v, a)
+        t = np.linspace(0.0, T, max(2, math.ceil(T / dt)) + 1)
+        u = np.interp(TM.trapezoid_s(d[-1], v, a, t), d, ug)
+        Q = walk(arm, [pose_at(x) for x in u], s.q_start, max_step=0.2)
+        if Q is None:
+            return None, None
+        f = TM.joint_retime(t, np.array(Q), jv, ja)
+        if f <= 1.0 + 1e-3:
+            break
+        v, a = v / (f * 1.02), a / (f * 1.02) ** 2
+    return t, Q
+
+
 def time_segment(arm, s: Segment, motion: dict) -> None:
     dt = float(motion["dt"])
-    caps = TM.caps_from(motion["caps"][s.caps]) if s.caps in motion["caps"] else None
+    cap = motion["caps"].get(s.caps) if s.caps else None
+    scale = None if cap is None else cap.get("joint_scale")
+    caps = TM.caps_from(cap) if cap is not None and scale is None else None
     if s.kind == "hold":
         j0, j1 = s.joints, s.joints_end or s.joints
         moves = [abs(j1[k] - j0.get(k, j1[k])) for k in j1] or [0.0]
@@ -327,8 +368,11 @@ def time_segment(arm, s: Segment, motion: dict) -> None:
                 u = min(max(u, 0.0), 1.0)
                 i = min(int(np.searchsorted(cum, u, side="right")) - 1, n - 1)
                 return se3.interpolate(P[i], P[i + 1], (u - cum[i]) / (cum[i + 1] - cum[i]))
-        t, u = TM.unit_timing(max(dp, 1e-9), dr, caps, dt)
-        Q = walk(arm, [pose_at(x) for x in u], s.q_start, max_step=0.2)
+        if scale is not None:
+            t, Q = _joint_scaled_line(arm, s, pose_at, dp, dr, float(scale), motion)
+        else:
+            t, u = TM.unit_timing(max(dp, 1e-9), dr, caps, dt)
+            Q = walk(arm, [pose_at(x) for x in u], s.q_start, max_step=0.2)
         if Q is None:
             raise RuntimeError(f"{s.name}: the timed line cannot be followed")
         Q[-1] = s.q_goal
