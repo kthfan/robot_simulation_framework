@@ -45,10 +45,17 @@ def run():
 def test_segments_of_one_cycle(run):
     world, segs, traj, problems, eng = run
     kinds = [s.kind for s in segs]
-    assert kinds.count("free") == 7          # home->pick, 2 inside picks, 2 carries, pick table, ->home
+    n_slots = len(world.features({"kind": "slot"}))
+    # the locate tour (home -> the first read, then one per slot), the two picks'
+    # pre_insert, the two carries, -> home
+    assert kinds.count("free") == n_slots + 2 + 2 + 1
     assert kinds.count("path") == 4          # the tilt, twice per transfer
     names = [s.name for s in segs]
-    assert names[0].startswith("free001:pick:incoming/L2/C0/sight_far") and names[-1].endswith(":home")
+    assert names[0].startswith("free001:locate:incoming/L2/C0/sight_far") and names[-1].endswith(":home")
+    first_pick = next(n for n in names if ":pick:" in n)
+    assert first_pick.endswith("pick:incoming/L2/C0/pre_insert")          # no reads in a pick
+    reads = [s for s in segs if s.kind == "hold" and s.event.startswith("read the AprilGrid")]
+    assert len(reads) == 2 * n_slots and all(s.duration == world.process["read_dwell"] for s in reads)
     carried = [s for s in segs if s.kind == "free" and s.carried is not None]
     assert len(carried) == 2 and all(s.caps == "carry" for s in carried)
 
@@ -113,7 +120,7 @@ def test_job_round_trip(run, tmp_path):
     world, segs, traj, problems, eng = run
     job = PL.write_job(world, segs, tmp_path / "job.json", root=CELL.parents[1], arm=eng.arm)
     assert job["robot_urdf"] == "cells/tm_tray/assets/tm5s_egu50.urdf"
-    assert len(job["segments"]) == 7 and job["limit_margin_deg"] == 5.0
+    assert len(job["segments"]) == sum(s.kind == "free" for s in segs) and job["limit_margin_deg"] == 5.0
     carried = [s for s in job["segments"] if s["carried"]]
     assert len(carried) == 2 and len(carried[0]["carried"]["boxes"]) == 3
     # the carry rule for cuRobo: a tool axis within a cone of the vertical, the largest cone

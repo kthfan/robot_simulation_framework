@@ -89,3 +89,29 @@ def test_live_view_renders_and_leaves_the_run(setup):
         moved = cell.render("overview")
         cell.move_view("overview", (0.0, -3.0, 1.6), (0.0, 0.3, 0.9), 60.0)
     assert (np.abs(moved.astype(int) - last.astype(int)).max(axis=2) > 10).mean() > 0.1
+
+
+def test_read_camera_renders_the_labels(tmp_path):
+    """The locate tour's reads with RTX (rsf.sim.reads): every read of the first two
+    slots gives a sharp image of its label (black tags on white). With the detector
+    installed, the board is found where the cell has it."""
+    import numpy as np
+
+    from rsf.sim import reads as RD
+    world = load_world(CELL / "layouts" / "strict.yaml")
+    wf = Workflow.from_file(CELL / "workflows" / "inspect_and_sort.yaml")
+    occ = wf.initial_occupancy(world, wf.resolve_sets(world))
+    traj = json.loads(gzip.decompress(CYCLE1.read_bytes()))
+    setup = RD.setup_for(world)
+    cell = IsaacCell(world, occ, reads=setup)
+    rd = RD.Reader(setup, traj["segments"], cell, images=tmp_path)
+    t_end = rd.todo[3]["t"] + 0.1                        # far and near reads of two slots
+    cell.run(traj, t_end=t_end, on_sample=rd)
+    assert len(rd.rows) == 4
+    from PIL import Image
+    for r in rd.rows:
+        img = np.asarray(Image.open(tmp_path / r["image"]))
+        assert img.shape == (setup.cameras[r["camera"]].height, setup.cameras[r["camera"]].width)
+        assert (img < 60).mean() > 0.002 and (img > 190).mean() > 0.01, r["image"]
+        if r["found"] is not None:
+            assert r["found"] and r["pos_err_mm"] < 0.5 and r["rot_err_deg"] < 0.5, r
