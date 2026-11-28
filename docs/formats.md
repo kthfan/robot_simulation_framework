@@ -119,9 +119,23 @@ names:
                            "tracking": true, "caps": true},
                 "ok": true}],
  "other_contacts": [...],                        // robot contacts outside every transfer
+ "reads": {                                      // the plan's marker reads (process.reads, rsf.sim.reads)
+   "summary": {"reads", "found", "missed", "pos_err_mm": {"mean", "max"}, "rot_err_deg": {"mean", "max"}},
+   "rows": [{"slot", "entity", "read": "sight_near", "segment", "t", "camera", "board_id",
+             "T_cv": 4x4,                       // camera (OpenCV frame) in the world, from the simulated arm
+             "K": [fx, fy, cx, cy],             // the intrinsics the image was rendered with
+             "image": "<file>.png",             // with --read-images
+             "found": true, "boards_seen": [ids], "board_T": 4x4, "pos_err_mm", "rot_err_deg", "distance_m"}],
+   "located": {"layout": "<file>.yaml", "fixtures": {"incoming": {"reads", "estimated": {"yaw_deg", "xyz_mm"}}}}},
  "meta": {"layout", "workflow", "plan", "sim_seconds", "wall_seconds", "backend", "params": {...},
           "live_debug": {...}}}                   // live_debug only when debug code ran (the run is not an acceptance result)
 ```
+
+`found` is `null` when the run had no detector (images only); `tools/detect_reads.py`
+detects them afterwards. `pos_err_mm` / `rot_err_deg`: the read board against the
+simulated cell's truth. `located` (with `--located`): each fixture's floor
+displacement (yaw, then x y z about its boards' centroid) fitted to the near reads
+against `--nominal`, and the layout written with it.
 
 ## Execution report (`--report run.npz`)
 

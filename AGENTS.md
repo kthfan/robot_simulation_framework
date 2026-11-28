@@ -21,7 +21,7 @@ bash cells/example_pick_place/run.sh      # the same through the command-line to
 | `rsf.model` (layout, world, workflow, registry, audit) | `test_tm_tray_layout.py`, `test_workflow_audit.py`, `test_usd_model.py`, `test_example_cell.py` |
 | `rsf.kinematics`, `rsf.collision` | `test_kinematics_reach.py`, `test_collision.py`, `test_m3_collision.py` |
 | `rsf.planning` | `test_teach.py`, `test_plan.py`, `test_rrt.py`, `test_example_cell.py` |
-| `rsf.compile`, `rsf.sim` | `test_compile_mjcf.py`, `test_usd.py`, `test_sim.py`, `test_vision.py`, `test_example_cell.py` |
+| `rsf.compile`, `rsf.sim` | `test_compile_mjcf.py`, `test_usd.py`, `test_sim.py`, `test_vision.py`, `test_reads.py`, `test_example_cell.py` |
 | `rsf.live` | `test_live.py` |
 | the tray cell's plugin or assets | `test_tm_tray_*.py`, `test_m3_collision.py`, `test_teach.py`, `test_locate.py` |
 
