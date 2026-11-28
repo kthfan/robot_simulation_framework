@@ -6,6 +6,7 @@
   "process": {
    "standoff_far": 0.35,
    "standoff_near": 0.2768,
+   "read_dwell": 0.5,
    "carry_tilt_deg": 5.0,
    "tilt_motion": {
     "pivot": [
@@ -20,6 +21,14 @@
     "min": 0.021,
     "max": 0.06085
    },
+   "continuity": {
+    "prefer": {
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     }
+    }
+   },
    "push_plate": {
     "geometry": "air_cylinder_plate",
     "margin": 0.002,
@@ -30,17 +39,7 @@
     "dt": 0.01,
     "caps": {
      "in_jig": {
-      "v": 0.05,
-      "a": 0.25,
-      "w": 0.25,
-      "alpha": 1.0
-     },
-     "carry": {
-      "v": 0.25,
-      "a": 1.5,
-      "w": 0.5,
-      "alpha": 3.0,
-      "a_down": 4.0
+      "joint_scale": 0.5
      },
      "empty": {
       "v": 0.25,
@@ -73,6 +72,91 @@
   "tasks": [
    {
     "index": 0,
+    "cycle": -1,
+    "skill": "tm_tray.locate",
+    "args": {
+     "at": [
+      "incoming/L0/C0",
+      "incoming/L0/C1",
+      "incoming/L0/C2",
+      "incoming/L0/C3",
+      "incoming/L1/C0",
+      "incoming/L1/C1",
+      "incoming/L1/C2",
+      "incoming/L1/C3",
+      "incoming/L2/C0",
+      "incoming/L2/C1",
+      "incoming/L2/C2",
+      "incoming/L2/C3",
+      "outgoing/L0/C0",
+      "outgoing/L0/C1",
+      "outgoing/L0/C2",
+      "outgoing/L0/C3",
+      "outgoing/L0/C4",
+      "outgoing/L0/C5",
+      "outgoing/L1/C0",
+      "outgoing/L1/C1",
+      "outgoing/L1/C2",
+      "outgoing/L1/C3",
+      "outgoing/L1/C4",
+      "outgoing/L1/C5",
+      "outgoing/L2/C0",
+      "outgoing/L2/C1",
+      "outgoing/L2/C2",
+      "outgoing/L2/C3",
+      "outgoing/L2/C4",
+      "outgoing/L2/C5",
+      "outgoing/L3/C0",
+      "outgoing/L3/C1",
+      "outgoing/L3/C2",
+      "outgoing/L3/C3",
+      "outgoing/L3/C4",
+      "outgoing/L3/C5",
+      "table/L0/C0"
+     ]
+    },
+    "sequences": [
+     "locate:incoming/L2/C0",
+     "locate:incoming/L2/C1",
+     "locate:incoming/L2/C2",
+     "locate:incoming/L2/C3",
+     "locate:incoming/L1/C3",
+     "locate:incoming/L1/C2",
+     "locate:incoming/L1/C1",
+     "locate:incoming/L1/C0",
+     "locate:incoming/L0/C0",
+     "locate:incoming/L0/C1",
+     "locate:incoming/L0/C2",
+     "locate:incoming/L0/C3",
+     "locate:outgoing/L3/C0",
+     "locate:outgoing/L3/C1",
+     "locate:outgoing/L3/C2",
+     "locate:outgoing/L3/C3",
+     "locate:outgoing/L3/C4",
+     "locate:outgoing/L3/C5",
+     "locate:outgoing/L2/C5",
+     "locate:outgoing/L2/C4",
+     "locate:outgoing/L2/C3",
+     "locate:outgoing/L2/C2",
+     "locate:outgoing/L2/C1",
+     "locate:outgoing/L2/C0",
+     "locate:outgoing/L1/C0",
+     "locate:outgoing/L1/C1",
+     "locate:outgoing/L1/C2",
+     "locate:outgoing/L1/C3",
+     "locate:outgoing/L1/C4",
+     "locate:outgoing/L1/C5",
+     "locate:outgoing/L0/C5",
+     "locate:outgoing/L0/C4",
+     "locate:outgoing/L0/C3",
+     "locate:outgoing/L0/C2",
+     "locate:outgoing/L0/C1",
+     "locate:outgoing/L0/C0",
+     "locate:table/L0/C0"
+    ]
+   },
+   {
+    "index": 1,
     "cycle": 0,
     "skill": "tm_tray.transfer",
     "args": {
@@ -86,7 +170,7 @@
     ]
    },
    {
-    "index": 1,
+    "index": 2,
     "cycle": 0,
     "skill": "wait",
     "args": {
@@ -95,7 +179,7 @@
     "sequences": []
    },
    {
-    "index": 2,
+    "index": 3,
     "cycle": 0,
     "skill": "tm_tray.transfer",
     "args": {
@@ -109,7 +193,7 @@
     ]
    },
    {
-    "index": 3,
+    "index": 4,
     "cycle": 1,
     "skill": "tm_tray.transfer",
     "args": {
@@ -123,7 +207,7 @@
     ]
    },
    {
-    "index": 4,
+    "index": 5,
     "cycle": 1,
     "skill": "wait",
     "args": {
@@ -132,7 +216,7 @@
     "sequences": []
    },
    {
-    "index": 5,
+    "index": 6,
     "cycle": 1,
     "skill": "tm_tray.transfer",
     "args": {
@@ -146,7 +230,7 @@
     ]
    },
    {
-    "index": 6,
+    "index": 7,
     "cycle": 2,
     "skill": "tm_tray.transfer",
     "args": {
@@ -160,7 +244,7 @@
     ]
    },
    {
-    "index": 7,
+    "index": 8,
     "cycle": 2,
     "skill": "wait",
     "args": {
@@ -169,7 +253,7 @@
     "sequences": []
    },
    {
-    "index": 8,
+    "index": 9,
     "cycle": 2,
     "skill": "tm_tray.transfer",
     "args": {
@@ -183,7 +267,7 @@
     ]
    },
    {
-    "index": 9,
+    "index": 10,
     "cycle": 3,
     "skill": "tm_tray.transfer",
     "args": {
@@ -197,7 +281,7 @@
     ]
    },
    {
-    "index": 10,
+    "index": 11,
     "cycle": 3,
     "skill": "wait",
     "args": {
@@ -206,7 +290,7 @@
     "sequences": []
    },
    {
-    "index": 11,
+    "index": 12,
     "cycle": 3,
     "skill": "tm_tray.transfer",
     "args": {
@@ -220,7 +304,7 @@
     ]
    },
    {
-    "index": 12,
+    "index": 13,
     "cycle": 4,
     "skill": "tm_tray.transfer",
     "args": {
@@ -234,7 +318,7 @@
     ]
    },
    {
-    "index": 13,
+    "index": 14,
     "cycle": 4,
     "skill": "wait",
     "args": {
@@ -243,7 +327,7 @@
     "sequences": []
    },
    {
-    "index": 14,
+    "index": 15,
     "cycle": 4,
     "skill": "tm_tray.transfer",
     "args": {
@@ -257,7 +341,7 @@
     ]
    },
    {
-    "index": 15,
+    "index": 16,
     "cycle": 5,
     "skill": "tm_tray.transfer",
     "args": {
@@ -271,7 +355,7 @@
     ]
    },
    {
-    "index": 16,
+    "index": 17,
     "cycle": 5,
     "skill": "wait",
     "args": {
@@ -280,7 +364,7 @@
     "sequences": []
    },
    {
-    "index": 17,
+    "index": 18,
     "cycle": 5,
     "skill": "tm_tray.transfer",
     "args": {
@@ -294,7 +378,7 @@
     ]
    },
    {
-    "index": 18,
+    "index": 19,
     "cycle": 6,
     "skill": "tm_tray.transfer",
     "args": {
@@ -308,7 +392,7 @@
     ]
    },
    {
-    "index": 19,
+    "index": 20,
     "cycle": 6,
     "skill": "wait",
     "args": {
@@ -317,7 +401,7 @@
     "sequences": []
    },
    {
-    "index": 20,
+    "index": 21,
     "cycle": 6,
     "skill": "tm_tray.transfer",
     "args": {
@@ -331,7 +415,7 @@
     ]
    },
    {
-    "index": 21,
+    "index": 22,
     "cycle": 7,
     "skill": "tm_tray.transfer",
     "args": {
@@ -345,7 +429,7 @@
     ]
    },
    {
-    "index": 22,
+    "index": 23,
     "cycle": 7,
     "skill": "wait",
     "args": {
@@ -354,7 +438,7 @@
     "sequences": []
    },
    {
-    "index": 23,
+    "index": 24,
     "cycle": 7,
     "skill": "tm_tray.transfer",
     "args": {
@@ -368,7 +452,7 @@
     ]
    },
    {
-    "index": 24,
+    "index": 25,
     "cycle": 8,
     "skill": "tm_tray.transfer",
     "args": {
@@ -382,7 +466,7 @@
     ]
    },
    {
-    "index": 25,
+    "index": 26,
     "cycle": 8,
     "skill": "wait",
     "args": {
@@ -391,7 +475,7 @@
     "sequences": []
    },
    {
-    "index": 26,
+    "index": 27,
     "cycle": 8,
     "skill": "tm_tray.transfer",
     "args": {
@@ -405,7 +489,7 @@
     ]
    },
    {
-    "index": 27,
+    "index": 28,
     "cycle": 9,
     "skill": "tm_tray.transfer",
     "args": {
@@ -419,7 +503,7 @@
     ]
    },
    {
-    "index": 28,
+    "index": 29,
     "cycle": 9,
     "skill": "wait",
     "args": {
@@ -428,7 +512,7 @@
     "sequences": []
    },
    {
-    "index": 29,
+    "index": 30,
     "cycle": 9,
     "skill": "tm_tray.transfer",
     "args": {
@@ -442,7 +526,7 @@
     ]
    },
    {
-    "index": 30,
+    "index": 31,
     "cycle": 10,
     "skill": "tm_tray.transfer",
     "args": {
@@ -456,7 +540,7 @@
     ]
    },
    {
-    "index": 31,
+    "index": 32,
     "cycle": 10,
     "skill": "wait",
     "args": {
@@ -465,7 +549,7 @@
     "sequences": []
    },
    {
-    "index": 32,
+    "index": 33,
     "cycle": 10,
     "skill": "tm_tray.transfer",
     "args": {
@@ -479,7 +563,7 @@
     ]
    },
    {
-    "index": 33,
+    "index": 34,
     "cycle": 11,
     "skill": "tm_tray.transfer",
     "args": {
@@ -493,7 +577,7 @@
     ]
    },
    {
-    "index": 34,
+    "index": 35,
     "cycle": 11,
     "skill": "wait",
     "args": {
@@ -502,7 +586,7 @@
     "sequences": []
    },
    {
-    "index": 35,
+    "index": 36,
     "cycle": 11,
     "skill": "tm_tray.transfer",
     "args": {
@@ -534,21 +618,21 @@
     0.0
    ]
   },
-  "seconds": 231.9
+  "seconds": 308.8
  },
  "ok": true,
  "sequences": [
   {
-   "sequence": "pick:incoming/L2/C0",
+   "sequence": "locate:incoming/L2/C0",
    "ok": true,
    "problems": [],
    "meta": {
-    "skill": "tm_tray.pick",
+    "skill": "tm_tray.locate",
     "slot": "incoming/L2/C0"
    },
    "points": [
     {
-     "sequence": "pick:incoming/L2/C0",
+     "sequence": "locate:incoming/L2/C0",
      "name": "sight_far",
      "q": [
       -3.529299,
@@ -556,7 +640,7 @@
       1.664802,
       1.627858,
       -1.960228,
-      -3.141219
+      3.141966
      ],
      "xyz": [
       0.375783,
@@ -591,7 +675,7 @@
      "action": "read the AprilGrid (far)"
     },
     {
-     "sequence": "pick:incoming/L2/C0",
+     "sequence": "locate:incoming/L2/C0",
      "name": "sight_near",
      "q": [
       -3.457155,
@@ -599,7 +683,7 @@
       1.542059,
       1.615197,
       -1.888083,
-      -3.141294
+      3.141891
      ],
      "xyz": [
       0.448983,
@@ -632,7 +716,3510 @@
       "joint_5": -1
      },
      "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:incoming/L2/C1",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "incoming/L2/C1"
+   },
+   "points": [
+    {
+     "sequence": "locate:incoming/L2/C1",
+     "name": "sight_far",
+     "q": [
+      -2.868348,
+      -0.416655,
+      1.846711,
+      1.710587,
+      -1.299276,
+      3.141336
+     ],
+     "xyz": [
+      0.375783,
+      -0.086,
+      1.239845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.032025,
+     "limit_margin": 0.823643,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
     },
+    {
+     "sequence": "locate:incoming/L2/C1",
+     "name": "sight_near",
+     "q": [
+      -2.937717,
+      -0.223254,
+      1.721209,
+      1.642703,
+      -1.368645,
+      3.141403
+     ],
+     "xyz": [
+      0.448983,
+      -0.086,
+      1.239845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.046524,
+     "limit_margin": 0.949145,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:incoming/L2/C2",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "incoming/L2/C2"
+   },
+   "points": [
+    {
+     "sequence": "locate:incoming/L2/C2",
+     "name": "sight_far",
+     "q": [
+      -2.182387,
+      -0.416858,
+      1.846821,
+      1.710036,
+      -0.613315,
+      3.140289
+     ],
+     "xyz": [
+      0.375783,
+      0.086,
+      1.239845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.019114,
+     "limit_margin": 0.823533,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:incoming/L2/C2",
+     "name": "sight_near",
+     "q": [
+      -2.403111,
+      -0.223347,
+      1.72128,
+      1.642423,
+      -0.834039,
+      3.14076
+     ],
+     "xyz": [
+      0.448983,
+      0.086,
+      1.239845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.035152,
+     "limit_margin": 0.949074,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:incoming/L2/C3",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "incoming/L2/C3"
+   },
+   "points": [
+    {
+     "sequence": "locate:incoming/L2/C3",
+     "name": "sight_far",
+     "q": [
+      -1.889702,
+      -0.152647,
+      1.665295,
+      1.626032,
+      -0.32063,
+      3.138827
+     ],
+     "xyz": [
+      0.375783,
+      0.258,
+      1.239845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.016609,
+     "limit_margin": 1.005059,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:incoming/L2/C3",
+     "name": "sight_near",
+     "q": [
+      -2.081644,
+      -0.016904,
+      1.542333,
+      1.614294,
+      -0.512572,
+      3.139962
+     ],
+     "xyz": [
+      0.448983,
+      0.258,
+      1.239845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.030687,
+     "limit_margin": 1.128021,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:incoming/L1/C3",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "incoming/L1/C3"
+   },
+   "points": [
+    {
+     "sequence": "locate:incoming/L1/C3",
+     "name": "sight_far",
+     "q": [
+      -1.889702,
+      0.027767,
+      2.189093,
+      0.92182,
+      -0.32063,
+      3.138827
+     ],
+     "xyz": [
+      0.375783,
+      0.258,
+      0.989845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.013595,
+     "limit_margin": 0.481261,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:incoming/L1/C3",
+     "name": "sight_near",
+     "q": [
+      -2.081644,
+      0.155477,
+      2.045225,
+      0.93902,
+      -0.512573,
+      3.139962
+     ],
+     "xyz": [
+      0.448983,
+      0.258,
+      0.989845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.027308,
+     "limit_margin": 0.625129,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:incoming/L1/C2",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "incoming/L1/C2"
+   },
+   "points": [
+    {
+     "sequence": "locate:incoming/L1/C2",
+     "name": "sight_far",
+     "q": [
+      -2.182387,
+      -0.25907,
+      2.430768,
+      0.968303,
+      -0.613315,
+      3.140289
+     ],
+     "xyz": [
+      0.375783,
+      0.086,
+      0.989845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.012962,
+     "limit_margin": 0.239586,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:incoming/L1/C2",
+     "name": "sight_near",
+     "q": [
+      -2.403112,
+      -0.042963,
+      2.259073,
+      0.924246,
+      -0.83404,
+      3.14076
+     ],
+     "xyz": [
+      0.448983,
+      0.086,
+      0.989845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.02746,
+     "limit_margin": 0.411281,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:incoming/L1/C1",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "incoming/L1/C1"
+   },
+   "points": [
+    {
+     "sequence": "locate:incoming/L1/C1",
+     "name": "sight_far",
+     "q": [
+      -2.868348,
+      -0.258821,
+      2.430604,
+      0.96886,
+      -1.299276,
+      3.141336
+     ],
+     "xyz": [
+      0.375783,
+      -0.086,
+      0.989845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.02172,
+     "limit_margin": 0.23975,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:incoming/L1/C1",
+     "name": "sight_near",
+     "q": [
+      -2.937717,
+      -0.042867,
+      2.258982,
+      0.924543,
+      -1.368645,
+      3.141404
+     ],
+     "xyz": [
+      0.448983,
+      -0.086,
+      0.989845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.036345,
+     "limit_margin": 0.411372,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:incoming/L1/C0",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "incoming/L1/C0"
+   },
+   "points": [
+    {
+     "sequence": "locate:incoming/L1/C0",
+     "name": "sight_far",
+     "q": [
+      -3.529299,
+      0.028344,
+      2.188491,
+      0.923769,
+      -1.960228,
+      3.141966
+     ],
+     "xyz": [
+      0.375783,
+      -0.258,
+      0.989845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.04004,
+     "limit_margin": 0.481863,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:incoming/L1/C0",
+     "name": "sight_near",
+     "q": [
+      -3.457155,
+      0.15573,
+      2.044918,
+      0.939982,
+      -1.888083,
+      3.141891
+     ],
+     "xyz": [
+      0.448983,
+      -0.258,
+      0.989845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.053009,
+     "limit_margin": 0.625436,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:incoming/L0/C0",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "incoming/L0/C0"
+   },
+   "points": [
+    {
+     "sequence": "locate:incoming/L0/C0",
+     "name": "sight_far",
+     "q": [
+      -3.5293,
+      0.69423,
+      2.328175,
+      0.118199,
+      -1.960228,
+      3.141966
+     ],
+     "xyz": [
+      0.375783,
+      -0.258,
+      0.739845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.03569,
+     "limit_margin": 0.342179,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:incoming/L0/C0",
+     "name": "sight_near",
+     "q": [
+      -3.457155,
+      0.725762,
+      2.170526,
+      0.244342,
+      -1.888084,
+      3.141891
+     ],
+     "xyz": [
+      0.448983,
+      -0.258,
+      0.739845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.049183,
+     "limit_margin": 0.499828,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:incoming/L0/C1",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "incoming/L0/C1"
+   },
+   "points": [
+    {
+     "sequence": "locate:incoming/L0/C1",
+     "name": "sight_far",
+     "q": [
+      -2.868348,
+      0.707675,
+      2.617101,
+      -0.184133,
+      -1.299277,
+      3.141336
+     ],
+     "xyz": [
+      0.375783,
+      -0.086,
+      0.739845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.016668,
+     "limit_margin": 0.053253,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:incoming/L0/C1",
+     "name": "sight_near",
+     "q": [
+      -2.937718,
+      0.685794,
+      2.408336,
+      0.046529,
+      -1.368646,
+      3.141404
+     ],
+     "xyz": [
+      0.448983,
+      -0.086,
+      0.739845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.031494,
+     "limit_margin": 0.262018,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:incoming/L0/C2",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "incoming/L0/C2"
+   },
+   "points": [
+    {
+     "sequence": "locate:incoming/L0/C2",
+     "name": "sight_far",
+     "q": [
+      -2.182388,
+      0.707747,
+      2.617314,
+      -0.18506,
+      -0.613316,
+      3.140289
+     ],
+     "xyz": [
+      0.375783,
+      0.086,
+      0.739845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.009945,
+     "limit_margin": 0.05304,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:incoming/L0/C2",
+     "name": "sight_near",
+     "q": [
+      -2.403112,
+      0.685788,
+      2.40844,
+      0.046128,
+      -0.83404,
+      3.14076
+     ],
+     "xyz": [
+      0.448983,
+      0.086,
+      0.739845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.023793,
+     "limit_margin": 0.261914,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:incoming/L0/C3",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "incoming/L0/C3"
+   },
+   "points": [
+    {
+     "sequence": "locate:incoming/L0/C3",
+     "name": "sight_far",
+     "q": [
+      -1.889702,
+      0.694136,
+      2.328849,
+      0.115695,
+      -0.32063,
+      3.138827
+     ],
+     "xyz": [
+      0.375783,
+      0.258,
+      0.739845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.012115,
+     "limit_margin": 0.341505,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:incoming/L0/C3",
+     "name": "sight_near",
+     "q": [
+      -2.081645,
+      0.725681,
+      2.170856,
+      0.243186,
+      -0.512573,
+      3.139962
+     ],
+     "xyz": [
+      0.448983,
+      0.258,
+      0.739845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.025336,
+     "limit_margin": 0.499498,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L3/C0",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L3/C0"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L3/C0",
+     "name": "sight_far",
+     "q": [
+      -0.755674,
+      0.19718,
+      1.3587,
+      1.584455,
+      -2.328194,
+      3.142455
+     ],
+     "xyz": [
+      -0.375783,
+      0.43,
+      1.219845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.05535,
+     "limit_margin": 1.311654,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L3/C0",
+     "name": "sight_near",
+     "q": [
+      -0.658745,
+      0.297444,
+      1.231157,
+      1.611835,
+      -2.231266,
+      3.142301
+     ],
+     "xyz": [
+      -0.448983,
+      0.43,
+      1.219845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.063115,
+     "limit_margin": 1.439197,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L3/C1",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L3/C1"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L3/C1",
+     "name": "sight_far",
+     "q": [
+      -0.387707,
+      -0.15357,
+      1.717906,
+      1.576268,
+      -1.960228,
+      3.141966
+     ],
+     "xyz": [
+      -0.375783,
+      0.258,
+      1.219845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.048586,
+     "limit_margin": 0.952448,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L3/C1",
+     "name": "sight_near",
+     "q": [
+      -0.315562,
+      -0.017533,
+      1.594778,
+      1.563385,
+      -1.888083,
+      3.141891
+     ],
+     "xyz": [
+      -0.448983,
+      0.258,
+      1.219845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.059564,
+     "limit_margin": 1.075576,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L3/C2",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L3/C2"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L3/C2",
+     "name": "sight_far",
+     "q": [
+      0.273245,
+      -0.422306,
+      1.901955,
+      1.660994,
+      -1.299276,
+      3.141336
+     ],
+     "xyz": [
+      -0.375783,
+      0.086,
+      1.219845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.031475,
+     "limit_margin": 0.768399,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L3/C2",
+     "name": "sight_near",
+     "q": [
+      0.203876,
+      -0.225487,
+      1.774767,
+      1.591379,
+      -1.368645,
+      3.141403
+     ],
+     "xyz": [
+      -0.448983,
+      0.086,
+      1.219845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.04608,
+     "limit_margin": 0.895587,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L3/C3",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L3/C3"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L3/C3",
+     "name": "sight_far",
+     "q": [
+      0.959206,
+      -0.422514,
+      1.902068,
+      1.660446,
+      -0.613315,
+      3.140289
+     ],
+     "xyz": [
+      -0.375783,
+      -0.086,
+      1.219845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.018786,
+     "limit_margin": 0.768286,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L3/C3",
+     "name": "sight_near",
+     "q": [
+      0.738481,
+      -0.225582,
+      1.774838,
+      1.5911,
+      -0.834039,
+      3.14076
+     ],
+     "xyz": [
+      -0.448983,
+      -0.086,
+      1.219845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.034817,
+     "limit_margin": 0.895516,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L3/C4",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L3/C4"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L3/C4",
+     "name": "sight_far",
+     "q": [
+      1.251891,
+      -0.154166,
+      1.718402,
+      1.574444,
+      -0.32063,
+      3.138827
+     ],
+     "xyz": [
+      -0.375783,
+      -0.258,
+      1.219845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.016502,
+     "limit_margin": 0.951952,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L3/C4",
+     "name": "sight_near",
+     "q": [
+      1.059948,
+      -0.017811,
+      1.595051,
+      1.562483,
+      -0.512572,
+      3.139962
+     ],
+     "xyz": [
+      -0.448983,
+      -0.258,
+      1.219845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.03069,
+     "limit_margin": 1.075303,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L3/C5",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L3/C5"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L3/C5",
+     "name": "sight_far",
+     "q": [
+      1.364825,
+      0.196176,
+      1.359925,
+      1.581032,
+      -0.207695,
+      3.137228
+     ],
+     "xyz": [
+      -0.375783,
+      -0.43,
+      1.219845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.015635,
+     "limit_margin": 1.310429,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L3/C5",
+     "name": "sight_near",
+     "q": [
+      1.221289,
+      0.296953,
+      1.231808,
+      1.610163,
+      -0.351232,
+      3.139086
+     ],
+     "xyz": [
+      -0.448983,
+      -0.43,
+      1.219845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.027421,
+     "limit_margin": 1.438546,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L2/C5",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L2/C5"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L2/C5",
+     "name": "sight_far",
+     "q": [
+      1.364825,
+      0.369513,
+      1.819123,
+      0.948497,
+      -0.207696,
+      3.137228
+     ],
+     "xyz": [
+      -0.375783,
+      -0.43,
+      0.969845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.015498,
+     "limit_margin": 0.851231,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L2/C5",
+     "name": "sight_near",
+     "q": [
+      1.221289,
+      0.451207,
+      1.693668,
+      0.994049,
+      -0.351232,
+      3.139086
+     ],
+     "xyz": [
+      -0.448983,
+      -0.43,
+      0.969845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.028856,
+     "limit_margin": 0.976686,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L2/C4",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L2/C4"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L2/C4",
+     "name": "sight_far",
+     "q": [
+      1.251891,
+      0.064024,
+      2.217008,
+      0.857648,
+      -0.32063,
+      3.138827
+     ],
+     "xyz": [
+      -0.375783,
+      -0.258,
+      0.969845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.013319,
+     "limit_margin": 0.453346,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L2/C4",
+     "name": "sight_near",
+     "q": [
+      1.059948,
+      0.187775,
+      2.070709,
+      0.881239,
+      -0.512573,
+      3.139962
+     ],
+     "xyz": [
+      -0.448983,
+      -0.258,
+      0.969845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.026942,
+     "limit_margin": 0.599645,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L2/C3",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L2/C3"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L2/C3",
+     "name": "sight_far",
+     "q": [
+      0.959205,
+      -0.215478,
+      2.466009,
+      0.889469,
+      -0.613315,
+      3.140289
+     ],
+     "xyz": [
+      -0.375783,
+      -0.086,
+      0.969845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.012424,
+     "limit_margin": 0.204345,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L2/C3",
+     "name": "sight_near",
+     "q": [
+      0.738481,
+      -0.004569,
+      2.288591,
+      0.856334,
+      -0.83404,
+      3.14076
+     ],
+     "xyz": [
+      -0.448983,
+      -0.086,
+      0.969845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.026782,
+     "limit_margin": 0.381763,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L2/C2",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L2/C2"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L2/C2",
+     "name": "sight_far",
+     "q": [
+      0.273245,
+      -0.215234,
+      2.465839,
+      0.890038,
+      -1.299276,
+      3.141336
+     ],
+     "xyz": [
+      -0.375783,
+      0.086,
+      0.969845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.020819,
+     "limit_margin": 0.204515,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L2/C2",
+     "name": "sight_near",
+     "q": [
+      0.203875,
+      -0.004476,
+      2.288499,
+      0.856636,
+      -1.368645,
+      3.141404
+     ],
+     "xyz": [
+      -0.448983,
+      0.086,
+      0.969845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.035447,
+     "limit_margin": 0.381855,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L2/C1",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L2/C1"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L2/C1",
+     "name": "sight_far",
+     "q": [
+      -0.387707,
+      0.064583,
+      2.216394,
+      0.859627,
+      -1.960228,
+      3.141966
+     ],
+     "xyz": [
+      -0.375783,
+      0.258,
+      0.969845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.039231,
+     "limit_margin": 0.45396,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L2/C1",
+     "name": "sight_near",
+     "q": [
+      -0.315563,
+      0.18802,
+      2.070398,
+      0.882212,
+      -1.888083,
+      3.141891
+     ],
+     "xyz": [
+      -0.448983,
+      0.258,
+      0.969845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.052299,
+     "limit_margin": 0.599956,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L2/C0",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L2/C0"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L2/C0",
+     "name": "sight_far",
+     "q": [
+      -0.755674,
+      0.370337,
+      1.817889,
+      0.952109,
+      -2.328195,
+      3.142455
+     ],
+     "xyz": [
+      -0.375783,
+      0.43,
+      0.969845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.054899,
+     "limit_margin": 0.852465,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L2/C0",
+     "name": "sight_near",
+     "q": [
+      -0.658745,
+      0.451599,
+      1.69305,
+      0.995787,
+      -2.231266,
+      3.142301
+     ],
+     "xyz": [
+      -0.448983,
+      0.43,
+      0.969845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.066439,
+     "limit_margin": 0.977304,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L1/C0",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L1/C0"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L1/C0",
+     "name": "sight_far",
+     "q": [
+      -0.755674,
+      0.850146,
+      1.898905,
+      0.391284,
+      -2.328195,
+      3.142455
+     ],
+     "xyz": [
+      -0.375783,
+      0.43,
+      0.719845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.053598,
+     "limit_margin": 0.771449,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L1/C0",
+     "name": "sight_near",
+     "q": [
+      -0.658745,
+      0.892273,
+      1.771762,
+      0.4764,
+      -2.231266,
+      3.142301
+     ],
+     "xyz": [
+      -0.448983,
+      0.43,
+      0.719845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.065592,
+     "limit_margin": 0.898592,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L1/C1",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L1/C1"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L1/C1",
+     "name": "sight_far",
+     "q": [
+      -0.387707,
+      0.757809,
+      2.317663,
+      0.065132,
+      -1.960228,
+      3.141966
+     ],
+     "xyz": [
+      -0.375783,
+      0.258,
+      0.719845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.036043,
+     "limit_margin": 0.352691,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L1/C1",
+     "name": "sight_near",
+     "q": [
+      -0.315563,
+      0.78068,
+      2.161256,
+      0.198695,
+      -1.888084,
+      3.141891
+     ],
+     "xyz": [
+      -0.448983,
+      0.258,
+      0.719845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.049493,
+     "limit_margin": 0.509098,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L1/C2",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L1/C2"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L1/C2",
+     "name": "sight_far",
+     "q": [
+      0.273244,
+      0.797378,
+      2.60197,
+      -0.258705,
+      -1.299277,
+      3.141336
+     ],
+     "xyz": [
+      -0.375783,
+      0.086,
+      0.719845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.017102,
+     "limit_margin": 0.068384,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L1/C2",
+     "name": "sight_near",
+     "q": [
+      0.203875,
+      0.755015,
+      2.396939,
+      -0.011295,
+      -1.368646,
+      3.141404
+     ],
+     "xyz": [
+      -0.448983,
+      0.086,
+      0.719845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.03189,
+     "limit_margin": 0.273415,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L1/C3",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L1/C3"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L1/C3",
+     "name": "sight_far",
+     "q": [
+      0.959205,
+      0.797476,
+      2.602177,
+      -0.259653,
+      -0.613316,
+      3.140289
+     ],
+     "xyz": [
+      -0.375783,
+      -0.086,
+      0.719845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.010204,
+     "limit_margin": 0.068177,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L1/C3",
+     "name": "sight_near",
+     "q": [
+      0.738481,
+      0.755017,
+      2.397042,
+      -0.011702,
+      -0.83404,
+      3.14076
+     ],
+     "xyz": [
+      -0.448983,
+      -0.086,
+      0.719845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.024093,
+     "limit_margin": 0.273312,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L1/C4",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L1/C4"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L1/C4",
+     "name": "sight_far",
+     "q": [
+      1.25189,
+      0.757758,
+      2.31833,
+      0.062591,
+      -0.32063,
+      3.138827
+     ],
+     "xyz": [
+      -0.375783,
+      -0.258,
+      0.719845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.012235,
+     "limit_margin": 0.352024,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L1/C4",
+     "name": "sight_near",
+     "q": [
+      1.059948,
+      0.780614,
+      2.161584,
+      0.197525,
+      -0.512573,
+      3.139962
+     ],
+     "xyz": [
+      -0.448983,
+      -0.258,
+      0.719845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.025496,
+     "limit_margin": 0.50877,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L1/C5",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L1/C5"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L1/C5",
+     "name": "sight_far",
+     "q": [
+      1.364825,
+      0.849753,
+      1.900167,
+      0.387214,
+      -0.207696,
+      3.137228
+     ],
+     "xyz": [
+      -0.375783,
+      -0.43,
+      0.719845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.015129,
+     "limit_margin": 0.770187,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L1/C5",
+     "name": "sight_near",
+     "q": [
+      1.221288,
+      0.892057,
+      1.772388,
+      0.47448,
+      -0.351232,
+      3.139086
+     ],
+     "xyz": [
+      -0.448983,
+      -0.43,
+      0.719845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.028487,
+     "limit_margin": 0.897966,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L0/C5",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L0/C5"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L0/C5",
+     "name": "sight_far",
+     "q": [
+      1.364825,
+      1.430857,
+      1.594482,
+      0.111794,
+      -0.207696,
+      3.137228
+     ],
+     "xyz": [
+      -0.375783,
+      -0.43,
+      0.469845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.015984,
+     "limit_margin": 1.075872,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L0/C5",
+     "name": "sight_near",
+     "q": [
+      1.221288,
+      1.447252,
+      1.471098,
+      0.220575,
+      -0.351233,
+      3.139086
+     ],
+     "xyz": [
+      -0.448983,
+      -0.43,
+      0.469845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.028931,
+     "limit_margin": 1.199256,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L0/C4",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L0/C4"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L0/C4",
+     "name": "sight_far",
+     "q": [
+      1.25189,
+      1.459763,
+      1.960668,
+      -0.281751,
+      -0.320631,
+      3.138827
+     ],
+     "xyz": [
+      -0.375783,
+      -0.258,
+      0.469845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.015431,
+     "limit_margin": 0.709686,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L0/C4",
+     "name": "sight_near",
+     "q": [
+      1.059948,
+      1.431334,
+      1.830975,
+      -0.122586,
+      -0.512573,
+      3.139962
+     ],
+     "xyz": [
+      -0.448983,
+      -0.258,
+      0.469845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.029666,
+     "limit_margin": 0.839379,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L0/C3",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L0/C3"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L0/C3",
+     "name": "sight_far",
+     "q": [
+      0.959205,
+      1.586439,
+      2.163068,
+      -0.609507,
+      -0.613316,
+      3.140289
+     ],
+     "xyz": [
+      -0.375783,
+      -0.086,
+      0.469845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.016483,
+     "limit_margin": 0.507286,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L0/C3",
+     "name": "sight_near",
+     "q": [
+      0.73848,
+      1.484092,
+      2.021535,
+      -0.365271,
+      -0.83404,
+      3.14076
+     ],
+     "xyz": [
+      -0.448983,
+      -0.086,
+      0.469845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.032003,
+     "limit_margin": 0.648819,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L0/C2",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L0/C2"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L0/C2",
+     "name": "sight_far",
+     "q": [
+      0.273244,
+      1.586304,
+      2.16294,
+      -0.6086,
+      -1.299277,
+      3.141336
+     ],
+     "xyz": [
+      -0.375783,
+      0.086,
+      0.469845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.027617,
+     "limit_margin": 0.507414,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L0/C2",
+     "name": "sight_near",
+     "q": [
+      0.203875,
+      1.484055,
+      2.021457,
+      -0.364854,
+      -1.368646,
+      3.141404
+     ],
+     "xyz": [
+      -0.448983,
+      0.086,
+      0.469845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.042357,
+     "limit_margin": 0.648897,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L0/C1",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L0/C1"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L0/C1",
+     "name": "sight_far",
+     "q": [
+      -0.387708,
+      1.459587,
+      1.96014,
+      -0.279122,
+      -1.960228,
+      3.141966
+     ],
+     "xyz": [
+      -0.375783,
+      0.258,
+      0.469845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.04544,
+     "limit_margin": 0.710214,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L0/C1",
+     "name": "sight_near",
+     "q": [
+      -0.315563,
+      1.431299,
+      1.830693,
+      -0.121362,
+      -1.888084,
+      3.141891
+     ],
+     "xyz": [
+      -0.448983,
+      0.258,
+      0.469845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.05758,
+     "limit_margin": 0.839661,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:outgoing/L0/C0",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "outgoing/L0/C0"
+   },
+   "points": [
+    {
+     "sequence": "locate:outgoing/L0/C0",
+     "name": "sight_far",
+     "q": [
+      -0.755674,
+      1.430969,
+      1.593289,
+      0.116077,
+      -2.328195,
+      3.142455
+     ],
+     "xyz": [
+      -0.375783,
+      0.43,
+      0.469845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.056604,
+     "limit_margin": 1.077065,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:outgoing/L0/C0",
+     "name": "sight_near",
+     "q": [
+      -0.658745,
+      1.447354,
+      1.470482,
+      0.222599,
+      -2.231266,
+      3.142301
+     ],
+     "xyz": [
+      -0.448983,
+      0.43,
+      0.469845
+     ],
+     "quat_wxyz": [
+      0.5,
+      0.5,
+      -0.5,
+      -0.5
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": 0.025,
+     "along_samples": 15,
+     "manipulability": 0.066602,
+     "limit_margin": 1.199872,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "locate:table/L0/C0",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.locate",
+    "slot": "table/L0/C0"
+   },
+   "points": [
+    {
+     "sequence": "locate:table/L0/C0",
+     "name": "sight_far",
+     "q": [
+      -1.053434,
+      1.137945,
+      2.346737,
+      -0.344142,
+      -1.055158,
+      3.141072
+     ],
+     "xyz": [
+      0.0,
+      0.433783,
+      0.609845
+     ],
+     "quat_wxyz": [
+      0.0,
+      -0.0,
+      0.707107,
+      0.707107
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "free",
+     "clearance": 0.03,
+     "margin": 0.005,
+     "nearest": [
+      "link_0",
+      "pedestal/leg0"
+     ],
+     "along_slack": null,
+     "along_samples": 0,
+     "manipulability": 0.026694,
+     "limit_margin": 0.323617,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (far)"
+    },
+    {
+     "sequence": "locate:table/L0/C0",
+     "name": "sight_near",
+     "q": [
+      -1.16225,
+      1.084288,
+      2.155755,
+      -0.099446,
+      -1.163974,
+      3.141197
+     ],
+     "xyz": [
+      -0.0,
+      0.506983,
+      0.609845
+     ],
+     "quat_wxyz": [
+      0.0,
+      -0.0,
+      0.707107,
+      0.707107
+     ],
+     "joints": {
+      "right_gripper_joint": 0.057675,
+      "left_gripper_joint": 0.057675
+     },
+     "arrive": "line",
+     "clearance": 0.02202,
+     "margin": 0.005,
+     "nearest": [
+      "gripper_body",
+      "table/top"
+     ],
+     "along_slack": 0.01702,
+     "along_samples": 15,
+     "manipulability": 0.043273,
+     "limit_margin": 0.514599,
+     "branch": {
+      "joint_3": 1,
+      "joint_5": -1
+     },
+     "action": "read the AprilGrid (near)"
+    }
+   ]
+  },
+  {
+   "sequence": "pick:incoming/L2/C0",
+   "ok": true,
+   "problems": [],
+   "meta": {
+    "skill": "tm_tray.pick",
+    "slot": "incoming/L2/C0"
+   },
+   "points": [
     {
      "sequence": "pick:incoming/L2/C0",
      "name": "pre_insert",
@@ -1130,92 +4717,6 @@
    "points": [
     {
      "sequence": "pick:table/L0/C0",
-     "name": "sight_far",
-     "q": [
-      -1.053434,
-      1.137945,
-      2.346737,
-      -0.344142,
-      -1.055158,
-      3.141072
-     ],
-     "xyz": [
-      0.0,
-      0.433783,
-      0.609845
-     ],
-     "quat_wxyz": [
-      0.0,
-      -0.0,
-      0.707107,
-      0.707107
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "free",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": null,
-     "along_samples": 0,
-     "manipulability": 0.026694,
-     "limit_margin": 0.323617,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (far)"
-    },
-    {
-     "sequence": "pick:table/L0/C0",
-     "name": "sight_near",
-     "q": [
-      -1.16225,
-      1.084288,
-      2.155755,
-      -0.099446,
-      -1.163974,
-      3.141197
-     ],
-     "xyz": [
-      -0.0,
-      0.506983,
-      0.609845
-     ],
-     "quat_wxyz": [
-      0.0,
-      -0.0,
-      0.707107,
-      0.707107
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "line",
-     "clearance": 0.02202,
-     "margin": 0.005,
-     "nearest": [
-      "gripper_body",
-      "table/top"
-     ],
-     "along_slack": 0.01702,
-     "along_samples": 15,
-     "manipulability": 0.043273,
-     "limit_margin": 0.514599,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (near)"
-    },
-    {
-     "sequence": "pick:table/L0/C0",
      "name": "pre_insert",
      "q": [
       -1.150282,
@@ -1709,92 +5210,6 @@
     "slot": "incoming/L2/C1"
    },
    "points": [
-    {
-     "sequence": "pick:incoming/L2/C1",
-     "name": "sight_far",
-     "q": [
-      -0.959207,
-      -1.93024,
-      2.45352,
-      -0.52328,
-      -0.61159,
-      0.0
-     ],
-     "xyz": [
-      0.375783,
-      -0.086,
-      1.239845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "free",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": null,
-     "along_samples": 0,
-     "manipulability": 0.012585,
-     "limit_margin": 0.216834,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (far)"
-    },
-    {
-     "sequence": "pick:incoming/L2/C1",
-     "name": "sight_near",
-     "q": [
-      -0.738482,
-      -2.032009,
-      2.278161,
-      -0.246152,
-      -0.832314,
-      0.0
-     ],
-     "xyz": [
-      0.448983,
-      -0.086,
-      1.239845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "line",
-     "clearance": 0.02865,
-     "margin": 0.005,
-     "nearest": [
-      "link_2",
-      "pedestal/plate"
-     ],
-     "along_slack": 0.02365,
-     "along_samples": 15,
-     "manipulability": 0.026982,
-     "limit_margin": 0.392193,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (near)"
-    },
     {
      "sequence": "pick:incoming/L2/C1",
      "name": "pre_insert",
@@ -2292,92 +5707,6 @@
    "points": [
     {
      "sequence": "pick:incoming/L2/C2",
-     "name": "sight_far",
-     "q": [
-      -0.273246,
-      -1.930239,
-      2.45352,
-      -0.52328,
-      -1.297551,
-      0.0
-     ],
-     "xyz": [
-      0.375783,
-      0.086,
-      1.239845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "free",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": null,
-     "along_samples": 0,
-     "manipulability": 0.021127,
-     "limit_margin": 0.216834,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (far)"
-    },
-    {
-     "sequence": "pick:incoming/L2/C2",
-     "name": "sight_near",
-     "q": [
-      -0.203877,
-      -2.032009,
-      2.278161,
-      -0.246152,
-      -1.36692,
-      0.0
-     ],
-     "xyz": [
-      0.448983,
-      0.086,
-      1.239845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "line",
-     "clearance": 0.02686,
-     "margin": 0.005,
-     "nearest": [
-      "link_2",
-      "pedestal/plate"
-     ],
-     "along_slack": 0.02186,
-     "along_samples": 15,
-     "manipulability": 0.035753,
-     "limit_margin": 0.392193,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (near)"
-    },
-    {
-     "sequence": "pick:incoming/L2/C2",
      "name": "pre_insert",
      "q": [
       -0.2111,
@@ -2871,92 +6200,6 @@
     "slot": "incoming/L2/C3"
    },
    "points": [
-    {
-     "sequence": "pick:incoming/L2/C3",
-     "name": "sight_far",
-     "q": [
-      -1.889702,
-      -0.152647,
-      1.665295,
-      1.626032,
-      -0.32063,
-      3.138827
-     ],
-     "xyz": [
-      0.375783,
-      0.258,
-      1.239845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "free",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": null,
-     "along_samples": 0,
-     "manipulability": 0.016609,
-     "limit_margin": 1.005059,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (far)"
-    },
-    {
-     "sequence": "pick:incoming/L2/C3",
-     "name": "sight_near",
-     "q": [
-      -2.081644,
-      -0.016904,
-      1.542333,
-      1.614294,
-      -0.512572,
-      3.139962
-     ],
-     "xyz": [
-      0.448983,
-      0.258,
-      1.239845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "line",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": 0.025,
-     "along_samples": 15,
-     "manipulability": 0.030687,
-     "limit_margin": 1.128021,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (near)"
-    },
     {
      "sequence": "pick:incoming/L2/C3",
      "name": "pre_insert",
@@ -3454,92 +6697,6 @@
    "points": [
     {
      "sequence": "pick:incoming/L1/C0",
-     "name": "sight_far",
-     "q": [
-      2.753886,
-      0.028344,
-      2.188491,
-      0.923769,
-      -1.960228,
-      3.141966
-     ],
-     "xyz": [
-      0.375783,
-      -0.258,
-      0.989845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "free",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": null,
-     "along_samples": 0,
-     "manipulability": 0.04004,
-     "limit_margin": 0.481863,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (far)"
-    },
-    {
-     "sequence": "pick:incoming/L1/C0",
-     "name": "sight_near",
-     "q": [
-      2.82603,
-      0.15573,
-      2.044918,
-      0.939982,
-      -1.888083,
-      3.141891
-     ],
-     "xyz": [
-      0.448983,
-      -0.258,
-      0.989845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "line",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": 0.025,
-     "along_samples": 15,
-     "manipulability": 0.053009,
-     "limit_margin": 0.625436,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (near)"
-    },
-    {
-     "sequence": "pick:incoming/L1/C0",
      "name": "pre_insert",
      "q": [
       2.817651,
@@ -4033,92 +7190,6 @@
     "slot": "incoming/L1/C1"
    },
    "points": [
-    {
-     "sequence": "pick:incoming/L1/C1",
-     "name": "sight_far",
-     "q": [
-      -2.868348,
-      -0.258821,
-      2.430604,
-      0.96886,
-      -1.299276,
-      3.141336
-     ],
-     "xyz": [
-      0.375783,
-      -0.086,
-      0.989845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "free",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": null,
-     "along_samples": 0,
-     "manipulability": 0.02172,
-     "limit_margin": 0.23975,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (far)"
-    },
-    {
-     "sequence": "pick:incoming/L1/C1",
-     "name": "sight_near",
-     "q": [
-      -2.937717,
-      -0.042867,
-      2.258982,
-      0.924543,
-      -1.368645,
-      3.141404
-     ],
-     "xyz": [
-      0.448983,
-      -0.086,
-      0.989845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "line",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": 0.025,
-     "along_samples": 15,
-     "manipulability": 0.036345,
-     "limit_margin": 0.411372,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (near)"
-    },
     {
      "sequence": "pick:incoming/L1/C1",
      "name": "pre_insert",
@@ -4616,92 +7687,6 @@
    "points": [
     {
      "sequence": "pick:incoming/L1/C2",
-     "name": "sight_far",
-     "q": [
-      -2.182387,
-      -0.25907,
-      2.430768,
-      0.968303,
-      -0.613315,
-      3.140289
-     ],
-     "xyz": [
-      0.375783,
-      0.086,
-      0.989845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "free",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": null,
-     "along_samples": 0,
-     "manipulability": 0.012962,
-     "limit_margin": 0.239586,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (far)"
-    },
-    {
-     "sequence": "pick:incoming/L1/C2",
-     "name": "sight_near",
-     "q": [
-      -2.403112,
-      -0.042963,
-      2.259073,
-      0.924246,
-      -0.83404,
-      3.14076
-     ],
-     "xyz": [
-      0.448983,
-      0.086,
-      0.989845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "line",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": 0.025,
-     "along_samples": 15,
-     "manipulability": 0.02746,
-     "limit_margin": 0.411281,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (near)"
-    },
-    {
-     "sequence": "pick:incoming/L1/C2",
      "name": "pre_insert",
      "q": [
       -2.379198,
@@ -5195,92 +8180,6 @@
     "slot": "incoming/L1/C3"
    },
    "points": [
-    {
-     "sequence": "pick:incoming/L1/C3",
-     "name": "sight_far",
-     "q": [
-      -1.889702,
-      0.027767,
-      2.189093,
-      0.92182,
-      -0.32063,
-      3.138827
-     ],
-     "xyz": [
-      0.375783,
-      0.258,
-      0.989845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "free",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": null,
-     "along_samples": 0,
-     "manipulability": 0.013595,
-     "limit_margin": 0.481261,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (far)"
-    },
-    {
-     "sequence": "pick:incoming/L1/C3",
-     "name": "sight_near",
-     "q": [
-      -2.081644,
-      0.155477,
-      2.045225,
-      0.93902,
-      -0.512573,
-      3.139962
-     ],
-     "xyz": [
-      0.448983,
-      0.258,
-      0.989845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "line",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": 0.025,
-     "along_samples": 15,
-     "manipulability": 0.027308,
-     "limit_margin": 0.625129,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (near)"
-    },
     {
      "sequence": "pick:incoming/L1/C3",
      "name": "pre_insert",
@@ -5778,92 +8677,6 @@
    "points": [
     {
      "sequence": "pick:incoming/L0/C0",
-     "name": "sight_far",
-     "q": [
-      -3.5293,
-      0.69423,
-      2.328175,
-      0.118199,
-      -1.960228,
-      3.141966
-     ],
-     "xyz": [
-      0.375783,
-      -0.258,
-      0.739845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "free",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": null,
-     "along_samples": 0,
-     "manipulability": 0.03569,
-     "limit_margin": 0.342179,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (far)"
-    },
-    {
-     "sequence": "pick:incoming/L0/C0",
-     "name": "sight_near",
-     "q": [
-      -3.457155,
-      0.725762,
-      2.170526,
-      0.244342,
-      -1.888084,
-      3.141891
-     ],
-     "xyz": [
-      0.448983,
-      -0.258,
-      0.739845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "line",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": 0.025,
-     "along_samples": 15,
-     "manipulability": 0.049183,
-     "limit_margin": 0.499828,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (near)"
-    },
-    {
-     "sequence": "pick:incoming/L0/C0",
      "name": "pre_insert",
      "q": [
       -3.465535,
@@ -6357,92 +9170,6 @@
     "slot": "incoming/L0/C1"
    },
    "points": [
-    {
-     "sequence": "pick:incoming/L0/C1",
-     "name": "sight_far",
-     "q": [
-      -2.868348,
-      0.707675,
-      2.617101,
-      -0.184133,
-      -1.299277,
-      3.141336
-     ],
-     "xyz": [
-      0.375783,
-      -0.086,
-      0.739845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "free",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": null,
-     "along_samples": 0,
-     "manipulability": 0.016668,
-     "limit_margin": 0.053253,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (far)"
-    },
-    {
-     "sequence": "pick:incoming/L0/C1",
-     "name": "sight_near",
-     "q": [
-      -2.937718,
-      0.685794,
-      2.408336,
-      0.046529,
-      -1.368646,
-      3.141404
-     ],
-     "xyz": [
-      0.448983,
-      -0.086,
-      0.739845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "line",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": 0.025,
-     "along_samples": 15,
-     "manipulability": 0.031494,
-     "limit_margin": 0.262018,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (near)"
-    },
     {
      "sequence": "pick:incoming/L0/C1",
      "name": "pre_insert",
@@ -6940,92 +9667,6 @@
    "points": [
     {
      "sequence": "pick:incoming/L0/C2",
-     "name": "sight_far",
-     "q": [
-      -2.182388,
-      0.707747,
-      2.617314,
-      -0.18506,
-      -0.613316,
-      3.140289
-     ],
-     "xyz": [
-      0.375783,
-      0.086,
-      0.739845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "free",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": null,
-     "along_samples": 0,
-     "manipulability": 0.009945,
-     "limit_margin": 0.05304,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (far)"
-    },
-    {
-     "sequence": "pick:incoming/L0/C2",
-     "name": "sight_near",
-     "q": [
-      -2.403112,
-      0.685788,
-      2.40844,
-      0.046128,
-      -0.83404,
-      3.14076
-     ],
-     "xyz": [
-      0.448983,
-      0.086,
-      0.739845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "line",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": 0.025,
-     "along_samples": 15,
-     "manipulability": 0.023793,
-     "limit_margin": 0.261914,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (near)"
-    },
-    {
-     "sequence": "pick:incoming/L0/C2",
      "name": "pre_insert",
      "q": [
       -2.379198,
@@ -7519,92 +10160,6 @@
     "slot": "incoming/L0/C3"
    },
    "points": [
-    {
-     "sequence": "pick:incoming/L0/C3",
-     "name": "sight_far",
-     "q": [
-      -1.889702,
-      0.694136,
-      2.328849,
-      0.115695,
-      -0.32063,
-      3.138827
-     ],
-     "xyz": [
-      0.375783,
-      0.258,
-      0.739845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "free",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": null,
-     "along_samples": 0,
-     "manipulability": 0.012115,
-     "limit_margin": 0.341505,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (far)"
-    },
-    {
-     "sequence": "pick:incoming/L0/C3",
-     "name": "sight_near",
-     "q": [
-      -2.081645,
-      0.725681,
-      2.170856,
-      0.243186,
-      -0.512573,
-      3.139962
-     ],
-     "xyz": [
-      0.448983,
-      0.258,
-      0.739845
-     ],
-     "quat_wxyz": [
-      0.5,
-      0.5,
-      0.5,
-      0.5
-     ],
-     "joints": {
-      "right_gripper_joint": 0.057675,
-      "left_gripper_joint": 0.057675
-     },
-     "arrive": "line",
-     "clearance": 0.03,
-     "margin": 0.005,
-     "nearest": [
-      "link_0",
-      "pedestal/leg0"
-     ],
-     "along_slack": 0.025,
-     "along_samples": 15,
-     "manipulability": 0.025336,
-     "limit_margin": 0.499498,
-     "branch": {
-      "joint_3": 1,
-      "joint_5": -1
-     },
-     "action": "read the AprilGrid (near)"
-    },
     {
      "sequence": "pick:incoming/L0/C3",
      "name": "pre_insert",

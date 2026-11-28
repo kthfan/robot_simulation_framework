@@ -4,6 +4,8 @@
 # filled from the bottom up (cell_core.SequentialScheduler). When the incoming
 # rack is empty the cell requests a refill; when the outgoing rack is full it
 # requests removal. Both stop the run.
+# User 2026-11-28: the run begins by locating every jig (the far and the near
+# AprilGrid read of each slot); picks and places do not read again.
 schema: rsf.workflow/1
 name: inspect_and_sort
 
@@ -21,6 +23,9 @@ scheduler:
     bind:
       source:      {set: incoming, order: [-height, column], state: occupied, on_none: request_refill}
       destination: {set: outgoing, order: [height, column],  state: empty,    on_none: request_removal}
+
+setup:
+  - {skill: tm_tray.locate, args: {at: [$incoming.*, $outgoing.*, $inspection.*]}}
 
 cycle:
   - {skill: tm_tray.transfer, effect: transfer, args: {object: tray, from: $source, to: $inspection}}

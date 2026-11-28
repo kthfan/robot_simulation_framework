@@ -10,8 +10,14 @@
 * :func:`locating_camera`: the EIH 5M camera, hand-eye calibrated on the
   flange (``hardware.CAM_*``), with the intrinsics of the focus config nearest
   the read distance (``hardware.FOCAL_CONFIGS``).
+* :func:`reads` (``process.reads: tm_tray.reads``): the locate tour's reads for
+  :mod:`rsf.sim.reads`, with the detector (:func:`detect_boards`, when
+  ``aprilgrid_detector`` is installed).
 """
 from __future__ import annotations
+
+import math
+import re
 
 import numpy as np
 
@@ -77,3 +83,61 @@ def locating_camera(world, distance: float) -> dict:
     R = se3.quat_to_matrix((w, x, y, z))
     return {"link": "flange", "T_link_cv": se3.make_T(R, (A.CAM_FX, A.CAM_FY, A.CAM_FZ)), **focal_config(distance)}
 
+
+
+#: the reads of a locate sequence (``tm_tray.locate``) and the standoff each is taken at
+READS = {"sight_far": "standoff_far", "sight_near": "standoff_near"}
+_READ_SEG = re.compile(r"^locate:(.+)/(sight_far|sight_near):act$")
+
+
+def _rodrigues(rvec) -> np.ndarray:
+    th = float(np.linalg.norm(rvec))
+    if th < 1e-12:
+        return np.eye(3)
+    k = np.asarray(rvec, float) / th
+    K = np.array([[0, -k[2], k[1]], [k[2], 0, -k[0]], [-k[1], k[0], 0]])
+    return np.eye(3) + math.sin(th) * K + (1 - math.cos(th)) * K @ K
+
+
+def detect_boards(grey, fx, fy, cx, cy) -> dict:
+    """``{grid_id: T_camera_board}`` of every AprilGrid label the user's detector
+    (kthfan/AprilgridDetector) finds in *grey*."""
+    import aprilgrid_detector as agd
+    det = agd.Detector()
+    layout = agd.BoardLayout(tags_x=A.TAGS_X, tags_y=A.TAGS_Y, tag_size=A.TAG_SIZE,
+                             tag_separation=A.TAG_SEPARATION)
+    out = {}
+    for b in det.detect_boards(np.ascontiguousarray(grey), layout, agd.Camera(fx=fx, fy=fy, cx=cx, cy=cy)):
+        T = np.eye(4)
+        T[:3, :3] = _rodrigues(np.asarray(b.pose.rvec, float))
+        T[:3, 3] = np.asarray(b.pose.translation, float)
+        out[int(b.board_id)] = T
+    return out
+
+
+@register("vision", "tm_tray.reads")
+def reads(world):
+    """The locate tour's reads (``rsf.sim.reads``): the EIH camera at each read's focus
+    config, every slot's label, the detector, and the near reads to fit a rack with."""
+    import importlib.util
+
+    from rsf.sim.reads import Marker, ReadCamera, ReadSetup
+    cams, which = {}, {}
+    for read, key in READS.items():
+        c = locating_camera(world, float(world.process[key]))
+        name = f"eih_c{c['config']}"
+        cams[name] = ReadCamera(name, c["link"], c["T_link_cv"], c["fx"], c["fy"], c["cx"], c["cy"],
+                                c["width"], c["height"])
+        which[read] = name
+    ent = {f.key: f.entity for f in world.features({"kind": "slot"})}
+    markers = [Marker(l["key"], ent[l["key"]], l["T_sheet"], l["size"], sheet_image(l["grid_id"]), l["board_T"],
+                      l["grid_id"]) for l in labels(world)]
+
+    def match(name: str):
+        m = _READ_SEG.match(name)
+        return (m.group(1), m.group(2), which[m.group(2)]) if m else None
+
+    corners = np.array([[0.0, 0.0, 0.0, 1.0], [A.GRID_W, 0.0, 0.0, 1.0], [0.0, A.GRID_H, 0.0, 1.0],
+                        [A.GRID_W, A.GRID_H, 0.0, 1.0]]).T
+    has_detector = importlib.util.find_spec("aprilgrid_detector") is not None
+    return ReadSetup(cams, markers, match, detect_boards if has_detector else None, ("sight_near",), corners)

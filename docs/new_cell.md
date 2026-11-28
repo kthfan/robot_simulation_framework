@@ -191,7 +191,8 @@ skill returns one or more **sequences**; each sequence is a list of
 | `path` | for `path`: the poses from the previous waypoint to this one (both included) |
 | `along_scene`, `along_policy` | different scene / rules while arriving (default: the waypoint's) |
 | `action` | text: something happens on arrival. The plan holds the arm still while `joints` change to the **next** waypoint's values |
-| `meta["caps"]` | Cartesian speed limits of the arrival: a key of `process.motion.caps` (default `empty`) |
+| `meta["caps"]` | speed limits of the arrival: a key of `process.motion.caps` (default `empty`) |
+| `meta["dwell"]` | seconds the arm holds still after the waypoint's `action` (e.g. a camera read) |
 
 The first waypoint of a sequence is always reached by a free move.
 
@@ -247,7 +248,10 @@ planned. The judge, however, only evaluates pick → place transfers today.
 process:
   motion:                          # rsf.planning.plan
     dt: 0.01                       # trajectory sample period (s)
-    caps: {near: {v, a, w, alpha}, carry: {v, a, w, alpha, a_down}, empty: {...}}
+    caps:                          # per caps name (a waypoint's meta "caps")
+      near: {v, a, w, alpha}       #   Cartesian caps of the tool
+      in_jig: {joint_scale: 0.5}   #   or by the joints: this fraction of `joint` (v and a)
+      carry: {v, a, w, alpha, a_down}   # optional: a held object's own Cartesian caps
     joint: {v: 1.0, a: 2.0}        # free moves (rad/s, rad/s²)
     jaw: {speed: 0.05, settle: 0.3}
     home: [6 joint values]         # start and end of the run
@@ -258,10 +262,12 @@ process:
     sign_joints: [2, 4]            # joints whose sign is "the configuration" (elbow, wrist)
     prefer: {branch: {joint_3: 1, joint_5: -1}}   # or "auto" (default)
   judge: {carry_from: "grasp:act", carry_to: place_down, track_caps: [near]}   # rsf.sim.judge
+  reads: tm_tray.reads             # rsf.sim.reads: the cell's camera reads in simulation (a vision hook)
 ```
 
-`carry` caps apply to every segment that holds an object, and `carry_*`
-applies to free moves that hold one. The CPU planner, the cuRobo job and the
+`carry` caps, when given, apply to every segment that holds an object (the
+tm_tray layouts have none since 2026-11-28: a carry is as fast as an empty
+move), and `carry_*` applies to free moves that hold one. The CPU planner, the cuRobo job and the
 gate all enforce them.
 
 ## 8. Simulation

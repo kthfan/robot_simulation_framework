@@ -44,7 +44,11 @@ def test_inspect_and_sort_follows_the_original_scheduler(world, wf):
     dests = [s.key for s in ref.destinations()]
     ex = expand(wf, world)
     assert ex.cycles == len(sources) == 12
-    assert len(ex.tasks) == 3 * 12
+    assert len(ex.tasks) == 1 + 3 * 12
+    # the run first locates every jig (setup, user 2026-11-28)
+    loc = ex.tasks[0]
+    assert (loc.cycle, loc.skill) == (-1, "tm_tray.locate")
+    assert sorted(loc.args["at"]) == sorted(f.key for f in world.features({"kind": "slot"}))
     for c in range(ex.cycles):
         t = [x for x in ex.tasks if x.cycle == c]
         assert [x.skill for x in t] == ["tm_tray.transfer", "wait", "tm_tray.transfer"]
@@ -64,8 +68,8 @@ def test_full_outgoing_rack_requests_removal(world, wf):
 
 def test_tray_identity_is_kept(world, wf):
     ex = expand(wf, world)
-    first = ex.tasks[0].args["from"]
-    assert ex.occupancy[ex.tasks[2].args["to"]] == f"tray/{first}"
+    first = ex.tasks[1].args["from"]
+    assert ex.occupancy[ex.tasks[3].args["to"]] == f"tray/{first}"
 
 
 def test_unknown_binding_is_an_error(world):
@@ -228,3 +232,24 @@ def test_bindings_never_share_a_feature(world):
            "cycle": [{"skill": "noop", "args": {"x": "$a", "y": "$b"}}], "max_cycles": 1}
     t = expand(Workflow.from_dict(doc), world).tasks[0]
     assert t.args["x"] != t.args["y"]
+
+
+def test_setup_runs_once_before_the_cycles_and_lists_a_set(world):
+    """``setup`` steps run once (cycle -1), before the first cycle; ``$set.*`` is the
+    set's keys, spliced into a list; a misspelt set fails."""
+    doc = {"name": "t", "sets": {"in": {"kind": "slot", "role": "incoming"}, "tab": {"kind": "slot", "role": "inspection"}},
+           "initial": {"tray": ["in"]},
+           "scheduler": {"type": "rsf.ordered", "params": {"bind": {
+               "src": {"set": "in", "order": ["-height", "column"], "state": "occupied", "on_none": "request_refill"}}}},
+           "setup": [{"skill": "noop", "args": {"at": ["$in.*", "$tab"]}}],
+           "cycle": [{"skill": "noop", "effect": "none", "args": {"x": "$src"}}], "max_cycles": 2}
+    ex = expand(Workflow.from_dict(doc), world)
+    assert [t.cycle for t in ex.tasks] == [-1, 0, 1]
+    keys = [f.key for f in world.features({"kind": "slot", "role": "incoming"})]
+    assert ex.tasks[0].args["at"] == keys + ["table/L0/C0"]
+    doc["setup"] = [{"skill": "noop", "args": {"at": "$nope.*"}}]
+    with pytest.raises(WorkflowError, match="no set 'nope'"):
+        expand(Workflow.from_dict(doc), world)
+    doc["setup"] = [{"skill": "noop", "argz": {}}]
+    with pytest.raises(WorkflowError, match="setup step 0"):
+        Workflow.from_dict(doc)

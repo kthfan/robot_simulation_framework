@@ -152,6 +152,8 @@ scheduler:
   type: rsf.ordered
   params: {bind: {source:      {set: incoming, order: [-height, column], state: occupied, on_none: request_refill},
                   destination: {set: outgoing, order: [height, column],  state: empty,    on_none: request_removal}}}
+setup:                                       # once, before the first cycle: locate every jig
+  - {skill: tm_tray.locate, args: {at: [$incoming.*, $outgoing.*, $inspection.*]}}
 cycle:
   - {skill: tm_tray.transfer, effect: transfer, args: {object: tray, from: $source, to: $inspection}}
   - {skill: wait, args: {signal: inspection_done}}
@@ -168,6 +170,7 @@ task instances, cycle by cycle, and the event that ends the run.
 | `sets` | `{name: selector}`: named feature sets; each must match at least one feature |
 | `initial` | `{object: [set names or feature keys]}`: where objects start (default: the layout's `initially`) |
 | `scheduler` | `{type, params}`: which features each cycle works on (below) |
+| `setup` | steps run once, before the first cycle, with no bindings (tasks of cycle -1): e.g. locating every fixture |
 | `cycle` | the steps repeated every cycle |
 | `params` | passed to every skill |
 | `max_cycles` | stop after this many cycles (default 1000); the end event is then `max_cycles` |
@@ -177,7 +180,8 @@ A **step** is `{skill, args, effect}`:
 - `skill`: a registered skill (`<plugin>.<name>`). A name that is not registered
   (`wait`) is a step without motion: the trajectory gets a `hold:<skill>`.
 - `args`: passed to the skill. `$name` is a scheduler binding, or a set that
-  holds exactly one feature (`$inspection`).
+  holds exactly one feature (`$inspection`). `$name.*` is every feature key of
+  the set as a list; inside a list it is spliced in (`[$incoming.*, $outgoing.*]`).
 - `effect`: the bookkeeping the step does: `transfer` moves the object at
   `from` to `to`. Without `effect:`, the effect registered under the skill's
   own name is used, if any. Plugin skills are named `<plugin>.<name>`, so

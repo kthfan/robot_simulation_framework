@@ -14,6 +14,8 @@
     scheduler:
       type: rsf.ordered
       params: {bind: {source: {...}, destination: {...}}}
+    setup:                            # optional: once, before the first cycle
+      - {skill: tm_tray.locate, args: {at: [$incoming.*, $outgoing.*, $inspection.*]}}
     cycle:                            # repeated for every scheduler binding
       - {skill: tm_tray.transfer, effect: transfer, args: {object: tray, from: $source, to: $inspection}}
       - {skill: wait, args: {signal: inspection_done}}
@@ -23,7 +25,9 @@
     description: "..."                # optional
 
 ``$name`` in an argument is a scheduler binding, or a set that holds exactly one
-feature. A step's state change (its *effect*) is looked up by ``effect:`` or,
+feature; ``$name.*`` is every feature key of a set, as a list (inside a list it is
+spliced in). ``setup`` steps run once, before the first cycle, with no bindings
+(task ``cycle`` -1): e.g. locating every fixture before anything is moved. A step's state change (its *effect*) is looked up by ``effect:`` or,
 by default, by the skill's name in the ``effect`` registry (``effect: none``:
 none); skills with no registered effect do not change occupancy. A plugin's
 skills are named ``<plugin>.<name>``, so a step that moves something names its
@@ -48,8 +52,8 @@ from rsf.orchestrator import scheduler as _schedulers  # noqa: F401  (registers 
 from rsf.orchestrator.scheduler import Event
 
 SCHEMA = "rsf.workflow/1"
-TOP_KEYS = {"schema", "name", "description", "plugins", "sets", "initial", "scheduler", "cycle", "params",
-            "max_cycles"}
+TOP_KEYS = {"schema", "name", "description", "plugins", "sets", "initial", "scheduler", "setup", "cycle",
+            "params", "max_cycles"}
 
 
 class WorkflowError(ValueError):
@@ -74,6 +78,7 @@ class Workflow:
     max_cycles: int = 1000
     description: str = ""
     max_cycles_set: bool = False     #: the workflow chose max_cycles (repeating cycles are intended)
+    setup: list = field(default_factory=list)   #: steps run once before the first cycle
 
     @classmethod
     def from_file(cls, path) -> "Workflow":
@@ -90,17 +95,20 @@ class Workflow:
 
     @classmethod
     def from_dict(cls, doc: dict) -> "Workflow":
-        cycle = []
-        for i, s in enumerate(doc.get("cycle") or []):
-            unknown = set(s) - {"skill", "args", "effect"}
-            if unknown or "skill" not in s:
-                raise WorkflowError(f"cycle step {i}: needs 'skill'; unknown key(s) {sorted(unknown)}")
-            cycle.append(Step(s["skill"], dict(s.get("args") or {}), s.get("effect")))
+        def steps(part):
+            out = []
+            for i, s in enumerate(doc.get(part) or []):
+                unknown = set(s) - {"skill", "args", "effect"}
+                if unknown or "skill" not in s:
+                    raise WorkflowError(f"{part} step {i}: needs 'skill'; unknown key(s) {sorted(unknown)}")
+                out.append(Step(s["skill"], dict(s.get("args") or {}), s.get("effect")))
+            return out
+        cycle = steps("cycle")
         if not cycle:
             raise WorkflowError("empty cycle")
         return cls(doc.get("name", ""), dict(doc.get("sets") or {}), dict(doc["scheduler"]), cycle,
                    doc.get("initial"), dict(doc.get("params") or {}), int(doc.get("max_cycles", 1000)),
-                   doc.get("description", ""), "max_cycles" in doc)
+                   doc.get("description", ""), "max_cycles" in doc, steps("setup"))
 
     # ── resolution ─────────────────────────────────────────────────────────
     def resolve_sets(self, world) -> dict:
@@ -155,6 +163,8 @@ def expand(workflow: Workflow, world, occupancy: Optional[dict] = None) -> Expan
     sch = registry.get("scheduler", workflow.scheduler["type"])(world, sets, **(workflow.scheduler.get("params") or {}))
     tasks, end = [], None
     last = None
+    for step in workflow.setup:
+        _run_step(step, {}, sets, occ, tasks, -1)
     for c in range(workflow.max_cycles):
         start = dict(occ)
         b = sch.next(occ)
@@ -169,17 +179,26 @@ def expand(workflow: Workflow, world, occupancy: Optional[dict] = None) -> Expan
                 "purpose, set max_cycles in the workflow.")
         last = (start, dict(b))
         for step in workflow.cycle:
-            args = {k: _resolve(v, b, sets) for k, v in step.args.items()}
-            eff = step.effect or step.skill
-            if eff != "none" and eff in registry.names("effect"):
-                registry.get("effect", eff)(occ, args)
-            tasks.append(TaskInstance(len(tasks), c, step.skill, args, dict(b)))
+            _run_step(step, b, sets, occ, tasks, c)
     if end is None:
         end = Event("max_cycles", "", f"stopped after {workflow.max_cycles} cycles")
     return Expansion(tasks, end, occ, sets)
 
 
+def _run_step(step: Step, b: dict, sets: dict, occ: dict, tasks: list, cycle: int) -> None:
+    args = {k: _resolve(v, b, sets) for k, v in step.args.items()}
+    eff = step.effect or step.skill
+    if eff != "none" and eff in registry.names("effect"):
+        registry.get("effect", eff)(occ, args)
+    tasks.append(TaskInstance(len(tasks), cycle, step.skill, args, dict(b)))
+
+
 def _resolve(v, bindings: dict, sets: dict):
+    if isinstance(v, str) and v.startswith("$") and v.endswith(".*"):
+        name = v[1:-2]
+        if name not in sets:
+            raise WorkflowError(f"{v}: no set {name!r}")
+        return [f.key for f in sets[name]]
     if isinstance(v, str) and v.startswith("$"):
         name = v[1:]
         if name in bindings:
@@ -190,7 +209,11 @@ def _resolve(v, bindings: dict, sets: dict):
             return sets[name][0].key
         raise WorkflowError(f"${name}: neither a binding nor a set")
     if isinstance(v, list):
-        return [_resolve(x, bindings, sets) for x in v]
+        out = []
+        for x in v:                       # a `$set.*` inside a list is spliced in
+            r = _resolve(x, bindings, sets)
+            out += r if isinstance(x, str) and x.startswith("$") and x.endswith(".*") else [r]
+        return out
     if isinstance(v, dict):
         return {k: _resolve(x, bindings, sets) for k, x in v.items()}
     return v

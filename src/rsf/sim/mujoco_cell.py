@@ -58,7 +58,7 @@ def style(m, objects) -> None:
 
 class MujocoCell:
     def __init__(self, world, occupancy: Optional[dict] = None, params: Optional[SimParams] = None,
-                 flange: str = "flange"):
+                 flange: str = "flange", reads=None):
         import mujoco
         self.mj = mujoco
         self.world = world
@@ -106,6 +106,19 @@ class MujocoCell:
                 a.forcelimited = True
                 a.forcerange = [-self.p.jaw_force, self.p.jaw_force]
                 self.jaws.append(j.name)
+        self._cams = {}
+        if reads is not None:                           # rsf.sim.reads: markers and the read cameras
+            from rsf.sim import vision as V
+            for mk in reads.markers:
+                V.add_marker(spec, f"marker/{mk.key}", mk.T_sheet, mk.size, mk.image)
+            for c in reads.cameras.values():
+                V.add_camera(spec, ROBOT_PREFIX + c.link, c.name, c.T_link_cv, c.fx, c.fy, c.cx, c.cy,
+                             c.width, c.height)
+                self._cams[c.name] = c
+            spec.visual.global_.offwidth = max([int(spec.visual.global_.offwidth)]
+                                               + [c.width for c in reads.cameras.values()])
+            spec.visual.global_.offheight = max([int(spec.visual.global_.offheight)]
+                                                + [c.height for c in reads.cameras.values()])
         self.spec = spec
         self.m = spec.compile()
         self.d = mujoco.MjData(self.m)
@@ -159,6 +172,35 @@ class MujocoCell:
         v = self._views[name]
         self._views[name] = _r(v, eye=tuple(map(float, eye)), target=tuple(map(float, target)),
                                fov_deg=float(v.fov_deg if fov_deg is None else fov_deg))
+
+    # ── read cameras (rsf.sim.reads) ──────────────────────────────────────
+    def _kin(self):
+        mj, m = self.mj, self.m
+        if not hasattr(self, "d_read"):
+            self.d_read = mj.MjData(m)
+        dr = self.d_read
+        dr.qpos[:] = self.d.qpos                  # fresh kinematics of the state
+        mj.mj_kinematics(m, dr)
+        mj.mj_camlight(m, dr)
+        return dr
+
+    def camera_image(self, name: str):
+        """The read camera *name*'s grey image of the current state and the intrinsics
+        it was rendered with ``(fx, fy, cx, cy)``."""
+        from rsf.sim import vision as V
+        c = self._cams[name]
+        if not hasattr(self, "_read_r"):
+            self._read_r = {}
+        r = self._read_r.get(name)
+        if r is None:
+            r = self._read_r[name] = self.mj.Renderer(self.m, int(c.height), int(c.width))
+        return V.render_grey(self.m, self._kin(), name, renderer=r), (c.fx, c.fy, c.cx, c.cy)
+
+    def link_pose(self, link: str) -> np.ndarray:
+        """World pose of a robot link in the current state."""
+        dr = self._kin()
+        i = self.m.body(ROBOT_PREFIX + link).id
+        return _T(dr.xpos[i], dr.xmat[i])
 
     def close_views(self) -> None:
         for r in getattr(self, "_renderers", {}).values():

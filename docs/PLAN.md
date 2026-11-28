@@ -353,6 +353,12 @@ M3 碰撞判定移植、World→MuJoCo 編譯器。D29 夾爪 strict／as_built 
 - 原專案的限制（air-gapped、numpy 1.26、git 由使用者操作、CrossHost）不再適用。
 - D30 作為 M6 的參考決策。
 - `ToolPoseBound` 已有 `center_weight`（§6.1 #3）。
+- 2026-11-28：
+  - 完整流程包含定位：workflow 的 `setup:` 先以 `tm_tray.locate` 讀取所有 jig（每個 slot 遠讀＋近讀），之後的 pick／place 完全不再讀標籤（pick 由 `pre_insert` 開始）。
+  - 速度限制：帶盤的自由移動與空手相同（只受關節上限，D14 的 carry caps 移除）；架內直線與 tilt 為自由移動關節速度與加速度的 0.5 倍（`in_jig: {joint_scale: 0.5}`，原 D30 IN_JIG 0.05 m/s）。
+  - CPU 規劃器只作 fallback 與驗證（CPU gate）；自由移動的主要研發方向是 cuRobo（kthfan/curobo dev/main）。
+  - Isaac 串接 RTX 相機：定位讀取在模擬中實際拍照、偵測（MuJoCo 與 Isaac 都做）。
+  - 使用者的 cuRobo 實驗（扁平夾持工具，`benchmark/mesh_attached_tool_benchmark.py`）：少量大球加上 `mesh_only_success`，5–20 mm 間隙下成功率 90–100 %；dev/main 已含 PRM 以 mesh 驗證。盤子球體太胖的問題（p4_paths F3）因此不需另做球體擬合。
 
 - Tray 尺寸：保留原設定（0.1329 × 0.2470，2.5 mm recess）；高度 2026-11-19 更正為 0.130 m（原 0.0851）。
 - 實機已裝 air cylinder：預設模型包含；夾爪實際運行不會全關 → `tool.operating_range`（min 0.021）。
@@ -361,7 +367,9 @@ M3 碰撞判定移植、World→MuJoCo 編譯器。D29 夾爪 strict／as_built 
 ### 待辦（使用者 2026-11-22，尚未實作）
 - **AprilGrid 真實影像條件**：模糊、雜訊、曝光、陰影、遮擋、光照（detector 的 `tools/agsim/render.py` degradations）；
   偵測率與位姿誤差對這些條件的關係。
-- ~~slot 位置擾動後的定位與修正~~：strict 完成（2026-11-23，見下方進度）；as_built／recommended、執行中逐 slot 讀取尚未做。
+- ~~slot 位置擾動後的定位與修正~~：strict 完成（2026-11-23，見下方進度）；as_built／recommended 尚未做。
+  2026-11-28：讀取改在 run 的開頭（定位巡檢），模擬中實際拍照偵測並可寫出修正後的 layout（`rsf.sim.reads`）；
+  修正後重新示教、規劃仍為離線第二段（同一 run 內的線上重新規劃尚未做）。
 - ~~放寬攜帶限制~~：完成（2026-11-23，見下方進度）。
 - **實時檢視（P7，2026-11-25）**：模擬端渲染（Isaac RTX）、HTTP API + 瀏覽器檢視器、可在另一台主機看；
   第一版 MJPEG 完成（`docs/live_view.md`）；Isaac Sim 5.0 渲染以 `render_mode=play` 驗證（2026-11-25）。

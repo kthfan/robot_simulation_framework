@@ -42,39 +42,7 @@ import numpy as np  # noqa: E402
 #: board-frame points used to fit a rack's displacement (m): origin, along the row, down the column
 _BOARD_PTS = np.array([[0.0, 0.0, 0.0, 1.0], [0.1125, 0.0, 0.0, 1.0], [0.0, 0.030, 0.0, 1.0], [0.1125, 0.030, 0.0, 1.0]]).T
 
-
-def fit_planar(P: np.ndarray, Q: np.ndarray) -> np.ndarray:
-    """The world transform (yaw about z, then x, y, z) taking points *P* (3 x n) to *Q*
-    in the least-squares sense."""
-    p0, q0 = P.mean(axis=1, keepdims=True), Q.mean(axis=1, keepdims=True)
-    a, b = P[:2] - p0[:2], Q[:2] - q0[:2]
-    th = math.atan2(float(np.sum(a[0] * b[1] - a[1] * b[0])), float(np.sum(a[0] * b[0] + a[1] * b[1])))
-    R = np.array([[math.cos(th), -math.sin(th), 0.0], [math.sin(th), math.cos(th), 0.0], [0.0, 0.0, 1.0]])
-    T = np.eye(4)
-    T[:3, :3] = R
-    T[:3, 3] = (q0 - R @ p0).ravel()
-    return T
-
-
-def planar(B_est: np.ndarray, B_nom: np.ndarray) -> np.ndarray:
-    """The world correction taking the nominal board *B_nom* to the read *B_est*,
-    for something standing on the floor: only its yaw, and the translation that
-    puts the board's origin where it was read (the read's small roll and pitch
-    turned about the world origin would move the board by millimetres)."""
-    C = B_est @ np.linalg.inv(B_nom)
-    th = math.atan2(C[1, 0], C[0, 0])
-    T = np.eye(4)
-    T[:3, :3] = [[math.cos(th), -math.sin(th), 0.0], [math.sin(th), math.cos(th), 0.0], [0.0, 0.0, 1.0]]
-    T[:3, 3] = B_est[:3, 3] - T[:3, :3] @ B_nom[:3, 3]
-    return T
-
-
-def describe(D: np.ndarray, about) -> dict:
-    """``D`` as yaw (deg) about *about* and the translation that follows (mm)."""
-    th = math.atan2(D[1, 0], D[0, 0])
-    c = np.asarray(about, float)
-    t = D[:3, 3] - (c - D[:3, :3] @ c)
-    return {"yaw_deg": round(math.degrees(th), 4), "xyz_mm": [round(float(v) * 1e3, 3) for v in t]}
+from rsf.sim.reads import describe, fit_planar, planar  # noqa: E402,F401  (one copy: rsf.sim.reads)
 
 
 def main(argv=None) -> int:

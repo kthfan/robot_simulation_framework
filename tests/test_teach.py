@@ -36,10 +36,27 @@ def engine(world):
 def taught(world, engine):
     out = {}
     for key in ("incoming/L0/C0", "outgoing/L3/C5", "table/L0/C0"):
-        for sk in ("tm_tray.pick", "tm_tray.place"):
+        for sk in ("tm_tray.pick", "tm_tray.place", "tm_tray.locate"):
             for seq in registry.get("skill", sk)(world, {"at": key}):
                 out[seq.name] = (seq, engine.teach(seq))
     return out
+
+
+def test_locate_reads_far_then_near_and_holds_still(taught, world):
+    seq, r = taught["locate:outgoing/L3/C5"]
+    assert [(p.name, p.arrive) for p in r.points] == [("sight_far", "free"), ("sight_near", "line")]
+    assert [w.action for w in seq.waypoints] == ["read the AprilGrid (far)", "read the AprilGrid (near)"]
+    assert all(w.meta["dwell"] == world.process["read_dwell"] > 0 for w in seq.waypoints)
+
+
+def test_locate_tours_rack_by_rack_top_shelf_first():
+    from rsf_plugins.tm_tray.skills import locate_order
+    w = load_world(CELL / "layouts" / "strict.yaml")
+    keys = [f.key for f in w.features({"kind": "slot"})]
+    tour = locate_order(w, keys)
+    assert sorted(tour) == sorted(keys)
+    inc = [k for k in tour if k.startswith("incoming/")]
+    assert inc[:5] == ["incoming/L2/C0", "incoming/L2/C1", "incoming/L2/C2", "incoming/L2/C3", "incoming/L1/C3"]
 
 
 def test_every_sequence_is_taught(taught):
@@ -65,7 +82,9 @@ def test_points_reach_their_poses_and_stay_on_one_branch(taught, engine):
 def test_pick_jaws_and_motions(taught):
     seq, r = taught["pick:incoming/L0/C0"]
     pts = {p.name: p for p in r.points}
-    assert [p.arrive for p in r.points] == ["free", "line", "free", "line", "line", "line", "line", "path"]
+    # no AprilGrid reads: the slot was located before the run (user 2026-11-28)
+    assert [p.name for p in r.points][0] == "pre_insert"
+    assert [p.arrive for p in r.points] == ["free", "line", "line", "line", "line", "path"]
     assert all(v == pytest.approx(0.057675) for v in pts["insert"].joints.values())          # open going in (D5, D30)
     assert all(v == pytest.approx(0.0413, abs=1e-4) for v in pts["withdraw"].joints.values())  # closed after lift
     assert len(pts["insert"].joints) == 2
@@ -80,6 +99,8 @@ def test_tilt_motion_keeps_its_clearance(taught, world):
     c = world.process["tilt_motion"]["clearance"]
     assert c == 0.010
     for name, (seq, r) in taught.items():
+        if name.startswith("locate:"):                       # no tilt in a read
+            continue
         tilt = next(p for p in r.points if p.arrive == "path")
         assert tilt.along_slack >= -1e-7, (name, tilt.along_slack)
 
@@ -99,11 +120,14 @@ def test_workflow_teaches_each_motion_once(world, engine):
     wf = Workflow.from_file(CELL / "workflows" / "inspect_and_sort.yaml")
     wf.max_cycles = 2
     res = TE.teach_workflow(world, wf, engine=engine)
-    names = [n for t in res["tasks"] for n in t["sequences"]]
+    every = [n for t in res["tasks"] for n in t["sequences"]]
+    n_loc = len(world.features({"kind": "slot"}))
+    assert all(n.startswith("locate:") for n in every[:n_loc])          # every jig located first
+    names = every[n_loc:]
     assert names[:4] == ["pick:incoming/L2/C0", "place:table/L0/C0", "pick:table/L0/C0", "place:outgoing/L0/C0"]
-    assert len(res["sequences"]) == len(set(names))       # the table's pick/place taught once
+    assert len(res["sequences"]) == len(set(every))       # the table's pick/place taught once
     assert all(r.ok for r in res["sequences"].values())
-    assert [t["skill"] for t in res["tasks"][:3]] == ["tm_tray.transfer", "wait", "tm_tray.transfer"]
+    assert [t["skill"] for t in res["tasks"][:4]] == ["tm_tray.locate", "tm_tray.transfer", "wait", "tm_tray.transfer"]
     # one arm configuration for the whole run, so free moves never flip the elbow or the wrist
     # the configuration every sequence can use (chosen automatically for this run)
     pref = tuple(res["prefer"]["branch"].values())
@@ -117,7 +141,7 @@ def test_workflow_teaches_each_motion_once(world, engine):
                 assert res["sequences"][a].points[-1].branch == res["sequences"][b].points[0].branch, (a, b)
     # whole turns chosen for the run: no joint turns (nearly) a full turn between sequences
     q = np.zeros(6)
-    for n in names:
+    for n in every:
         pts = res["sequences"][n].points
         assert np.abs(np.array(pts[0].q) - q).max() < math.radians(300), n
         q = np.array(pts[-1].q)

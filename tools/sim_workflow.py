@@ -10,6 +10,14 @@ plan). ``--set friction.robot=0.3`` etc. changes simulation parameters
 sensitivity runs. ``--backend isaac`` replays it in Isaac Sim (PhysX) instead of
 MuJoCo: same world, servo and judge (needs Isaac Sim, see ``docs/p5_isaac.md``).
 
+**Reads.** A layout with ``process.reads`` (``rsf.sim.reads``) has its plan's marker
+reads taken as the run passes them: the read camera renders (MuJoCo, or Isaac's RTX),
+the detector finds the boards, and ``reads`` in the output says how far each is from
+the simulated truth. ``--nominal LAYOUT`` (the layout the robot was taught in; default:
+the simulated one) and ``--located OUT.yaml`` fit each located fixture's displacement
+and write the corrected layout to teach and plan in; ``--read-images DIR`` keeps the
+images; ``--no-reads`` skips them.
+
 ``--live [HOST:]PORT`` serves a live view while it runs: the simulator renders the
 views (Isaac: RTX), a browser shows them at ``http://HOST:PORT/`` and programs read
 ``/api/v1/...`` (``rsf.live``, ``docs/live_view.md``). ``--live 8765`` listens on this
@@ -207,6 +215,10 @@ def main(argv=None) -> int:
     ap.add_argument("--backend", choices=("mujoco", "isaac"), default="mujoco")
     ap.add_argument("--usd", help="isaac: where to write the compiled stage (default: a temporary file)")
     ap.add_argument("--report", help="also save the raw execution report (.npz)")
+    ap.add_argument("--no-reads", action="store_true", help="do not take the plan's marker reads")
+    ap.add_argument("--read-images", help="save every read's image here")
+    ap.add_argument("--nominal", help="the layout the robot was taught in (fit of the reads; default: LAYOUT)")
+    ap.add_argument("--located", help="write the layout corrected by the reads here")
     ap.add_argument("--out", required=True)
     lv = ap.add_argument_group("live view (rsf.live)")
     lv.add_argument("--live", metavar="[HOST:]PORT", help="serve a live view (default host 127.0.0.1)")
@@ -263,18 +275,29 @@ def main(argv=None) -> int:
     if a.transfers:
         trs = J.transfers(world, wf, traj["segments"], occ)
         t_end = trs[min(a.transfers, len(trs)) - 1].t1 + 0.5
+    from rsf.sim import reads as RD
+    setup = None if a.no_reads else RD.setup_for(world)
+    if setup is not None and not RD.schedule(setup, traj["segments"]):
+        setup = None                                  # the plan takes no reads
     if a.backend == "isaac":
         from rsf.sim.isaac_cell import IsaacCell
-        cell = IsaacCell(world, occ, params(a.set, "isaac"), usd_path=a.usd)
+        cell = IsaacCell(world, occ, params(a.set, "isaac"), usd_path=a.usd, reads=setup)
     else:
         from rsf.sim.mujoco_cell import MujocoCell
-        cell = MujocoCell(world, occ, params(a.set))
+        cell = MujocoCell(world, occ, params(a.set), reads=setup)
+    reader = RD.Reader(setup, traj["segments"], cell, a.read_images) if setup is not None else None
+    if reader is not None:
+        print(f"reads: {len(reader.todo)} ({'detector ' + ('on' if setup.detect else 'missing: images only')})",
+              flush=True)
     live = start_live(a, world, wf, cell, traj, t_end) if a.live else None
     if live:
         interrupt_on_hangup()
+    hooks = [h for h in (reader, live[1] if live else None) if h is not None]
+    on_sample = None if not hooks else (hooks[0] if len(hooks) == 1 else
+                                        (lambda t, *x: [h(t, *x) for h in hooks] and None))
     t0 = time.time()
     try:
-        rep = cell.run(traj, t_end=t_end, on_sample=live[1] if live else None,
+        rep = cell.run(traj, t_end=t_end, on_sample=on_sample,
                        progress=lambda t, w: print(f"  sim t={t:7.1f} s  wall {w:6.1f} s", flush=True))
     except BaseException as e:
         if live:
@@ -293,6 +316,21 @@ def main(argv=None) -> int:
     res = J.judge(world, wf, rep, occ, traj=traj)
     res["meta"] = {"layout": a.layout, "workflow": a.workflow, "plan": a.plan, "sim_seconds": round(float(rep.t[-1]), 2),
                    "wall_seconds": round(time.time() - t0, 1), "backend": a.backend, "params": {k: v for k, v in vars(cell.p).items()}}
+    if reader is not None:
+        res["reads"] = {"summary": reader.summary(), "rows": reader.rows}
+        sm = res["reads"]["summary"]
+        print(f"READS {sm['found']}/{sm['reads']} found" + (
+            f", board error max {sm['pos_err_mm']['max']} mm / {sm['rot_err_deg']['max']} deg" if sm.get("found") else ""),
+            flush=True)
+        if a.located and setup.detect is not None:
+            nom = load_world(a.nominal) if a.nominal else world
+            fits = RD.fit_entities(RD.setup_for(nom), reader.rows)
+            out = RD.located_layout(a.nominal or a.layout, a.located, nom.name, fits, note="tools/sim_workflow.py")
+            res["reads"]["located"] = {"layout": str(out), "fixtures": {
+                k: {"reads": f["reads"], "estimated": f["estimated"]} for k, f in fits.items()}}
+            for k, f in fits.items():
+                print(f"  located {k}: {f['estimated']} ({f['reads']} reads)", flush=True)
+            print(f"  -> {out}", flush=True)
     if live and live[1].console is not None and live[1].console.log:
         # debug code ran in this run: it may have changed it, so the verdict is not an acceptance result
         res["meta"]["live_debug"] = {"tainted": True, "log": live[1].console.log}

@@ -64,6 +64,10 @@ class IsaacParams(SimParams):
     #: show parts loaded from USD by their original prims (materials, textures) instead of their
     #: colliders; physics is the same either way (rsf.compile.usd, "Looks")
     visuals: bool = True
+    #: read cameras (rsf.sim.reads): RTX subframes per render, renders per image (the
+    #: renderer converges; the last is taken)
+    read_subframes: int = 8
+    read_renders: int = 2
 
 
 _APP = None
@@ -128,7 +132,7 @@ def _T7(x) -> np.ndarray:
 
 class IsaacCell:
     def __init__(self, world, occupancy: Optional[dict] = None, params: Optional[IsaacParams] = None,
-                 flange: str = "flange", usd_path=None):
+                 flange: str = "flange", usd_path=None, reads=None):
         start_app(params)                                    # Isaac's own pxr loads with the app
         from rsf.compile import usd as U
         from rsf.model.urdf import UrdfModel
@@ -157,6 +161,8 @@ class IsaacCell:
         self._cam_ops = {}                            # view -> (USD camera, its transform op)
         self._k = 0                                   # physics step (a render per step at most)
         self._rendered_k = None
+        self.reads = reads                            # rsf.sim.reads: markers and read cameras (RTX)
+        self._read_cams = {}                          # name -> (render product, annotator, crop, intrinsics)
 
     @staticmethod
     def p_headless(params) -> bool:
@@ -173,7 +179,9 @@ class IsaacCell:
         _APP.update()
         for v in self._views.values():                # cameras and lights before physics starts
             self._make_view(v)
-        if self._views:
+        if self.reads is not None:
+            self._make_reads()
+        if self._views or self.reads is not None:
             self._timeline_for_render()
         self.physx, self.sim_if, self.view = start_physics(ctx, self.p.timestep)
         self.art = self.view.create_articulation_view(self.robot_path)
@@ -214,6 +222,136 @@ class IsaacCell:
         ann = rep.AnnotatorRegistry.get_annotator("rgb")
         ann.attach([rp])
         self._annot[v.name] = ann
+
+    # ── read cameras (rsf.sim.reads): RTX images of the printed markers ──────
+    def _lights(self, st) -> None:
+        from pxr import UsdLux
+        root = f"{self.robot_path.rsplit('/', 1)[0]}/rsf_live"
+        if not st.GetPrimAtPath(f"{root}/dome"):      # the compiled stage has no lights
+            UsdLux.DomeLight.Define(st, f"{root}/dome").CreateIntensityAttr(1000.0)
+            UsdLux.DistantLight.Define(st, f"{root}/sun").CreateIntensityAttr(2500.0)
+
+    def _body_prim(self, st, link: str):
+        from pxr import Usd
+        body, T_bl = self.links[link]
+        name = self._prim_name(body)
+        prim = st.GetPrimAtPath(f"{self.robot_path}/{name}")
+        if not prim:
+            prim = next(p for p in Usd.PrimRange(st.GetPrimAtPath(self.robot_path)) if p.GetName() == name)
+        return prim, np.asarray(T_bl, float)
+
+    def _make_reads(self) -> None:
+        """Every marker as a textured, self-lit quad; every read camera on its link.
+
+        A USD camera has its principal point at the image centre, the calibrated one
+        does not: the camera renders a slightly larger image centred on the optical
+        axis, and :meth:`camera_image` crops the calibrated size out of it at whole
+        pixels, so the image's own principal point is within half a pixel of the
+        calibrated one and is handed to the detector exactly."""
+        import omni.replicator.core as rep
+        import omni.usd
+        from PIL import Image
+        from pxr import Gf, Sdf, UsdGeom, UsdShade
+        st = omni.usd.get_context().get_stage()
+        self._lights(st)
+        tex_dir = self.usd_path.parent / "markers"
+        tex_dir.mkdir(parents=True, exist_ok=True)
+        root = f"{self.robot_path.rsplit('/', 1)[0]}/rsf_markers"
+        for i, mk in enumerate(self.reads.markers):
+            png = tex_dir / f"marker_{i}.png"
+            Image.fromarray(np.asarray(mk.image, np.uint8)).save(png)
+            base = f"{root}/m{i}"
+            xf = UsdGeom.Xform.Define(st, base)
+            xf.AddTransformOp().Set(Gf.Matrix4d(*np.asarray(mk.T_sheet, float).T.ravel().tolist()))
+            w, h = float(mk.size[0]) / 2.0, float(mk.size[1]) / 2.0
+            mesh = UsdGeom.Mesh.Define(st, f"{base}/sheet")
+            mesh.CreatePointsAttr([(-w, -h, 0.0), (w, -h, 0.0), (w, h, 0.0), (-w, h, 0.0)])
+            mesh.CreateFaceVertexCountsAttr([4])
+            mesh.CreateFaceVertexIndicesAttr([0, 1, 2, 3])
+            mesh.CreateNormalsAttr([(0.0, 0.0, 1.0)] * 4)
+            mesh.CreateDoubleSidedAttr(False)
+            st_pv = UsdGeom.PrimvarsAPI(mesh).CreatePrimvar("st", Sdf.ValueTypeNames.TexCoord2fArray,
+                                                             UsdGeom.Tokens.vertex)
+            st_pv.Set([(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)])   # image rows top to bottom: t up
+            mat = UsdShade.Material.Define(st, f"{base}/mat")
+            sh = UsdShade.Shader.Define(st, f"{base}/mat/pbr")
+            sh.CreateIdAttr("UsdPreviewSurface")
+            sh.CreateInput("roughness", Sdf.ValueTypeNames.Float).Set(1.0)
+            sh.CreateInput("metallic", Sdf.ValueTypeNames.Float).Set(0.0)
+            rd = UsdShade.Shader.Define(st, f"{base}/mat/st")
+            rd.CreateIdAttr("UsdPrimvarReader_float2")
+            rd.CreateInput("varname", Sdf.ValueTypeNames.Token).Set("st")
+            tx = UsdShade.Shader.Define(st, f"{base}/mat/tex")
+            tx.CreateIdAttr("UsdUVTexture")
+            tx.CreateInput("file", Sdf.ValueTypeNames.Asset).Set(str(png))
+            tx.CreateInput("sourceColorSpace", Sdf.ValueTypeNames.Token).Set("raw")
+            tx.CreateInput("st", Sdf.ValueTypeNames.Float2).ConnectToSource(rd.ConnectableAPI(), "result")
+            rgb = tx.CreateOutput("rgb", Sdf.ValueTypeNames.Float3)
+            sh.CreateInput("diffuseColor", Sdf.ValueTypeNames.Color3f).ConnectToSource(rgb)
+            sh.CreateInput("emissiveColor", Sdf.ValueTypeNames.Color3f).ConnectToSource(rgb)   # as MuJoCo's emission
+            mat.CreateSurfaceOutput().ConnectToSource(sh.ConnectableAPI(), "surface")
+            UsdShade.MaterialBindingAPI.Apply(mesh.GetPrim()).Bind(mat)
+        pix = 0.003                                    # mm per pixel (any: only ratios matter)
+        cv_to_usd = np.diag([1.0, -1.0, -1.0, 1.0])     # USD cameras look along -z, y up
+        for c in self.reads.cameras.values():
+            pad_x = int(math.ceil(abs(c.width / 2.0 - c.cx))) + 1
+            pad_y = int(math.ceil(abs(c.height / 2.0 - c.cy))) + 1
+            Wb, Hb = c.width + 2 * pad_x, c.height + 2 * pad_y
+            x0 = int(round((Wb - 1) / 2.0 - c.cx))      # OpenCV: pixel centres on integers
+            y0 = int(round((Hb - 1) / 2.0 - c.cy))
+            prim, T_bl = self._body_prim(st, c.link)
+            cam = UsdGeom.Camera.Define(st, f"{prim.GetPath()}/rsf_read_{self._prim_name(c.name)}")
+            cam.CreateFocalLengthAttr(float(c.fx) * pix)
+            cam.CreateHorizontalApertureAttr(Wb * pix)
+            cam.CreateVerticalApertureAttr(Hb * pix)
+            cam.CreateClippingRangeAttr(Gf.Vec2f(0.01, 100.0))
+            T = T_bl @ np.asarray(c.T_link_cv, float) @ cv_to_usd
+            cxf = UsdGeom.Xformable(cam)
+            cxf.ClearXformOpOrder()
+            cxf.AddTransformOp().Set(Gf.Matrix4d(*T.T.ravel().tolist()))
+            rp = rep.create.render_product(str(cam.GetPath()), (Wb, Hb))
+            ann = rep.AnnotatorRegistry.get_annotator("rgb")
+            ann.attach([rp])
+            self._enable(rp, False)                     # rendered only when read
+            self._read_cams[c.name] = (rp, ann, (x0, y0),
+                                       (float(c.fx), float(c.fx), (Wb - 1) / 2.0 - x0, (Hb - 1) / 2.0 - y0))
+
+    @staticmethod
+    def _enable(rp, on: bool) -> None:
+        ht = getattr(rp, "hydra_texture", None)
+        if ht is not None and hasattr(ht, "set_updates_enabled"):
+            ht.set_updates_enabled(on)
+
+    def camera_image(self, name: str):
+        """The read camera *name*'s grey image of the current state (RTX) and the
+        intrinsics it was rendered with ``(fx, fy, cx, cy)`` (square pixels: fy = fx)."""
+        import omni.replicator.core as rep
+        if not self._started:
+            self._start()
+        rp, ann, (x0, y0), K = self._read_cams[name]
+        c = self.reads.cameras[name]
+        self._timeline_for_render()
+        if self.p.render_sync:
+            self.sync_render()
+        self._enable(rp, True)
+        img = None
+        for _ in range(max(1, int(self.p.read_renders))):
+            try:
+                rep.orchestrator.step(rt_subframes=int(self.p.read_subframes), delta_time=0.0, pause_timeline=True)
+            except TypeError:
+                rep.orchestrator.step()
+            d = ann.get_data()
+            img = d.get("data") if isinstance(d, dict) else d
+        self._enable(rp, False)
+        self._rendered_k = None                          # the views draw again
+        img = np.asarray(img)[..., :3].astype(float)
+        grey = (0.299 * img[..., 0] + 0.587 * img[..., 1] + 0.114 * img[..., 2]).round().clip(0, 255)
+        return np.ascontiguousarray(grey[y0:y0 + c.height, x0:x0 + c.width].astype(np.uint8)), K
+
+    def link_pose(self, link: str) -> np.ndarray:
+        """World pose of a robot link in the current state (PhysX)."""
+        body, T_bl = self.links[link]
+        return _T7(self.art.get_link_transforms()[0][self.link_names.index(self._prim_name(body))]) @ T_bl
 
     def _pose_camera(self, v) -> None:
         from pxr import Gf

@@ -1,4 +1,8 @@
-"""TM tray skills: pick, place and transfer as teach-engine sequences (P3).
+"""TM tray skills: locate, pick, place and transfer as teach-engine sequences (P3).
+
+The run first locates every jig (``tm_tray.locate``: the far and the near
+AprilGrid read of each slot, user 2026-11-28: the whole run includes locating),
+then picks and places without reading again: a pick starts at ``pre_insert``.
 
 Each :class:`sequence.Phase` becomes a :class:`rsf.planning.teach.Waypoint` with
 
@@ -32,6 +36,8 @@ from .collision_check import JAWS, MARGIN, carried_tray_pose, path_policy, polic
 from .geometry import slot_of
 from .tool import tool_geometry
 
+#: The read phases of :func:`sequence.pick_phases`: the locate skill's, not the pick's.
+SIGHT = ("sight_far", "sight_near")
 PICK_ARRIVE = {"sight_far": "free", "sight_near": "line", "pre_insert": "free", "insert": "line",
                "push": "line", "lift": "line", "withdraw": "line", "carry": "path"}
 PLACE_ARRIVE = {"carry": "free", "withdraw": "path", "place_lift": "line", "place_down": "line",
@@ -70,7 +76,7 @@ def phase_scene(world, key: str, ph) -> Scene:
     return Scene(others + tuple(moved.world_solids()))
 
 
-def _waypoints(world, key, phases, arrive, jaw, action, caps) -> list:
+def _waypoints(world, key, phases, arrive, jaw, action, caps, dwell=None) -> list:
     out, scenes = [], {}
     for i, ph in enumerate(phases):
         scene = phase_scene(world, key, ph)
@@ -85,14 +91,48 @@ def _waypoints(world, key, phases, arrive, jaw, action, caps) -> list:
         out.append(Waypoint(ph.name, ph.T, scene, policy(key, contact=ph.contact),
                             {n: j for n in JAWS}, arrive[ph.name] if i else "free", ph.path,
                             along_policy, along_scene, action.get(ph.name, ""),
-                            {"tray": ph.tray, "tray_shift": ph.shift, "caps": caps.get(ph.name, "empty")}))
+                            {"tray": ph.tray, "tray_shift": ph.shift, "caps": caps.get(ph.name, "empty"),
+                             **({"dwell": dwell[ph.name]} if dwell and ph.name in dwell else {})}))
+    return out
+
+
+def locate_order(world, keys) -> list:
+    """*keys* as a tour: rack by rack in the order they first appear, each rack top
+    shelf first, the columns alternating direction from one shelf to the next."""
+    racks, out = {}, []
+    for k in keys:
+        racks.setdefault(slot_of(world.feature(k)).rack, []).append(k)
+    for ks in racks.values():
+        sl = {k: slot_of(world.feature(k)) for k in ks}
+        for i, layer in enumerate(sorted({s.layer for s in sl.values()}, reverse=True)):
+            row = sorted((k for k in ks if sl[k].layer == layer), key=lambda k: sl[k].column)
+            out += row if i % 2 == 0 else row[::-1]
+    return out
+
+
+@register("skill", "tm_tray.locate")
+def locate(world, args: dict) -> list:
+    """Read the AprilGrid of every slot in ``at`` (a key or a list), far then near:
+    one sequence ``locate:<key>`` per slot, in :func:`locate_order`. Each read
+    holds the arm still ``process.read_dwell`` seconds."""
+    keys = args["at"] if isinstance(args["at"], list) else [args["at"]]
+    dwell = float(world.process.get("read_dwell", 0.0))
+    out = []
+    for key in locate_order(world, keys):
+        phases = [p for p in SEQ.pick_phases(world.process, slot_of(world.feature(key)), tool_geometry(world))
+                  if p.name in SIGHT]
+        out.append(Sequence(f"locate:{key}", _waypoints(world, key, phases, PICK_ARRIVE, PICK_JAW, PICK_ACTION,
+                                                        PICK_CAPS, {n: dwell for n in SIGHT}),
+                            {"skill": "tm_tray.locate", "slot": key}))
     return out
 
 
 @register("skill", "tm_tray.pick")
 def pick(world, args: dict) -> list:
+    """Pick at ``at`` (or ``from``): from ``pre_insert`` on; the slot was located before."""
     key = args["at"] if "at" in args else args["from"]
-    phases = SEQ.pick_phases(world.process, slot_of(world.feature(key)), tool_geometry(world))
+    phases = [p for p in SEQ.pick_phases(world.process, slot_of(world.feature(key)), tool_geometry(world))
+              if p.name not in SIGHT]
     return [Sequence(f"pick:{key}", _waypoints(world, key, phases, PICK_ARRIVE, PICK_JAW, PICK_ACTION, PICK_CAPS),
                      {"skill": "tm_tray.pick", "slot": key})]
 

@@ -30,13 +30,17 @@ means *as it is used here*, so you do not need the original.
 | contact rule / policy | per (robot link, obstacle) pair: required clearance, or contact allowed | `rsf.collision` |
 | slack | clearance beyond the required margin (negative: violation) | |
 | segment | a piece of the trajectory: `line`, `path`, `free`, `hold` | `rsf.planning.plan.Segment` |
-| caps | Cartesian limits (v, a, ω, α, a_down) a segment is timed to | `process.motion.caps` |
+| caps | the limits a segment is timed to: Cartesian (v, a, ω, α, a_down) or `joint_scale` (a fraction of the free moves' joint caps) | `process.motion.caps` |
 | gate | the CPU check of every trajectory sample with exact meshes; nothing passes without it | `plan.check_segment` |
 | job | the free segments written for cuRobo on a GPU | `rsf.curobo_job/1` |
 | transfer | a pick sequence followed by a place sequence, judged as one | `rsf.sim.judge` |
 | seat | where the plan sets an object down; the judge's *placement* criterion is the error against it (`seat_mm`, `seat_deg`) | `rsf.sim.judge` |
 | cycle / binding / end event | one repetition of a workflow's steps; the features a scheduler gives it (`$name`); why the run stopped (`sources_empty`, `max_cycles`) | `rsf.model.workflow` |
 | `robot_seat` | tag of solids the arm's base may touch (its mount, the floor) | |
+| setup (step) | a workflow step run once before the first cycle (task cycle -1) | `Workflow.setup` |
+| locate tour | the setup step of the tray cell: every slot's far and near AprilGrid read, rack by rack, before anything is moved (user 2026-11-28) | `tm_tray.locate` |
+| read | a hold in which a camera on the robot images a marker; in simulation rendered and detected, and the board pose compared with the truth | `rsf.sim.reads` |
+| dwell | how long the arm holds still after a waypoint's action (`meta["dwell"]`; the reads: `process.read_dwell`) | |
 
 ## This repository's phases (P0–P7)
 
@@ -63,7 +67,7 @@ Phases of `docs/PLAN.md` §7; each has a results doc.
 | **D5** | close the jaws to the tray width ("width fit") after lifting |
 | **D9** | the robot driver seam: simulation and the real robot behind one interface (ROS2 JSON trajectories) |
 | **D11** | layout poses get uncertainties, corrected later by AprilGrid registration |
-| **D14** | carry caps: speed/acceleration limits of the carried tray; the 15° tilt-back design value |
+| **D14** | carry caps: speed/acceleration limits of the carried tray (removed from the layouts 2026-11-28, user: a carry is as fast as an empty move); the 15° tilt-back design value |
 | **D16** | `as_built`: the cell as measured on site (a record: derive variants, do not edit it) |
 | **D17** | tray / jig / plate geometry: rails on column tops, a 2.5 mm recess the plate slides under |
 | **D18** | a camera-frame mix-up (hand-eye vs another camera) that moved every sighting pose; the lesson: name frames explicitly |
@@ -74,7 +78,7 @@ Phases of `docs/PLAN.md` §7; each has a results doc.
 | **D24** | the close AprilGrid read: standoff 0.2768 m, plate clearance against the tray below |
 | **D28** | the gripper (supplied 2026-10-06) and its pick sequence without the push plate |
 | **D29** | the corrected gripper model (removed a stray mount offset from `tm5s.usd`) |
-| **D30** | jaw values, 2 mm overtravel / place offset, the in-shelf speed caps (`in_jig`), plate friction, and the five pass criteria of a transfer — the basis of `rsf.sim.judge` |
+| **D30** | jaw values, 2 mm overtravel / place offset, the in-shelf speed caps (`in_jig`; replaced 2026-11-28 by half the free moves' joint speed, user), plate friction, and the five pass criteria of a transfer — the basis of `rsf.sim.judge` |
 | **M3** | milestone: every slot's pick and place collision-free (ported as `tm_tray.collision_check`) |
 | **M4** | milestone: AprilGrid locating; defines the board frame and the vertical reach limit |
 | **M5** | milestone: scanning with the RealSense D455 (not used for locating) |
