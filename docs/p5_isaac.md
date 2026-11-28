@@ -110,6 +110,36 @@ The first attempt simulated the cycle but the judge failed: it computed the plan
 flange with EAIK, which is not installed with Isaac. The judge now uses the URDF's FK
 (identical to 1e-15), and `sim_workflow --report` keeps the raw run before judging.
 
+## Read cameras: the AprilGrid reads with RTX (2026-11-28)
+
+With `process.reads` (`rsf.sim.reads`), `IsaacCell(..., reads=setup)` adds to the
+stage before physics starts:
+
+* every label as a quad with its printed sheet as texture, **self-lit only**
+  (`emissiveColor` from the texture, `diffuseColor` black): it looks the same under
+  any light;
+* every read camera as a USD camera under its link's body prim (it moves with the
+  arm as rendered), square pixels, focal length `fx`. A USD camera's principal
+  point is the image centre and the calibrated one is not: the camera renders an
+  image a few pixels larger, centred on the optical axis, and `camera_image` crops
+  the calibrated size out of it at whole pixels; the image's own principal point
+  (within half a pixel of the calibrated one; OpenCV convention: pixel centres on
+  integers) goes to the detector;
+* render products kept updating (`IsaacParams.read_always_render`); each read
+  renders `read_renders` times with `read_subframes` RTX subframes and takes the
+  last image.
+
+`camera_image(name) -> (grey, (fx, fy, cx, cy))`, `link_pose(link)` (PhysX). The
+Kaggle Isaac environment has no `aprilgrid_detector`: the run saves the images
+(`--read-images`) and `tools/detect_reads.py` detects them afterwards.
+
+strict, `strict_cycle1.json.gz` (the locate tour and one cycle), Kaggle T4:
+
+| run | result |
+|---|---|
+| 1 | aborted in the renderer (`operator new`) at the 25th read, with the read cameras switched on per read (`set_updates_enabled`); the 24 images before it all found their boards |
+| 2 (cameras always updating) | **2/2 transfers pass**, all 74 images saved (154.6 s simulated, 395 s wall, host memory flat at 7.6–7.7 GB); detected here: **74/74 boards found**, lateral error 0.007 mm, but boards read too far: near 0.30 mm (0.11 %), far 0.64 mm (0.18 %), rotation up to 1.7° (far). Lit and self-lit labels over-exposed the white, which shrank the black tags |
+
 ## Rendering on Kaggle (Vulkan)
 
 Kaggle's container exposes the GPU for compute only (`NVIDIA_DRIVER_CAPABILITIES=compute,utility`):
