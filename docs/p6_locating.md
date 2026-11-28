@@ -115,6 +115,37 @@ What this does not cover yet:
   the table.
 * as_built and recommended: not run (the user asked for strict first).
 
+## Locating first, in the run (2026-11-28)
+
+User 2026-11-28: the whole run includes locating, every jig is located before
+anything is moved, and a pick or place never reads again.
+
+* **Workflow.** `inspect_and_sort` has a `setup:` step, `tm_tray.locate` on every
+  slot (`[$incoming.*, $outgoing.*, $inspection.*]`): per slot a sequence
+  `locate:<key>` with the far read (`sight_far`, reached free) and the near read
+  (`sight_near`, a line), the arm still `process.read_dwell` (0.5 s, assumed) at
+  each. The tour goes rack by rack, top shelf first, the columns alternating
+  (`skills.locate_order`). A pick starts at `pre_insert`.
+* **Reads in the simulation** (`rsf.sim.reads`, `process.reads: tm_tray.reads`):
+  at the middle of every read hold the simulated EIH camera renders, the
+  detector finds the boards, and the board pose (the camera's pose from the
+  simulated arm, as the real cell has it from its joints) is compared with the
+  cell's truth. `tools/sim_workflow.py` does it for both backends: MuJoCo
+  (OSMesa/EGL) and Isaac (RTX: the labels as textured, self-lit quads, the camera
+  on the flange's body; a USD camera's principal point is the image centre, so it
+  renders a slightly larger image centred on the optical axis and the calibrated
+  size is cropped out of it at whole pixels, the image's own principal point,
+  within half a pixel of the calibrated one, going to the detector).
+* **Correcting.** `--located OUT.yaml` fits each fixture's floor displacement to
+  its near reads against `--nominal` (the layout taught in) and writes the
+  corrected layout; teaching and planning the transfers in it is the second,
+  offline stage (as above). Replanning inside the same run is not done.
+
+strict, one cycle (`cells/tm_tray/plans/strict_cycle1.json.gz`), MuJoCo, ideal
+images: **74/74 reads found**, board error ≤ 0.041 mm / 0.073°; fitted against the
+same layout every rack and the table come out within 0.03 mm / 0.011° of where
+they are (incoming 12 near reads, outgoing 24, table 1). Both transfers pass.
+
 ## Next
 
 * Realistic images: the detector's own degradations (`tools/agsim/render.py`:
