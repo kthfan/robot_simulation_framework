@@ -115,7 +115,11 @@ class Reader:
 
     def __call__(self, t, *_):
         while self.todo and t >= self.todo[0]["t"] - 1e-9:
-            self.rows.append(self._read(self.todo.pop(0), t))
+            row = self._read(self.todo.pop(0), t)
+            self.rows.append(row)
+            if self.images is not None:              # kept as they come: a run that dies keeps its reads
+                with open(self.images / "reads.jsonl", "a") as f:
+                    f.write(json.dumps(row) + "\n")
 
     def _read(self, r: dict, t: float) -> dict:
         cam = self.setup.cameras[r["camera"]]
@@ -124,7 +128,8 @@ class Reader:
         mk = self.marker[r["key"]]
         rec = {"slot": r["key"], "entity": mk.entity, "read": r["read"], "segment": r["segment"],
                "t": round(float(t), 3), "camera": cam.name, "board_id": mk.board_id,
-               "T_cv": np.round(T_cv, 9).tolist(), "K": [float(fx), float(fy), float(cx), float(cy)]}
+               "T_cv": np.round(T_cv, 9).tolist(), "K": [float(fx), float(fy), float(cx), float(cy)],
+               "host_rss_mb": _rss_mb()}
         if self.images is not None:
             from PIL import Image
             self.images.mkdir(parents=True, exist_ok=True)
@@ -137,6 +142,16 @@ class Reader:
 
     def summary(self) -> dict:
         return summarize(self.rows, len(self.todo))
+
+
+def _rss_mb() -> float:
+    """This process's resident memory now (MB; Linux), else its peak."""
+    try:
+        with open("/proc/self/statm") as f:
+            return round(int(f.read().split()[1]) * os.sysconf("SC_PAGE_SIZE") / 2 ** 20, 1)
+    except (OSError, ValueError):
+        import resource
+        return round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0, 1)
 
 
 def image_name(rec: dict) -> str:

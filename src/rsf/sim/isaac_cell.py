@@ -68,6 +68,9 @@ class IsaacParams(SimParams):
     #: renderer converges; the last is taken)
     read_subframes: int = 8
     read_renders: int = 2
+    #: keep the read cameras' render products updating between reads (instead of switching
+    #: them on per read): every view render then draws them too, but nothing is reallocated
+    read_always_render: bool = True
 
 
 _APP = None
@@ -312,7 +315,7 @@ class IsaacCell:
             rp = rep.create.render_product(str(cam.GetPath()), (Wb, Hb))
             ann = rep.AnnotatorRegistry.get_annotator("rgb")
             ann.attach([rp])
-            self._enable(rp, False)                     # rendered only when read
+            self._enable(rp, bool(self.p.read_always_render))
             self._read_cams[c.name] = (rp, ann, (x0, y0),
                                        (float(c.fx), float(c.fx), (Wb - 1) / 2.0 - x0, (Hb - 1) / 2.0 - y0))
 
@@ -333,7 +336,8 @@ class IsaacCell:
         self._timeline_for_render()
         if self.p.render_sync:
             self.sync_render()
-        self._enable(rp, True)
+        if not self.p.read_always_render:
+            self._enable(rp, True)
         img = None
         for _ in range(max(1, int(self.p.read_renders))):
             try:
@@ -342,7 +346,8 @@ class IsaacCell:
                 rep.orchestrator.step()
             d = ann.get_data()
             img = d.get("data") if isinstance(d, dict) else d
-        self._enable(rp, False)
+        if not self.p.read_always_render:
+            self._enable(rp, False)
         self._rendered_k = None                          # the views draw again
         img = np.asarray(img)[..., :3].astype(float)
         grey = (0.299 * img[..., 0] + 0.587 * img[..., 1] + 0.114 * img[..., 2]).round().clip(0, 255)
